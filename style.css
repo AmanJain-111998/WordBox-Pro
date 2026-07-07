@@ -1,0 +1,1009 @@
+/* ==========================================================================
+   Design Tokens & CSS Custom Properties
+   ========================================================================== */
+:root {
+  /* Fonts */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-logo: 'Outfit', 'Inter', sans-serif;
+
+  /* Common Colors */
+  --white: #ffffff;
+  --black: #000000;
+  
+  /* State Colors (Default Mode) */
+  --color-correct: #10b981;      /* Emerald 500 */
+  --color-correct-glow: rgba(16, 185, 129, 0.2);
+  --color-present: #f59e0b;      /* Amber 500 */
+  --color-present-glow: rgba(245, 158, 11, 0.2);
+  --color-absent: #475569;       /* Slate 600 */
+  --color-absent-glow: rgba(71, 85, 105, 0.2);
+  
+  /* Theme Variables (Default: Dark Slate Theme) */
+  --bg-main: #0f172a;            /* Slate 900 */
+  --bg-card: rgba(30, 41, 59, 0.7); /* Slate 800 with transparency */
+  --bg-card-opaque: #1e293b;
+  --text-main: #f8fafc;          /* Slate 50 */
+  --text-muted: #94a3b8;         /* Slate 400 */
+  --border-color: #334155;       /* Slate 700 */
+  --border-active: #64748b;       /* Slate 500 */
+  --key-bg: #334155;             /* Slate 700 */
+  --key-text: #f8fafc;
+  --toast-bg: rgba(15, 23, 42, 0.95);
+  --toast-text: #f8fafc;
+  --toast-border: #475569;
+  
+  /* Glassmorphism details */
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+  --backdrop-blur: blur(12px);
+  
+  /* Animations */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Theme overrides */
+body.light-theme {
+  --bg-main: #f8fafc;            /* Slate 50 */
+  --bg-card: rgba(255, 255, 255, 0.75);
+  --bg-card-opaque: #ffffff;
+  --text-main: #0f172a;          /* Slate 900 */
+  --text-muted: #64748b;         /* Slate 500 */
+  --border-color: #cbd5e1;       /* Slate 300 */
+  --border-active: #94a3b8;       /* Slate 400 */
+  --key-bg: #e2e8f0;             /* Slate 200 */
+  --key-text: #0f172a;
+  --toast-bg: rgba(255, 255, 255, 0.95);
+  --toast-text: #0f172a;
+  --toast-border: #cbd5e1;
+  --glass-shadow: 0 8px 32px 0 rgba(15, 23, 42, 0.08);
+  --glass-border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Colorblind High Contrast Mode overrides */
+body.colorblind {
+  --color-correct: #f97316;      /* Orange 500 */
+  --color-correct-glow: rgba(249, 115, 22, 0.2);
+  --color-present: #06b6d4;      /* Cyan 500 */
+  --color-present-glow: rgba(6, 182, 212, 0.2);
+}
+
+/* ==========================================================================
+   Base Styles & Reset
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--font-primary);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+/* ==========================================================================
+   App Shell Layout
+   ========================================================================== */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Navigation Header */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 16px;
+  border-bottom: var(--glass-border);
+  backdrop-filter: var(--backdrop-blur);
+  background: var(--bg-card);
+  box-shadow: var(--glass-shadow);
+  z-index: 10;
+}
+
+.logo-text {
+  font-family: var(--font-logo);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.logo-accent {
+  color: var(--color-correct);
+  margin-left: 2px;
+  font-weight: 800;
+  text-shadow: 0 0 15px var(--color-correct-glow);
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.icon-button:active {
+  transform: scale(0.92);
+}
+
+body.light-theme .icon-button:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.icon-button svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ==========================================================================
+   Controls Section (Difficulty Tabs & Mode)
+   ========================================================================== */
+.game-controls {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.mode-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mode-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: rgba(94, 234, 212, 0.1);
+  color: #14b8a6;
+  border: 1px solid rgba(94, 234, 212, 0.2);
+  text-shadow: 0 0 8px rgba(20, 184, 166, 0.2);
+}
+
+/* Difficulty Tabs Styles */
+.difficulty-tabs {
+  display: flex;
+  background: var(--key-bg);
+  padding: 4px;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+  border: var(--glass-border);
+}
+
+body.light-theme .difficulty-tabs {
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.tab-button {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-primary);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 8px 0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.tab-button.active {
+  background-color: var(--bg-card-opaque);
+  color: var(--text-main);
+  box-shadow: var(--glass-shadow);
+}
+
+/* ==========================================================================
+   Game Board Grid
+   ========================================================================== */
+.game-board-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+}
+
+.game-board {
+  display: grid;
+  grid-template-rows: repeat(6, 1fr);
+  grid-gap: 6px;
+  width: 100%;
+  max-width: 330px;
+  height: 100%;
+  max-height: 400px;
+}
+
+.board-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 6px;
+}
+
+.tile {
+  aspect-ratio: 1;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 700;
+  font-family: var(--font-logo);
+  text-transform: uppercase;
+  color: var(--text-main);
+  transition: border-color var(--transition-fast), background-color 0.4s ease;
+  position: relative;
+  transform-style: preserve-3d;
+  background-color: transparent;
+}
+
+.tile.pop-effect {
+  animation: popLetter var(--transition-fast) forwards;
+}
+
+.tile.active-input {
+  border-color: var(--border-active);
+}
+
+/* Letters Validation Colors */
+.tile.flip-animation {
+  animation: flipTile 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.tile.correct-state {
+  background-color: var(--color-correct) !important;
+  border-color: var(--color-correct) !important;
+  box-shadow: 0 0 12px var(--color-correct-glow);
+}
+
+.tile.present-state {
+  background-color: var(--color-present) !important;
+  border-color: var(--color-present) !important;
+  box-shadow: 0 0 12px var(--color-present-glow);
+}
+
+.tile.absent-state {
+  background-color: var(--color-absent) !important;
+  border-color: var(--color-absent) !important;
+}
+
+/* Row Shake Effect */
+.board-row.shake {
+  animation: shakeRow 0.5s linear;
+}
+
+/* Row Bounce Victory Animation */
+.board-row.bounce .tile {
+  animation: bounceTile 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+/* ==========================================================================
+   Virtual Keyboard
+   ========================================================================== */
+.game-keyboard-wrapper {
+  padding: 10px;
+  background-color: rgba(15, 23, 42, 0.3);
+  backdrop-filter: var(--backdrop-blur);
+  border-top: var(--glass-border);
+}
+
+body.light-theme .game-keyboard-wrapper {
+  background-color: rgba(241, 245, 249, 0.5);
+}
+
+.game-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.keyboard-row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  touch-action: manipulation;
+}
+
+.key-btn {
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 700;
+  height: 48px;
+  flex: 1;
+  background-color: var(--key-bg);
+  color: var(--key-text);
+  border: none;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast), transform 0.05s ease;
+  user-select: none;
+}
+
+.key-btn:active {
+  transform: scale(0.92);
+}
+
+.key-btn.key-wide {
+  flex: 1.5;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+/* Keyboard States colors mapping */
+.key-btn.correct-state {
+  background-color: var(--color-correct);
+  color: var(--white);
+}
+
+.key-btn.present-state {
+  background-color: var(--color-present);
+  color: var(--white);
+}
+
+.key-btn.absent-state {
+  background-color: var(--color-absent);
+  color: var(--white);
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   Toast Messages System
+   ========================================================================== */
+.toast-container {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 100;
+  width: 90%;
+  max-width: 300px;
+}
+
+.toast-message {
+  background-color: var(--toast-bg);
+  color: var(--toast-text);
+  border: 1px solid var(--toast-border);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+  animation: slideDownIn var(--transition-fast) forwards, fadeOutUp 0.3s ease 2s forwards;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Modal Dialogs Overlay & Card Layout
+   ========================================================================== */
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  opacity: 1;
+  transition: opacity var(--transition-normal);
+}
+
+body.light-theme .modal-overlay {
+  background-color: rgba(15, 23, 42, 0.4);
+}
+
+.modal-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-card {
+  width: 90%;
+  max-width: 440px;
+  max-height: 85%;
+  background: var(--bg-card-opaque);
+  border-radius: 20px;
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUpModal var(--transition-normal) forwards;
+}
+
+.modal-header {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: var(--glass-border);
+}
+
+.modal-header h2 {
+  font-family: var(--font-logo);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 28px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+  color: var(--text-main);
+}
+
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-main);
+}
+
+/* ==========================================================================
+   Help Modal Specific Styles
+   ========================================================================== */
+.modal-body p {
+  margin-bottom: 12px;
+}
+
+.examples-container {
+  margin: 20px 0;
+  padding: 16px 0;
+  border-top: var(--glass-border);
+  border-bottom: var(--glass-border);
+}
+
+.examples-container h3 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.example-item {
+  margin-bottom: 16px;
+}
+
+.example-item:last-child {
+  margin-bottom: 0;
+}
+
+.example-grid {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.example-grid .tile {
+  width: 36px;
+  height: 36px;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.difficulty-explanation {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+body.light-theme .difficulty-explanation {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.difficulty-explanation h3 {
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.difficulty-explanation ul {
+  list-style: none;
+}
+
+.difficulty-explanation li {
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+
+.difficulty-explanation li:last-child {
+  margin-bottom: 0;
+}
+
+.modal-footer-info {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   Stats Modal Specific Styles
+   ========================================================================== */
+.stats-summary {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.stat-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-number {
+  font-family: var(--font-logo);
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+.guess-distribution-section h3 {
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.guess-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.guess-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.guess-label {
+  width: 12px;
+}
+
+.guess-track {
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+  height: 20px;
+}
+
+body.light-theme .guess-track {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.guess-fill {
+  background-color: var(--color-absent);
+  color: var(--white);
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  min-width: 24px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.guess-fill.highlight {
+  background-color: var(--color-correct);
+  box-shadow: 0 0 10px var(--color-correct-glow);
+}
+
+.stats-footer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 20px;
+  border-top: var(--glass-border);
+  gap: 20px;
+}
+
+.timer-container {
+  text-align: center;
+  flex: 1;
+}
+
+.timer-container h3 {
+  font-size: 11px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.countdown-timer {
+  font-family: var(--font-logo);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.share-action-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.share-button {
+  background-color: var(--color-correct);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px var(--color-correct-glow);
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+}
+
+.share-button:hover {
+  opacity: 0.95;
+}
+
+.share-button:active {
+  transform: scale(0.95);
+}
+
+.primary-button {
+  width: 100%;
+  background-color: var(--color-correct);
+  color: var(--white);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: opacity var(--transition-fast);
+}
+
+.primary-button:hover {
+  opacity: 0.95;
+}
+
+/* ==========================================================================
+   Settings Modal Specific Styles
+   ========================================================================== */
+.settings-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 0;
+  border-bottom: var(--glass-border);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-item.border-top {
+  border-top: var(--glass-border);
+  margin-top: 10px;
+}
+
+.setting-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.setting-info p {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.3;
+}
+
+.warning-text {
+  color: #ef4444 !important;
+}
+
+.mode-select-dropdown {
+  background-color: var(--key-bg);
+  color: var(--text-main);
+  border: var(--glass-border);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-family: var(--font-primary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+/* Switch Toggle Styling */
+.switch-toggle {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider-round {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--key-bg);
+  transition: .3s;
+  border-radius: 24px;
+  border: var(--glass-border);
+}
+
+.slider-round:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: var(--white);
+  transition: .3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input:checked + .slider-round {
+  background-color: var(--color-correct);
+}
+
+input:checked + .slider-round:before {
+  transform: translateX(20px);
+}
+
+.danger-button {
+  background-color: #ef4444;
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.danger-button:hover {
+  opacity: 0.9;
+}
+
+.modal-footer-credit {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 24px;
+}
+
+/* ==========================================================================
+   PWA Install Banner
+   ========================================================================== */
+.install-banner {
+  position: absolute;
+  bottom: 80px;
+  left: 16px;
+  right: 16px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  border-radius: 12px;
+  padding: 12px 16px;
+  z-index: 90;
+  backdrop-filter: var(--backdrop-blur);
+  animation: slideUpIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+body.light-theme .install-banner {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.install-banner.hidden {
+  display: none !important;
+}
+
+.install-banner-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.install-text {
+  font-size: 12px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.install-button {
+  background-color: var(--color-correct);
+  color: var(--white);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.close-install-button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ==========================================================================
+   Animations Keyframes
+   ========================================================================== */
+
+/* Tile letter insertion scale pop */
+@keyframes popLetter {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Tile flip validation animation */
+@keyframes flipTile {
+  0% { transform: rotateX(0deg); }
+  45% { transform: rotateX(90deg); }
+  55% { transform: rotateX(90deg); }
+  100% { transform: rotateX(0deg); }
+}
+
+/* Row shake validation error animation */
+@keyframes shakeRow {
+  0%, 100% { transform: translateX(0); }
+  15%, 45%, 75% { transform: translateX(-8px); }
+  30%, 60%, 90% { transform: translateX(8px); }
+}
+
+/* Winning row tile bounce animation */
+@keyframes bounceTile {
+  0%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-18px); }
+  60% { transform: translateY(6px); }
+}
+
+/* Banner / Toast entries animation */
+@keyframes slideDownIn {
+  from { transform: translate(-50%, -20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+@keyframes fadeOutUp {
+  from { transform: translate(-50%, 0); opacity: 1; }
+  to { transform: translate(-50%, -20px); opacity: 0; }
+}
+
+@keyframes slideUpIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUpModal {
+  from { transform: translateY(50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Helper hidden utilities */
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   Breakpoints for Small Screens
+   ========================================================================== */
+@media (max-height: 650px) {
+  .app-header {
+    height: 50px;
+  }
+  .game-controls {
+    padding: 8px 12px;
+  }
+  .tile {
+    font-size: 20px;
+  }
+  .key-btn {
+    height: 40px;
+    font-size: 12px;
+  }
+  .key-btn.key-wide {
+    font-size: 10px;
+  }
+}

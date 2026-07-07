@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Wordle Pro | Easy, Medium, Hard Wordle Game</title>
+  
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Wordle Pro - Play Wordle with Easy, Medium, and Hard difficulty levels. Featuring 1500+ curated words, practice mode, daily challenges, detailed stats, and full offline support.">
+  <meta name="theme-color" content="#0f172a">
+  
+  <!-- PWA & Apple Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Wordle Pro">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body class="dark-theme">
+  <!-- Main App Shell -->
+  <div id="app-container" class="app-container">
+    
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <button id="btn-help" class="icon-button" aria-label="How to play">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </button>
+      </div>
+      
+      <div class="header-center">
+        <h1 class="logo-text">WORDLE<span class="logo-accent">PRO</span></h1>
+      </div>
+      
+      <div class="header-right">
+        <button id="btn-stats" class="icon-button" aria-label="Game Statistics">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </button>
+        <button id="btn-settings" class="icon-button" aria-label="Settings">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+    
+    <!-- Toast Message Container -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <!-- Game Mode & Difficulty Controls -->
+    <section class="game-controls">
+      <div class="mode-indicator" id="mode-indicator">
+        <span id="current-mode-label" class="mode-label">PRACTICE MODE</span>
+      </div>
+      
+      <div class="difficulty-tabs">
+        <button id="tab-easy" class="tab-button active" data-difficulty="easy">
+          <span class="tab-label">EASY</span>
+        </button>
+        <button id="tab-medium" class="tab-button" data-difficulty="medium">
+          <span class="tab-label">MEDIUM</span>
+        </button>
+        <button id="tab-hard" class="tab-button" data-difficulty="hard">
+          <span class="tab-label">HARD</span>
+        </button>
+      </div>
+    </section>
+    
+    <!-- Wordle Letter Board Grid -->
+    <main class="game-board-wrapper">
+      <div id="game-board" class="game-board" aria-label="Wordle Grid">
+        <!-- 6 Rows of 5 tiles will be generated dynamically by JavaScript -->
+      </div>
+    </main>
+    
+    <!-- On-screen Virtual Keyboard -->
+    <footer class="game-keyboard-wrapper">
+      <div id="game-keyboard" class="game-keyboard" aria-label="Onscreen Keyboard">
+        <!-- Keyboard rows will be generated dynamically by JavaScript -->
+      </div>
+    </footer>
+    
+    <!-- PWA Install Banner -->
+    <div id="install-banner" class="install-banner hidden">
+      <div class="install-banner-content">
+        <p class="install-text">Play offline like a native app!</p>
+        <button id="btn-install-app" class="install-button">Download App</button>
+        <button id="btn-close-install" class="close-install-button" aria-label="Close install prompt">×</button>
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- HOW TO PLAY MODAL -->
+  <div id="modal-help" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>How To Play</h2>
+        <button id="btn-close-help" class="modal-close" aria-label="Close dialog">×</button>
+      </div>
+      <div class="modal-body">
+        <p>Guess the word in 6 tries. Each guess must be a valid 5-letter word.</p>
+        <p>The color of the tiles will change to show how close your guess was to the word.</p>
+        
+        <div class="examples-container">
+          <h3>Examples</h3>
+          <div class="example-item">
+            <div class="example-grid">
+              <div class="tile correct-state">W</div>
+              <div class="tile">E</div>
+              <div class="tile">A</div>
+              <div class="tile">R</div>
+              <div class="tile">Y</div>
+            </div>
+            <p><strong>W</strong> is in the word and in the correct spot.</p>
+          </div>
+          
+          <div class="example-item">
+            <div class="example-grid">
+              <div class="tile">P</div>
+              <div class="tile present-state">I</div>
+              <div class="tile">L</div>
+              <div class="tile">O</div>
+              <div class="tile">T</div>
+            </div>
+            <p><strong>I</strong> is in the word but in the wrong spot.</p>
+          </div>
+          
+          <div class="example-item">
+            <div class="example-grid">
+              <div class="tile">V</div>
+              <div class="tile">A</div>
+              <div class="tile">G</div>
+              <div class="tile absent-state">U</div>
+              <div class="tile">E</div>
+            </div>
+            <p><strong>U</strong> is not in the word in any spot.</p>
+          </div>
+        </div>
+        
+        <div class="difficulty-explanation">
+          <h3>Difficulty Levels</h3>
+          <ul>
+            <li><strong>Easy:</strong> High-frequency words with common letters. Great for starting out.</li>
+            <li><strong>Medium:</strong> Common words with moderate letter variations and occasional traps.</li>
+            <li><strong>Hard:</strong> Uncommon words, double letters, or rare letters (Q, Z, X, J, K). A true challenge!</li>
+          </ul>
+        </div>
+        
+        <div class="modal-footer-info">
+          <p>This app works 100% offline! Install it to your home screen to play anywhere.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATISTICS MODAL -->
+  <div id="modal-stats" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="stats-title">STATISTICS</h2>
+        <button id="btn-close-stats" class="modal-close" aria-label="Close dialog">×</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="stats-summary">
+          <div class="stat-box">
+            <span id="stat-played" class="stat-number">0</span>
+            <span class="stat-label">Played</span>
+          </div>
+          <div class="stat-box">
+            <span id="stat-win-pct" class="stat-number">0%</span>
+            <span class="stat-label">Win %</span>
+          </div>
+          <div class="stat-box">
+            <span id="stat-streak" class="stat-number">0</span>
+            <span class="stat-label">Current Streak</span>
+          </div>
+          <div class="stat-box">
+            <span id="stat-max-streak" class="stat-number">0</span>
+            <span class="stat-label">Max Streak</span>
+          </div>
+        </div>
+
+        <div class="guess-distribution-section">
+          <h3>GUESS DISTRIBUTION</h3>
+          <div id="guess-bars" class="guess-bars">
+            <!-- 6 Guess bars rendered dynamically -->
+          </div>
+        </div>
+        
+        <div class="stats-footer-controls">
+          <div id="timer-container" class="timer-container hidden">
+            <h3>NEXT DAILY CHALLENGE</h3>
+            <span id="next-daily-countdown" class="countdown-timer">00:00:00</span>
+          </div>
+          
+          <div id="share-action-container" class="share-action-container hidden">
+            <button id="btn-share-stats" class="share-button">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              <span>SHARE SCORE</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="action-footer">
+          <button id="btn-practice-again" class="primary-button hidden">Practice Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="modal-settings" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>SETTINGS</h2>
+        <button id="btn-close-settings" class="modal-close" aria-label="Close dialog">×</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="settings-list">
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Game Mode</h3>
+              <p>Practice Unlimited or play Daily Challenges</p>
+            </div>
+            <div class="setting-control">
+              <select id="select-game-mode" class="mode-select-dropdown">
+                <option value="practice">Unlimited Practice</option>
+                <option value="daily">Daily Challenge</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Dark Mode</h3>
+              <p>Switch dark/light aesthetics</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch-toggle" for="toggle-dark-mode">
+                <input type="checkbox" id="toggle-dark-mode" checked>
+                <span class="slider-round"></span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>High Contrast Mode</h3>
+              <p>Accessibility colors (colorblind friendly)</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch-toggle" for="toggle-colorblind">
+                <input type="checkbox" id="toggle-colorblind">
+                <span class="slider-round"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Sound Effects</h3>
+              <p>Procedural synth audio feedback</p>
+            </div>
+            <div class="setting-control">
+              <label class="switch-toggle" for="toggle-sound">
+                <input type="checkbox" id="toggle-sound" checked>
+                <span class="slider-round"></span>
+              </label>
+            </div>
+          </div>
+          
+          <div class="setting-item border-top">
+            <div class="setting-info">
+              <h3>Clear Statistics</h3>
+              <p class="warning-text">Permanently erases all game records</p>
+            </div>
+            <div class="setting-control">
+              <button id="btn-reset-stats" class="danger-button">Reset</button>
+            </div>
+          </div>
+          
+        </div>
+        
+        <div class="modal-footer-credit">
+          <p>Wordle Pro v1.0.0 • Offline Ready PWA</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Javascript Modules -->
+  <script src="./words.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+.DS_Store
+__pycache__/
+generate_word_lists.py
+test.js

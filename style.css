@@ -28,6 +28,8 @@
   --border-active: #64748b;       /* Slate 500 */
   --key-bg: #334155;             /* Slate 700 */
   --key-text: #f8fafc;
+  --key-absent-bg: #1e293b;      /* Slate 800 */
+  --key-absent-text: #64748b;    /* Slate 500 */
   --toast-bg: rgba(15, 23, 42, 0.95);
   --toast-text: #f8fafc;
   --toast-border: #475569;
@@ -54,6 +56,8 @@ body.light-theme {
   --border-active: #94a3b8;       /* Slate 400 */
   --key-bg: #e2e8f0;             /* Slate 200 */
   --key-text: #0f172a;
+  --key-absent-bg: #cbd5e1;      /* Slate 300 */
+  --key-absent-text: #94a3b8;    /* Slate 400 */
   --toast-bg: rgba(255, 255, 255, 0.95);
   --toast-text: #0f172a;
   --toast-border: #cbd5e1;
@@ -379,9 +383,9 @@ body.light-theme .game-keyboard-wrapper {
 }
 
 .key-btn.absent-state {
-  background-color: var(--color-absent);
-  color: var(--white);
-  opacity: 0.6;
+  background-color: var(--key-absent-bg);
+  color: var(--key-absent-text);
+  opacity: 0.7;
 }
 
 /* ==========================================================================

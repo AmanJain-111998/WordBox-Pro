@@ -1,4 +1,4 @@
-// app.js - Wordle Pro Core Controller
+// app.js - Gamebox Pro Orchestrator & Games Engines
 
 // ==========================================================================
 // PWA Service Worker Registration & Installation Prompt
@@ -8,26 +8,20 @@ let deferredPrompt = null;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js')
-      .then((reg) => console.log('[Service Worker] Registered successfully:', reg.scope))
+      .then((reg) => console.log('[Service Worker] Registered:', reg.scope))
       .catch((err) => console.error('[Service Worker] Registration failed:', err));
   });
 }
 
-// Handle PWA Install Prompt Banner
 window.addEventListener('beforeinstallprompt', (e) => {
-  // Prevent Chrome 67 and earlier from automatically showing the prompt
   e.preventDefault();
-  // Stash the event so it can be triggered later.
   deferredPrompt = e;
-  // Update UI notify the user they can install the PWA
-  const installBanner = document.getElementById('install-banner');
-  if (installBanner) {
-    installBanner.classList.remove('hidden');
-  }
+  const banner = document.getElementById('install-banner');
+  if (banner) banner.classList.remove('hidden');
 });
 
 // ==========================================================================
-// Web Audio Synth Engine
+// Native Web Audio Synthesizer
 // ==========================================================================
 class SoundSynth {
   constructor() {
@@ -45,20 +39,15 @@ class SoundSynth {
     if (!this.enabled) return;
     this.init();
     const ctx = this.ctx;
-    
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
     osc.type = 'sine';
     osc.frequency.setValueAtTime(600, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.08);
-    
     gain.gain.setValueAtTime(0.08, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-    
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
     osc.start();
     osc.stop(ctx.currentTime + 0.08);
   }
@@ -67,20 +56,15 @@ class SoundSynth {
     if (!this.enabled) return;
     this.init();
     const ctx = this.ctx;
-    
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(350, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.05);
-    
     gain.gain.setValueAtTime(0.06, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-    
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
     osc.start();
     osc.stop(ctx.currentTime + 0.05);
   }
@@ -89,22 +73,16 @@ class SoundSynth {
     if (!this.enabled) return;
     this.init();
     const ctx = this.ctx;
-    
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
     osc.type = 'sine';
-    // Pitch goes up slightly for each consecutive letter
     const freq = 200 + (index * 70);
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(freq + 40, ctx.currentTime + 0.15);
-    
     gain.gain.setValueAtTime(0.05, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
-    
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
     osc.start();
     osc.stop(ctx.currentTime + 0.15);
   }
@@ -113,20 +91,15 @@ class SoundSynth {
     if (!this.enabled) return;
     this.init();
     const ctx = this.ctx;
-    
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    
     osc.type = 'sawtooth';
     osc.frequency.setValueAtTime(130, ctx.currentTime);
-    
     gain.gain.setValueAtTime(0.12, ctx.currentTime);
     gain.gain.setValueAtTime(0.12, ctx.currentTime + 0.08);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    
     osc.connect(gain);
     gain.connect(ctx.destination);
-    
     osc.start();
     osc.stop(ctx.currentTime + 0.25);
   }
@@ -136,23 +109,17 @@ class SoundSynth {
     this.init();
     const ctx = this.ctx;
     const now = ctx.currentTime;
-    
-    // Play a happy major scale arpeggio
-    const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+    const notes = [261.63, 329.63, 392.00, 523.25];
     notes.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(freq, now + idx * 0.12);
-      
       gain.gain.setValueAtTime(0, now + idx * 0.12);
       gain.gain.linearRampToValueAtTime(0.08, now + idx * 0.12 + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.45);
-      
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
       osc.start(now + idx * 0.12);
       osc.stop(now + idx * 0.12 + 0.5);
     });
@@ -163,23 +130,17 @@ class SoundSynth {
     this.init();
     const ctx = this.ctx;
     const now = ctx.currentTime;
-    
-    // Play a sad descending minor/dissonant sequence
-    const notes = [392.00, 370.00, 349.23, 311.13]; // G4, F#4, F4, D#4
+    const notes = [392.00, 370.00, 349.23, 311.13];
     notes.forEach((freq, idx) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      
       osc.type = 'sawtooth';
       osc.frequency.setValueAtTime(freq, now + idx * 0.16);
-      
       gain.gain.setValueAtTime(0, now + idx * 0.16);
       gain.gain.linearRampToValueAtTime(0.06, now + idx * 0.16 + 0.02);
       gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.6);
-      
       osc.connect(gain);
       gain.connect(ctx.destination);
-      
       osc.start(now + idx * 0.16);
       osc.stop(now + idx * 0.16 + 0.7);
     });
@@ -189,59 +150,47 @@ class SoundSynth {
 const AudioPlayer = new SoundSynth();
 
 // ==========================================================================
-// Game Engine Configuration & State
+// Central State & Configuration
 // ==========================================================================
-const MAX_GUESSES = 6;
-const WORD_LENGTH = 5;
-
-const GameState = {
-  difficulty: 'easy',       // 'easy', 'medium', 'hard'
-  gameMode: 'practice',     // 'practice', 'daily'
-  targetWord: '',
-  guesses: [],
-  currentInput: '',
-  gameStatus: 'IN_PROGRESS', // 'IN_PROGRESS', 'WON', 'LOST'
-  stats: {},                // Local statistics loaded from localstorage
-  isAnimating: false,
+const GameHubState = {
+  activeGame: null,        // null (Dashboard), 'wordle', 'octordle', 'crossword', 'sudoku'
+  difficulty: 'easy',      // 'easy', 'medium', 'hard'
+  gameMode: 'practice',    // 'practice', 'daily'
+  stats: {},
   dailyIndex: 0
 };
 
-// Default Statistics Structure
-const defaultStats = {
-  practice: {
-    easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] },
-    medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] },
-    hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] }
+// Initial Multi-Game Stats Blueprint
+const defaultStatsSchema = {
+  wordle: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] } }
   },
-  daily: {
-    easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] },
-    medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] },
-    hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] }
+  octordle: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0) }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0) }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0) } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), lastPlayedDay: -1, lastResult: null, savedGuesses: [] } }
+  },
+  crossword: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0 }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0 }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0 } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
+  },
+  sudoku: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0 }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0 }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0 } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
   }
 };
 
 // ==========================================================================
-// Word Lists Mapping
-// ==========================================================================
-const difficultyWordLists = {
-  easy: EASY_WORDS,
-  medium: MEDIUM_WORDS,
-  hard: HARD_WORDS
-};
-
-// ==========================================================================
-// Initialization & Lifecycle
+// Initialization
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
   loadUserSettings();
   loadStats();
-  initBoard();
-  initKeyboard();
-  bindEvents();
-  startNewGame();
+  bindOrchestratorEvents();
+  renderQWERTYKeyboard();
+  showView('dashboard');
 });
 
-// Load user choices (themes, sound) from LocalStorage
 function loadUserSettings() {
   const settings = JSON.parse(localStorage.getItem('wordle_settings')) || {
     darkMode: true,
@@ -249,29 +198,20 @@ function loadUserSettings() {
     sound: true,
     gameMode: 'practice'
   };
-
-  document.body.className = '';
-  if (settings.darkMode) {
-    document.body.classList.add('dark-theme');
-  } else {
-    document.body.classList.add('light-theme');
-  }
   
-  if (settings.colorblind) {
-    document.body.classList.add('colorblind');
-  }
-
+  document.body.className = '';
+  document.body.classList.add(settings.darkMode ? 'dark-theme' : 'light-theme');
+  if (settings.colorblind) document.body.classList.add('colorblind');
+  
   AudioPlayer.enabled = settings.sound;
-  GameState.gameMode = settings.gameMode;
-
-  // Sync controls UI
+  GameHubState.gameMode = settings.gameMode;
+  
   document.getElementById('toggle-dark-mode').checked = settings.darkMode;
   document.getElementById('toggle-colorblind').checked = settings.colorblind;
   document.getElementById('toggle-sound').checked = settings.sound;
   document.getElementById('select-game-mode').value = settings.gameMode;
 }
 
-// Save settings to LocalStorage
 function saveUserSettings() {
   const settings = {
     darkMode: document.getElementById('toggle-dark-mode').checked,
@@ -282,75 +222,127 @@ function saveUserSettings() {
   localStorage.setItem('wordle_settings', JSON.stringify(settings));
 }
 
-// Load statistics from LocalStorage
 function loadStats() {
-  const saved = localStorage.getItem('wordle_pro_stats');
+  const saved = localStorage.getItem('gamebox_pro_stats');
   if (saved) {
-    // Deep merge to handle migrations/missing properties
-    GameState.stats = JSON.parse(saved);
-    // Ensure all pathways exist
-    if (!GameState.stats.practice) GameState.stats.practice = defaultStats.practice;
-    if (!GameState.stats.daily) GameState.stats.daily = defaultStats.daily;
+    GameHubState.stats = JSON.parse(saved);
+    // Ensure compatibility with previous formats by merging schemas
+    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku']) {
+      if (!GameHubState.stats[game]) {
+        GameHubState.stats[game] = JSON.parse(JSON.stringify(defaultStatsSchema[game]));
+      }
+    }
   } else {
-    GameState.stats = JSON.parse(JSON.stringify(defaultStats));
+    GameHubState.stats = JSON.parse(JSON.stringify(defaultStatsSchema));
   }
 }
 
-// Save stats
 function saveStats() {
-  localStorage.setItem('wordle_pro_stats', JSON.stringify(GameState.stats));
+  localStorage.setItem('gamebox_pro_stats', JSON.stringify(GameHubState.stats));
 }
 
-// Reset stats
 function resetAllStats() {
-  GameState.stats = JSON.parse(JSON.stringify(defaultStats));
+  GameHubState.stats = JSON.parse(JSON.stringify(defaultStatsSchema));
   saveStats();
-  showToast('Statistics Cleared');
+  showToast('All stats cleared');
   updateStatsModal();
 }
 
+// Deterministic index for daily challenge based on days since Jan 1, 2026
+function getDailyIndex() {
+  const epoch = new Date(2026, 0, 1).getTime();
+  const now = new Date().getTime();
+  const diffDays = Math.floor((now - epoch) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
 // ==========================================================================
-// Board & Keyboard Generators
+// Views Switcher
 // ==========================================================================
-function initBoard() {
-  const board = document.getElementById('game-board');
-  board.innerHTML = '';
-  
-  for (let r = 0; r < MAX_GUESSES; r++) {
-    const row = document.createElement('div');
-    row.className = 'board-row';
-    row.id = `row-${r}`;
+function showView(view) {
+  if (view === 'dashboard') {
+    GameHubState.activeGame = null;
+    document.getElementById('view-dashboard').classList.remove('hidden');
+    document.getElementById('view-game').classList.add('hidden');
     
-    for (let c = 0; c < WORD_LENGTH; c++) {
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      tile.id = `tile-${r}-${c}`;
-      row.appendChild(tile);
+    // Header tweaks
+    document.getElementById('btn-home').classList.add('hidden');
+    document.getElementById('btn-stats').classList.add('hidden');
+    document.getElementById('logo-main').innerHTML = 'GAMEBOX<span class="logo-accent">PRO</span>';
+  } else {
+    GameHubState.activeGame = view;
+    document.getElementById('view-dashboard').classList.add('hidden');
+    document.getElementById('view-game').classList.remove('hidden');
+    
+    document.getElementById('btn-home').classList.remove('hidden');
+    document.getElementById('btn-stats').classList.remove('hidden');
+    
+    // Set headers
+    const gameTitles = {
+      wordle: 'WORDLE<span class="logo-accent">PRO</span>',
+      octordle: 'OCTORDLE<span class="logo-accent">PRO</span>',
+      crossword: 'CROSSWORD<span class="logo-accent">PRO</span>',
+      sudoku: 'SUDOKU<span class="logo-accent">PRO</span>'
+    };
+    document.getElementById('logo-main').innerHTML = gameTitles[view];
+    
+    // Manage Game View Panels
+    document.querySelectorAll('.game-board-panel').forEach(p => p.classList.add('hidden'));
+    document.getElementById(`game-${view}`).classList.remove('hidden');
+    
+    // Keyboard layouts
+    const qwertyKb = document.getElementById('keyboard-qwerty');
+    const numericKb = document.getElementById('keyboard-numeric');
+    if (view === 'sudoku') {
+      qwertyKb.classList.add('hidden');
+      numericKb.classList.remove('hidden');
+    } else {
+      qwertyKb.classList.remove('hidden');
+      numericKb.classList.add('hidden');
     }
-    board.appendChild(row);
+    
+    // Difficulty labels wraps
+    document.getElementById('level-indicator').classList.add('hidden');
+    document.getElementById('sudoku-mistakes-counter').classList.add('hidden');
+    
+    startActiveGame();
   }
 }
 
-function initKeyboard() {
-  const keyboard = document.getElementById('game-keyboard');
-  keyboard.innerHTML = '';
+function startActiveGame() {
+  GameHubState.dailyIndex = getDailyIndex();
   
-  const layout = [
+  if (GameHubState.activeGame === 'wordle') {
+    WordleEngine.start();
+  } else if (GameHubState.activeGame === 'octordle') {
+    OctordleEngine.start();
+  } else if (GameHubState.activeGame === 'crossword') {
+    CrosswordEngine.start();
+  } else if (GameHubState.activeGame === 'sudoku') {
+    SudokuEngine.start();
+  }
+}
+
+// ==========================================================================
+// QWERTY Virtual Keyboard Generator
+// ==========================================================================
+function renderQWERTYKeyboard() {
+  const keyboard = document.getElementById('keyboard-qwerty');
+  keyboard.innerHTML = '';
+  const rows = [
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'],
     ['a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'],
     ['enter', 'z', 'x', 'c', 'v', 'b', 'n', 'm', 'backspace']
   ];
   
-  layout.forEach((rowKeys) => {
+  rows.forEach(keys => {
     const row = document.createElement('div');
     row.className = 'keyboard-row';
-    
-    rowKeys.forEach((key) => {
+    keys.forEach(key => {
       const btn = document.createElement('button');
       btn.className = 'key-btn';
       btn.dataset.key = key;
       btn.id = `key-${key}`;
-      
       if (key === 'enter' || key === 'backspace') {
         btn.classList.add('key-wide');
         if (key === 'backspace') {
@@ -361,111 +353,22 @@ function initKeyboard() {
       } else {
         btn.innerText = key.toUpperCase();
       }
-      
       row.appendChild(btn);
     });
-    
     keyboard.appendChild(row);
   });
 }
 
-// ==========================================================================
-// Game State Controller Logic
-// ==========================================================================
-
-// Calculates unique daily word index deterministically based on date (Epoch)
-function getDailyWordIndex() {
-  const epoch = new Date(2026, 0, 1).getTime(); // Jan 1, 2026 as seed start
-  const now = new Date().getTime();
-  const diffDays = Math.floor((now - epoch) / (1000 * 60 * 60 * 24));
-  return Math.max(0, diffDays);
-}
-
-function startNewGame() {
-  GameState.currentInput = '';
-  GameState.guesses = [];
-  GameState.gameStatus = 'IN_PROGRESS';
-  GameState.isAnimating = false;
-  
-  // Clear grid cells
-  for (let r = 0; r < MAX_GUESSES; r++) {
-    const row = document.getElementById(`row-${r}`);
-    row.className = 'board-row';
-    for (let c = 0; c < WORD_LENGTH; c++) {
-      const tile = document.getElementById(`tile-${r}-${c}`);
-      tile.className = 'tile';
-      tile.innerText = '';
-    }
-  }
-
-  // Clear keyboard states style
-  const keys = document.querySelectorAll('.key-btn');
-  keys.forEach((k) => {
+function clearKeyboardStates() {
+  document.querySelectorAll('#keyboard-qwerty .key-btn').forEach(k => {
     k.className = 'key-btn';
-    if (k.dataset.key === 'enter' || k.dataset.key === 'backspace') {
-      k.classList.add('key-wide');
-    }
+    if (k.dataset.key === 'enter' || k.dataset.key === 'backspace') k.classList.add('key-wide');
   });
-
-  const list = difficultyWordLists[GameState.difficulty];
-  const selectModeLabel = document.getElementById('current-mode-label');
-
-  if (GameState.gameMode === 'daily') {
-    selectModeLabel.innerText = 'DAILY CHALLENGE';
-    selectModeLabel.style.borderColor = 'rgba(239, 68, 68, 0.2)';
-    selectModeLabel.style.color = '#ef4444';
-    selectModeLabel.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-    
-    const dailyDay = getDailyWordIndex();
-    GameState.dailyIndex = dailyDay;
-    const wordIdx = dailyDay % list.length;
-    GameState.targetWord = list[wordIdx];
-    
-    // Check if daily challenge has already been completed today
-    const statObj = GameState.stats.daily[GameState.difficulty];
-    if (statObj.lastPlayedDay === dailyDay) {
-      // Re-hydrate the board from saved guesses
-      GameState.guesses = [...statObj.savedGuesses];
-      GameState.gameStatus = statObj.lastResult;
-      
-      // Paint board instantly (without delay or sound)
-      GameState.guesses.forEach((guess, rowIdx) => {
-        const evalResult = gradeGuess(guess, GameState.targetWord);
-        evalResult.forEach((state, colIdx) => {
-          const tile = document.getElementById(`tile-${rowIdx}-${colIdx}`);
-          tile.innerText = guess[colIdx].toUpperCase();
-          tile.classList.add(`${state}-state`);
-          
-          const key = document.getElementById(`key-${guess[colIdx]}`);
-          updateKeyStyle(key, state);
-        });
-      });
-      
-      // Open stats modal automatically
-      setTimeout(() => {
-        openModal(document.getElementById('modal-stats'));
-        updateStatsModal();
-      }, 300);
-      return;
-    }
-  } else {
-    // Practice Mode - Infinite
-    selectModeLabel.innerText = 'PRACTICE MODE';
-    selectModeLabel.style.borderColor = 'rgba(94, 234, 212, 0.2)';
-    selectModeLabel.style.color = '#14b8a6';
-    selectModeLabel.style.backgroundColor = 'rgba(94, 234, 212, 0.1)';
-    
-    // Random word
-    const randIdx = Math.floor(Math.random() * list.length);
-    GameState.targetWord = list[randIdx];
-  }
-  
-  console.log(`Wordle target word (${GameState.difficulty}): ${GameState.targetWord.toUpperCase()}`);
 }
 
-function updateKeyStyle(keyBtn, state) {
+function updateKeyStyle(keyChar, state) {
+  const keyBtn = document.getElementById(`key-${keyChar}`);
   if (!keyBtn) return;
-  // Hierarchical rules: correct (green) overrides present (yellow) overrides absent (gray)
   if (keyBtn.classList.contains('correct-state')) return;
   if (keyBtn.classList.contains('present-state') && state !== 'correct') return;
   
@@ -473,517 +376,1553 @@ function updateKeyStyle(keyBtn, state) {
   keyBtn.classList.add(`${state}-state`);
 }
 
-// Precise Wordle coloring logic with duplicate letter constraints
-function gradeGuess(guess, target) {
-  const evaluation = Array(WORD_LENGTH).fill('absent');
-  const targetLettersCount = {};
-  
-  // Pass 1: Build counter of letters not matched in target, and mark exact correct letters
-  for (let i = 0; i < WORD_LENGTH; i++) {
-    const char = target[i];
-    if (guess[i] === char) {
-      evaluation[i] = 'correct';
-    } else {
-      targetLettersCount[char] = (targetLettersCount[char] || 0) + 1;
-    }
-  }
-  
-  // Pass 2: Mark yellow present letters, verifying count thresholds
-  for (let i = 0; i < WORD_LENGTH; i++) {
-    if (evaluation[i] === 'correct') continue;
-    
-    const char = guess[i];
-    if (targetLettersCount[char] && targetLettersCount[char] > 0) {
-      evaluation[i] = 'present';
-      targetLettersCount[char]--;
-    }
-  }
-  
-  return evaluation;
-}
-
 // ==========================================================================
-// Input Event Handling
+// Unified Core Event Router
 // ==========================================================================
-function handleKeyPress(key) {
-  if (GameState.gameStatus !== 'IN_PROGRESS' || GameState.isAnimating) return;
-  
-  if (key === 'enter') {
-    submitGuess();
-  } else if (key === 'backspace') {
-    handleBackspace();
-  } else if (/^[a-z]$/i.test(key)) {
-    handleLetterInput(key.toLowerCase());
-  }
-}
-
-function handleLetterInput(letter) {
-  if (GameState.currentInput.length >= WORD_LENGTH) return;
-  
-  AudioPlayer.playKey();
-  const rowIdx = GameState.guesses.length;
-  const colIdx = GameState.currentInput.length;
-  
-  GameState.currentInput += letter;
-  
-  const tile = document.getElementById(`tile-${rowIdx}-${colIdx}`);
-  if (tile) {
-    tile.innerText = letter.toUpperCase();
-    tile.classList.add('active-input', 'pop-effect');
-  }
-}
-
-function handleBackspace() {
-  if (GameState.currentInput.length === 0) return;
-  
-  AudioPlayer.playClick();
-  const rowIdx = GameState.guesses.length;
-  const colIdx = GameState.currentInput.length - 1;
-  
-  GameState.currentInput = GameState.currentInput.slice(0, -1);
-  
-  const tile = document.getElementById(`tile-${rowIdx}-${colIdx}`);
-  if (tile) {
-    tile.innerText = '';
-    tile.classList.remove('active-input', 'pop-effect');
-  }
-}
-
-function submitGuess() {
-  const rowIdx = GameState.guesses.length;
-  const guess = GameState.currentInput;
-  
-  if (guess.length < WORD_LENGTH) {
-    showToast('Not enough letters');
-    shakeRow(rowIdx);
-    AudioPlayer.playError();
-    return;
-  }
-  
-  if (!VALID_GUESSES.has(guess)) {
-    showToast('Not in word list');
-    shakeRow(rowIdx);
-    AudioPlayer.playError();
-    return;
-  }
-  
-  // Lock input and proceed to evaluations
-  GameState.isAnimating = true;
-  GameState.guesses.push(guess);
-  GameState.currentInput = '';
-  
-  const evaluation = gradeGuess(guess, GameState.targetWord);
-  
-  // Staggered tiles flip animation
-  evaluation.forEach((state, idx) => {
-    const tile = document.getElementById(`tile-${rowIdx}-${idx}`);
-    tile.classList.remove('active-input', 'pop-effect');
-    
-    // Add flip animation
-    setTimeout(() => {
-      tile.classList.add('flip-animation');
-      AudioPlayer.playFlip(idx);
-      
-      // Update backgrounds halfway through the rotation
-      setTimeout(() => {
-        tile.classList.add(`${state}-state`);
-        const key = document.getElementById(`key-${guess[idx]}`);
-        updateKeyStyle(key, state);
-      }, 250);
-      
-    }, idx * 150);
+function bindOrchestratorEvents() {
+  // Main selector cards clicks
+  document.querySelectorAll('.game-card').forEach(card => {
+    card.addEventListener('click', () => {
+      AudioPlayer.playClick();
+      showView(card.dataset.game);
+    });
   });
   
-  // Complete row reveal callback
-  setTimeout(() => {
-    GameState.isAnimating = false;
-    
-    if (guess === GameState.targetWord) {
-      handleGameOver('WON');
-    } else if (GameState.guesses.length >= MAX_GUESSES) {
-      handleGameOver('LOST');
-    }
-  }, WORD_LENGTH * 150 + 400);
-}
+  // Navigation Home
+  document.getElementById('btn-home').addEventListener('click', () => {
+    AudioPlayer.playClick();
+    showView('dashboard');
+  });
 
-// Row animation triggers
-function shakeRow(rowIdx) {
-  const row = document.getElementById(`row-${rowIdx}`);
-  if (row) {
-    row.classList.add('shake');
-    row.addEventListener('animationend', () => {
-      row.classList.remove('shake');
-    }, { once: true });
-  }
-}
+  // Controls tabs switch (difficulty)
+  document.querySelectorAll('.difficulty-tabs .tab-button').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      const activeTab = e.currentTarget;
+      if (activeTab.classList.contains('active')) return;
+      AudioPlayer.playClick();
+      
+      document.querySelectorAll('.difficulty-tabs .tab-button').forEach(b => b.classList.remove('active'));
+      activeTab.classList.add('active');
+      
+      GameHubState.difficulty = activeTab.dataset.difficulty;
+      startActiveGame();
+    });
+  });
 
-function bounceRow(rowIdx) {
-  const row = document.getElementById(`row-${rowIdx}`);
-  if (row) {
-    row.classList.add('bounce');
-  }
-}
-
-// ==========================================================================
-// Game Over & Stats Record Management
-// ==========================================================================
-function handleGameOver(result) {
-  GameState.gameStatus = result;
-  
-  if (result === 'WON') {
-    AudioPlayer.playWin();
-    showToast(getWinAffirmation(GameState.guesses.length));
-    bounceRow(GameState.guesses.length - 1);
-  } else {
-    AudioPlayer.playLoss();
-    showToast(GameState.targetWord.toUpperCase());
-  }
-
-  // Update statistics
-  const mode = GameState.gameMode;
-  const diff = GameState.difficulty;
-  const statObj = GameState.stats[mode][diff];
-  
-  if (mode === 'daily') {
-    statObj.lastPlayedDay = GameState.dailyIndex;
-    statObj.lastResult = result;
-    statObj.savedGuesses = [...GameState.guesses];
-  }
-  
-  statObj.played++;
-  if (result === 'WON') {
-    statObj.won++;
-    statObj.currentStreak++;
-    if (statObj.currentStreak > statObj.maxStreak) {
-      statObj.maxStreak = statObj.currentStreak;
-    }
-    // Record guess count distribution (0-indexed array representing guesses 1-6)
-    const guessIdx = GameState.guesses.length - 1;
-    statObj.guessDistribution[guessIdx]++;
-  } else {
-    statObj.currentStreak = 0;
-  }
-  
-  saveStats();
-  
-  // Open stats board
-  setTimeout(() => {
-    openModal(document.getElementById('modal-stats'));
+  // Menu Modals events
+  document.getElementById('btn-help').addEventListener('click', () => openHelpModal());
+  document.getElementById('btn-close-help').addEventListener('click', () => closeModal(document.getElementById('modal-help')));
+  document.getElementById('btn-stats').addEventListener('click', () => {
     updateStatsModal();
-  }, 1200);
-}
-
-function getWinAffirmation(guessesCount) {
-  const affirmations = ['Genius!', 'Magnificent!', 'Impressive', 'Splendid', 'Great', 'Phew!'];
-  return affirmations[guessesCount - 1] || 'Victory!';
-}
-
-// ==========================================================================
-// Toast Messaging helper
-// ==========================================================================
-function showToast(message) {
-  const container = document.getElementById('toast-container');
-  const toast = document.createElement('div');
-  toast.className = 'toast-message';
-  toast.innerText = message;
-  
-  container.appendChild(toast);
-  // Auto clear DOM
-  toast.addEventListener('animationend', (e) => {
-    if (e.animationName === 'fadeOutUp') {
-      toast.remove();
-    }
+    openModal(document.getElementById('modal-stats'));
   });
-}
-
-// ==========================================================================
-// Modals Controller
-// ==========================================================================
-function openModal(modalEl) {
-  if (!modalEl) return;
-  AudioPlayer.playClick();
-  modalEl.classList.remove('hidden');
-}
-
-function closeModal(modalEl) {
-  if (!modalEl) return;
-  AudioPlayer.playClick();
-  modalEl.classList.add('hidden');
-}
-
-// Populate stats modal content
-function updateStatsModal() {
-  const mode = GameState.gameMode;
-  const diff = GameState.difficulty;
-  const statObj = GameState.stats[mode][diff];
+  document.getElementById('btn-close-stats').addEventListener('click', () => closeModal(document.getElementById('modal-stats')));
   
-  // Title header text
-  document.getElementById('stats-title').innerText = `${mode.toUpperCase()} STATS (${diff.toUpperCase()})`;
+  document.getElementById('btn-settings').addEventListener('click', () => openModal(document.getElementById('modal-settings')));
+  document.getElementById('btn-close-settings').addEventListener('click', () => closeModal(document.getElementById('modal-settings')));
   
-  // Core stats metrics
-  document.getElementById('stat-played').innerText = statObj.played;
-  const winPct = statObj.played > 0 ? Math.round((statObj.won / statObj.played) * 100) : 0;
-  document.getElementById('stat-win-pct').innerText = `${winPct}%`;
-  document.getElementById('stat-streak').innerText = statObj.currentStreak;
-  document.getElementById('stat-max-streak').innerText = statObj.maxStreak;
-  
-  // Draw guess bars distribution
-  const barsContainer = document.getElementById('guess-bars');
-  barsContainer.innerHTML = '';
-  
-  const maxDistribution = Math.max(1, ...statObj.guessDistribution);
-  
-  for (let i = 0; i < MAX_GUESSES; i++) {
-    const row = document.createElement('div');
-    row.className = 'guess-bar-row';
-    
-    const count = statObj.guessDistribution[i];
-    const pct = Math.round((count / maxDistribution) * 100);
-    
-    // Highlight if active game row match
-    const isHighlight = GameState.gameStatus === 'WON' && GameState.guesses.length === (i + 1);
-    
-    row.innerHTML = `
-      <span class="guess-label">${i+1}</span>
-      <div class="guess-track">
-        <div class="guess-fill ${isHighlight ? 'highlight' : ''}" style="width: ${pct}%">${count}</div>
-      </div>
-    `;
-    barsContainer.appendChild(row);
-  }
-
-  // Daily Challenge timer setup
-  const timerContainer = document.getElementById('timer-container');
-  const shareAction = document.getElementById('share-action-container');
-  const practiceAgainBtn = document.getElementById('btn-practice-again');
-  
-  if (mode === 'daily') {
-    timerContainer.classList.remove('hidden');
-    
-    if (GameState.gameStatus !== 'IN_PROGRESS') {
-      shareAction.classList.remove('hidden');
-      practiceAgainBtn.classList.add('hidden');
-    } else {
-      shareAction.classList.add('hidden');
-      practiceAgainBtn.classList.add('hidden');
-    }
-  } else {
-    // Practice Mode
-    timerContainer.classList.add('hidden');
-    shareAction.classList.add('hidden');
-    
-    if (GameState.gameStatus !== 'IN_PROGRESS') {
-      practiceAgainBtn.classList.remove('hidden');
-    } else {
-      practiceAgainBtn.classList.add('hidden');
-    }
-  }
-}
-
-// Countdown timer loop for next Daily Challenge
-setInterval(() => {
-  const countdownEl = document.getElementById('next-daily-countdown');
-  if (!countdownEl || document.getElementById('timer-container').classList.contains('hidden')) return;
-  
-  const now = new Date();
-  const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  const diffMs = midnight - now;
-  
-  const h = Math.floor(diffMs / (1000 * 60 * 60)).toString().padStart(2, '0');
-  const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-  const s = Math.floor((diffMs % (1000 * 60)) / 1000).toString().padStart(2, '0');
-  
-  countdownEl.innerText = `${h}:${m}:${s}`;
-}, 1000);
-
-// Generate share grid format (emojis grid)
-function generateShareContent() {
-  const resultChar = GameState.gameStatus === 'WON' ? GameState.guesses.length : 'X';
-  let shareText = `Wordle Pro (${GameState.difficulty.toUpperCase()}) ${GameState.gameMode === 'daily' ? '#' + GameState.dailyIndex : 'Practice'} ${resultChar}/${MAX_GUESSES}\n\n`;
-  
-  const correctEmoji = document.body.classList.contains('colorblind') ? '🟧' : '🟩';
-  const presentEmoji = document.body.classList.contains('colorblind') ? '🟦' : '🟨';
-  const absentEmoji = document.body.classList.contains('dark-theme') ? '⬛' : '⬜';
-  
-  GameState.guesses.forEach((guess) => {
-    const evalResult = gradeGuess(guess, GameState.targetWord);
-    const rowEmojis = evalResult.map((state) => {
-      if (state === 'correct') return correctEmoji;
-      if (state === 'present') return presentEmoji;
-      return absentEmoji;
-    }).join('');
-    shareText += rowEmojis + '\n';
-  });
-  
-  shareText += '\nPlay offline at: Wordle Pro App!';
-  return shareText;
-}
-
-// ==========================================================================
-// DOM Events Binder
-// ==========================================================================
-function bindEvents() {
-  // On-screen Virtual Keyboard click events
-  document.getElementById('game-keyboard').addEventListener('click', (e) => {
-    const keyBtn = e.target.closest('.key-btn');
-    if (!keyBtn) return;
-    const key = keyBtn.dataset.key;
-    handleKeyPress(key);
-  });
-  
-  // Physical keyboard keydown listener
-  document.addEventListener('keydown', (e) => {
-    // Avoid double capture when typing inside selects/settings inputs
-    if (document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'INPUT') return;
-    
-    let key = e.key.toLowerCase();
-    if (key === 'escape') {
-      // Close all active overlays
-      document.querySelectorAll('.modal-overlay').forEach(closeModal);
-    } else {
-      if (key === 'backspace') key = 'backspace';
-      if (key === 'enter') key = 'enter';
-      handleKeyPress(key);
-    }
+  // Exit buttons
+  document.getElementById('btn-prompt-exit').addEventListener('click', () => {
+    closeModal(document.getElementById('modal-gameover-prompt'));
+    showView('dashboard');
   });
 
-  // Settings: Switch Game Mode
+  // Settings selections
   document.getElementById('select-game-mode').addEventListener('change', (e) => {
-    GameState.gameMode = e.target.value;
+    GameHubState.gameMode = e.target.value;
     saveUserSettings();
     closeModal(document.getElementById('modal-settings'));
-    startNewGame();
+    startActiveGame();
   });
-
-  // Settings: Toggle Dark/Light Mode
+  
   document.getElementById('toggle-dark-mode').addEventListener('change', (e) => {
     const isDark = e.target.checked;
     document.body.className = '';
-    if (isDark) {
-      document.body.classList.add('dark-theme');
-    } else {
-      document.body.classList.add('light-theme');
-    }
-    
-    // Keep colorblind mode if set
-    if (document.getElementById('toggle-colorblind').checked) {
-      document.body.classList.add('colorblind');
-    }
+    document.body.classList.add(isDark ? 'dark-theme' : 'light-theme');
+    if (document.getElementById('toggle-colorblind').checked) document.body.classList.add('colorblind');
     saveUserSettings();
     AudioPlayer.playClick();
   });
 
-  // Settings: Toggle Colorblind Mode
   document.getElementById('toggle-colorblind').addEventListener('change', (e) => {
-    const isColorblind = e.target.checked;
-    if (isColorblind) {
-      document.body.classList.add('colorblind');
-    } else {
-      document.body.classList.remove('colorblind');
-    }
+    const isColor = e.target.checked;
+    if (isColor) document.body.classList.add('colorblind');
+    else document.body.classList.remove('colorblind');
     saveUserSettings();
     AudioPlayer.playClick();
   });
 
-  // Settings: Toggle Sound FX
   document.getElementById('toggle-sound').addEventListener('change', (e) => {
     AudioPlayer.enabled = e.target.checked;
     saveUserSettings();
     AudioPlayer.playClick();
   });
 
-  // Settings: Reset statistics
   document.getElementById('btn-reset-stats').addEventListener('click', () => {
-    if (confirm('Are you sure you want to permanently erase all statistics?')) {
+    if (confirm('Permanently clear statistics of all games?')) {
       resetAllStats();
     }
   });
 
-  // Difficulty Tabs Switch
-  document.querySelector('.difficulty-tabs').addEventListener('click', (e) => {
-    const tab = e.target.closest('.tab-button');
-    if (!tab || tab.classList.contains('active') || GameState.isAnimating) return;
-    
-    AudioPlayer.playClick();
-    
-    // Update active tab styling
-    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-    tab.classList.add('active');
-    
-    GameState.difficulty = tab.dataset.difficulty;
-    startNewGame();
-  });
-
-  // Modals Nav Buttons
-  document.getElementById('btn-help').addEventListener('click', () => openModal(document.getElementById('modal-help')));
-  document.getElementById('btn-close-help').addEventListener('click', () => closeModal(document.getElementById('modal-help')));
-  document.getElementById('modal-help').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('modal-help')) closeModal(e.target);
-  });
-  
-  document.getElementById('btn-stats').addEventListener('click', () => {
-    openModal(document.getElementById('modal-stats'));
-    updateStatsModal();
-  });
-  document.getElementById('btn-close-stats').addEventListener('click', () => closeModal(document.getElementById('modal-stats')));
-  document.getElementById('modal-stats').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('modal-stats')) closeModal(e.target);
-  });
-  
-  document.getElementById('btn-settings').addEventListener('click', () => openModal(document.getElementById('modal-settings')));
-  document.getElementById('btn-close-settings').addEventListener('click', () => closeModal(document.getElementById('modal-settings')));
-  document.getElementById('modal-settings').addEventListener('click', (e) => {
-    if (e.target === document.getElementById('modal-settings')) closeModal(e.target);
-  });
-
-  // Stats: Practice Again Button
-  document.getElementById('btn-practice-again').addEventListener('click', () => {
-    closeModal(document.getElementById('modal-stats'));
-    startNewGame();
-  });
-
-  // Stats: Share Stats Grid
+  // Share Stats logic
   document.getElementById('btn-share-stats').addEventListener('click', () => {
-    const shareText = generateShareContent();
-    
+    const text = getShareContent();
     if (navigator.share) {
-      // Use mobile native share API if available
-      navigator.share({
-        title: 'Wordle Pro Score',
-        text: shareText
-      })
-      .then(() => showToast('Shared successfully!'))
-      .catch((err) => console.log('Share failed:', err));
+      navigator.share({ title: 'Gamebox Score', text }).catch(err => console.log(err));
     } else {
-      // Fallback: Copy to Clipboard
-      navigator.clipboard.writeText(shareText)
-        .then(() => showToast('Copied results to clipboard!'))
-        .catch(() => showToast('Failed to copy to clipboard'));
+      navigator.clipboard.writeText(text)
+        .then(() => showToast('Results copied to clipboard!'))
+        .catch(() => showToast('Copy failed'));
     }
   });
 
-  // Install PWA Prompt actions
-  const closeInstallPrompt = () => {
+  // Practice Again
+  document.getElementById('btn-practice-again').addEventListener('click', () => {
+    closeModal(document.getElementById('modal-stats'));
+    startActiveGame();
+  });
+
+  // QWERTY physical keyboard router
+  document.addEventListener('keydown', (e) => {
+    if (document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'INPUT') return;
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay').forEach(closeModal);
+      return;
+    }
+    
+    if (!GameHubState.activeGame) return;
+    
+    // Route keys
+    const key = e.key.toLowerCase();
+    if (GameHubState.activeGame === 'sudoku') {
+      if (/^[1-9]$/.test(key)) SudokuEngine.handleInput(parseInt(key));
+      if (key === 'backspace' || key === 'delete' || key === '0') SudokuEngine.eraseCell();
+    } else if (GameHubState.activeGame === 'crossword') {
+      if (/^[a-z]$/.test(key)) CrosswordEngine.handleInput(key);
+      if (key === 'backspace') CrosswordEngine.handleBackspace();
+      // Arrow keys navigation inside crossword
+      if (key === 'arrowup') CrosswordEngine.moveSelection(-1, 0);
+      if (key === 'arrowdown') CrosswordEngine.moveSelection(1, 0);
+      if (key === 'arrowleft') CrosswordEngine.moveSelection(0, -1);
+      if (key === 'arrowright') CrosswordEngine.moveSelection(0, 1);
+    } else {
+      // Wordle and Octordle
+      if (/^[a-z]$/.test(key)) handleQWERTYInput(key);
+      if (key === 'backspace') handleQWERTYBackspace();
+      if (key === 'enter') handleQWERTYSubmit();
+    }
+  });
+
+  // QWERTY Virtual keyboard router
+  document.getElementById('keyboard-qwerty').addEventListener('click', (e) => {
+    const btn = e.target.closest('.key-btn');
+    if (!btn) return;
+    const key = btn.dataset.key;
+    
+    if (GameHubState.activeGame === 'crossword') {
+      if (key === 'backspace') CrosswordEngine.handleBackspace();
+      else if (key === 'enter') { /* do nothing for crossword */ }
+      else CrosswordEngine.handleInput(key);
+    } else {
+      if (key === 'backspace') handleQWERTYBackspace();
+      else if (key === 'enter') handleQWERTYSubmit();
+      else handleQWERTYInput(key);
+    }
+  });
+
+  // Sudoku numeric pad click
+  document.getElementById('keyboard-numeric').addEventListener('click', (e) => {
+    const btn = e.target.closest('.key-btn');
+    if (!btn) return;
+    
+    if (btn.classList.contains('num-key')) {
+      SudokuEngine.handleInput(parseInt(btn.dataset.num));
+    } else if (btn.id === 'key-sudoku-notes') {
+      SudokuEngine.toggleNotesMode();
+    } else if (btn.id === 'key-sudoku-erase') {
+      SudokuEngine.eraseCell();
+    }
+  });
+
+  // PWA banner close
+  document.getElementById('btn-close-install').addEventListener('click', () => {
     document.getElementById('install-banner').classList.add('hidden');
-  };
-  
-  document.getElementById('btn-close-install').addEventListener('click', closeInstallPrompt);
+  });
   
   document.getElementById('btn-install-app').addEventListener('click', () => {
-    if (!deferredPrompt) return;
-    
-    // Show prompt banner
-    deferredPrompt.prompt();
-    
-    // Wait for resolution
-    deferredPrompt.userChoice.then((choiceResult) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('[PWA Installer] User accepted the installation');
-      } else {
-        console.log('[PWA Installer] User dismissed the installation');
-      }
-      deferredPrompt = null;
-      closeInstallPrompt();
-    });
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => {
+        deferredPrompt = null;
+        document.getElementById('install-banner').classList.add('hidden');
+      });
+    }
   });
+}
+
+// Router forwards for Wordle / Octordle
+function handleQWERTYInput(char) {
+  if (GameHubState.activeGame === 'wordle') WordleEngine.handleInput(char);
+  else if (GameHubState.activeGame === 'octordle') OctordleEngine.handleInput(char);
+}
+
+function handleQWERTYBackspace() {
+  if (GameHubState.activeGame === 'wordle') WordleEngine.handleBackspace();
+  else if (GameHubState.activeGame === 'octordle') OctordleEngine.handleBackspace();
+}
+
+function handleQWERTYSubmit() {
+  if (GameHubState.activeGame === 'wordle') WordleEngine.submitGuess();
+  else if (GameHubState.activeGame === 'octordle') OctordleEngine.submitGuess();
+}
+
+// Helper modals
+function openModal(el) {
+  if (!el) return;
+  AudioPlayer.playClick();
+  el.classList.remove('hidden');
+}
+
+function closeModal(el) {
+  if (!el) return;
+  AudioPlayer.playClick();
+  el.classList.add('hidden');
+}
+
+function showToast(msg) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast-message';
+  toast.innerText = msg;
+  container.appendChild(toast);
+  toast.addEventListener('animationend', (e) => {
+    if (e.animationName === 'fadeOutUp') toast.remove();
+  });
+}
+
+// win affirmation labels
+function getWinText(guesses) {
+  const words = ['Genius!', 'Magnificent!', 'Splendid', 'Excellent', 'Impressive', 'Phew!'];
+  return words[guesses - 1] || 'Victory!';
+}
+
+// ==========================================================================
+// GAME 1: Wordle Engine
+// ==========================================================================
+const WordleEngine = {
+  target: '',
+  guesses: [],
+  current: '',
+  status: 'IN_PROGRESS',
+  isAnimating: false,
+
+  start() {
+    this.guesses = [];
+    this.current = '';
+    this.status = 'IN_PROGRESS';
+    this.isAnimating = false;
+    
+    // Render Board Grid
+    const board = document.getElementById('board-wordle');
+    board.innerHTML = '';
+    for (let r = 0; r < 6; r++) {
+      const row = document.createElement('div');
+      row.className = 'board-row';
+      row.id = `wordle-row-${r}`;
+      for (let c = 0; c < 5; c++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.id = `wordle-tile-${r}-${c}`;
+        row.appendChild(tile);
+      }
+      board.appendChild(row);
+    }
+    
+    clearKeyboardStates();
+    
+    const list = difficultyWordLists[GameHubState.difficulty];
+    if (GameHubState.gameMode === 'daily') {
+      const idx = GameHubState.dailyIndex % list.length;
+      this.target = list[idx];
+      
+      const statObj = GameHubState.stats.wordle.daily[GameHubState.difficulty];
+      if (statObj.lastPlayedDay === GameHubState.dailyIndex) {
+        this.guesses = [...statObj.savedGuesses];
+        this.status = statObj.lastResult;
+        
+        // Render instantly
+        this.guesses.forEach((guess, rowIdx) => {
+          const evals = gradeGuess(guess, this.target);
+          evals.forEach((state, colIdx) => {
+            const tile = document.getElementById(`wordle-tile-${rowIdx}-${colIdx}`);
+            tile.innerText = guess[colIdx].toUpperCase();
+            tile.classList.add(`${state}-state`);
+            updateKeyStyle(guess[colIdx], state);
+          });
+        });
+        
+        setTimeout(() => {
+          updateStatsModal();
+          openModal(document.getElementById('modal-stats'));
+        }, 400);
+        return;
+      }
+    } else {
+      this.target = list[Math.floor(Math.random() * list.length)];
+    }
+    console.log('[Wordle Target]:', this.target.toUpperCase());
+  },
+
+  handleInput(char) {
+    if (this.status !== 'IN_PROGRESS' || this.isAnimating) return;
+    if (this.current.length >= 5) return;
+    AudioPlayer.playKey();
+    
+    const row = this.guesses.length;
+    const col = this.current.length;
+    this.current += char;
+    const tile = document.getElementById(`wordle-tile-${row}-${col}`);
+    if (tile) {
+      tile.innerText = char.toUpperCase();
+      tile.classList.add('active-input', 'pop-effect');
+    }
+  },
+
+  handleBackspace() {
+    if (this.current.length === 0) return;
+    AudioPlayer.playClick();
+    
+    const row = this.guesses.length;
+    const col = this.current.length - 1;
+    this.current = this.current.slice(0, -1);
+    const tile = document.getElementById(`wordle-tile-${row}-${col}`);
+    if (tile) {
+      tile.innerText = '';
+      tile.classList.remove('active-input', 'pop-effect');
+    }
+  },
+
+  submitGuess() {
+    if (this.status !== 'IN_PROGRESS' || this.isAnimating) return;
+    const guess = this.current;
+    const row = this.guesses.length;
+    
+    if (guess.length < 5) {
+      showToast('Not enough letters');
+      this.shake(row);
+      AudioPlayer.playError();
+      return;
+    }
+    
+    if (!VALID_GUESSES.has(guess)) {
+      showToast('Not in word list');
+      this.shake(row);
+      AudioPlayer.playError();
+      return;
+    }
+    
+    this.isAnimating = true;
+    this.guesses.push(guess);
+    this.current = '';
+    
+    const evals = gradeGuess(guess, this.target);
+    evals.forEach((state, idx) => {
+      const tile = document.getElementById(`wordle-tile-${row}-${idx}`);
+      tile.classList.remove('active-input', 'pop-effect');
+      setTimeout(() => {
+        tile.classList.add('flip-animation');
+        AudioPlayer.playFlip(idx);
+        setTimeout(() => {
+          tile.classList.add(`${state}-state`);
+          updateKeyStyle(guess[idx], state);
+        }, 250);
+      }, idx * 150);
+    });
+    
+    setTimeout(() => {
+      this.isAnimating = false;
+      if (guess === this.target) {
+        this.status = 'WON';
+        AudioPlayer.playWin();
+        showToast(getWinText(this.guesses.length));
+        this.bounce(row);
+        this.saveResults();
+      } else if (this.guesses.length >= 6) {
+        this.status = 'LOST';
+        AudioPlayer.playLoss();
+        showToast(this.target.toUpperCase());
+        this.saveResults();
+      }
+    }, 5 * 150 + 400);
+  },
+
+  shake(rowIdx) {
+    const row = document.getElementById(`wordle-row-${rowIdx}`);
+    if (row) {
+      row.classList.add('shake');
+      row.addEventListener('animationend', () => row.classList.remove('shake'), { once: true });
+    }
+  },
+
+  bounce(rowIdx) {
+    const row = document.getElementById(`wordle-row-${rowIdx}`);
+    if (row) row.classList.add('bounce');
+  },
+
+  saveResults() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    const statsObj = GameHubState.stats.wordle[mode][diff];
+    
+    if (mode === 'daily') {
+      statsObj.lastPlayedDay = GameHubState.dailyIndex;
+      statsObj.lastResult = this.status;
+      statsObj.savedGuesses = [...this.guesses];
+    }
+    
+    statsObj.played++;
+    if (this.status === 'WON') {
+      statsObj.won++;
+      statsObj.currentStreak++;
+      if (statsObj.currentStreak > statsObj.maxStreak) statsObj.maxStreak = statsObj.currentStreak;
+      statsObj.guessDistribution[this.guesses.length - 1]++;
+    } else {
+      statsObj.currentStreak = 0;
+    }
+    saveStats();
+    
+    setTimeout(() => {
+      updateStatsModal();
+      openModal(document.getElementById('modal-stats'));
+    }, 1200);
+  }
+};
+
+// Wordle evaluation algorithm helper
+function gradeGuess(guess, target) {
+  const evals = Array(5).fill('absent');
+  const counts = {};
+  
+  for (let i = 0; i < 5; i++) {
+    if (guess[i] === target[i]) {
+      evals[i] = 'correct';
+    } else {
+      counts[target[i]] = (counts[target[i]] || 0) + 1;
+    }
+  }
+  
+  for (let i = 0; i < 5; i++) {
+    if (evals[i] === 'correct') continue;
+    if (counts[guess[i]] && counts[guess[i]] > 0) {
+      evals[i] = 'present';
+      counts[guess[i]]--;
+    }
+  }
+  return evals;
+}
+
+// ==========================================================================
+// GAME 2: Octordle Engine (8 Wordles at once)
+// ==========================================================================
+const OctordleEngine = {
+  targets: [],
+  guesses: [],
+  current: '',
+  solved: [], // array of 8 booleans
+  activeBoard: 0, // 0 to 7
+  status: 'IN_PROGRESS',
+  isAnimating: false,
+
+  start() {
+    this.guesses = [];
+    this.current = '';
+    this.solved = Array(8).fill(false);
+    this.activeBoard = 0;
+    this.status = 'IN_PROGRESS';
+    this.isAnimating = false;
+    
+    const list = difficultyWordLists[GameHubState.difficulty];
+    if (GameHubState.gameMode === 'daily') {
+      // Pick 8 deterministic words
+      this.targets = [];
+      const startIdx = (GameHubState.dailyIndex * 8) % list.length;
+      for (let i = 0; i < 8; i++) {
+        this.targets.push(list[(startIdx + i) % list.length]);
+      }
+      
+      const statObj = GameHubState.stats.octordle.daily[GameHubState.difficulty];
+      if (statObj.lastPlayedDay === GameHubState.dailyIndex) {
+        this.guesses = [...statObj.savedGuesses];
+        this.status = statObj.lastResult;
+        
+        // Recompute solved flags
+        this.guesses.forEach((guess) => {
+          this.targets.forEach((tar, idx) => {
+            if (guess === tar) this.solved[idx] = true;
+          });
+        });
+        
+        this.repaintAll();
+        setTimeout(() => {
+          updateStatsModal();
+          openModal(document.getElementById('modal-stats'));
+        }, 400);
+        return;
+      }
+    } else {
+      // Practice: random 8 words
+      this.targets = [];
+      for (let i = 0; i < 8; i++) {
+        this.targets.push(list[Math.floor(Math.random() * list.length)]);
+      }
+    }
+    
+    console.log('[Octordle Targets]:', this.targets.map(t=>t.toUpperCase()));
+    this.repaintAll();
+  },
+
+  repaintAll() {
+    this.renderPreviews();
+    this.renderActiveBoard();
+    this.updateKeyboard();
+  },
+
+  renderPreviews() {
+    const container = document.getElementById('octordle-previews');
+    container.innerHTML = '';
+    
+    for (let b = 0; b < 8; b++) {
+      const card = document.createElement('div');
+      card.className = 'octordle-preview-card';
+      if (b === this.activeBoard) card.classList.add('active');
+      if (this.solved[b]) card.classList.add('solved');
+      else if (this.guesses.length >= 13 && !this.solved[b]) card.classList.add('failed');
+      
+      card.dataset.board = b;
+      
+      const label = document.createElement('span');
+      label.className = 'preview-label';
+      label.innerText = `B${b + 1}`;
+      card.appendChild(label);
+      
+      // Draw tiny mini-dots representing guess validations
+      const dotsGrid = document.createElement('div');
+      dotsGrid.className = 'preview-dot-board';
+      
+      for (let r = 0; r < 13; r++) {
+        const drow = document.createElement('div');
+        drow.className = 'preview-dot-row';
+        
+        const guess = this.guesses[r];
+        const hasEvaluations = guess && (!this.solved[b] || this.guesses.indexOf(this.targets[b]) >= r);
+        let evals = [];
+        if (hasEvaluations) {
+          evals = gradeGuess(guess, this.targets[b]);
+        }
+        
+        for (let c = 0; c < 5; c++) {
+          const dot = document.createElement('div');
+          dot.className = 'preview-dot';
+          if (hasEvaluations) {
+            dot.classList.add(evals[c]);
+          }
+          drow.appendChild(dot);
+        }
+        dotsGrid.appendChild(drow);
+      }
+      card.appendChild(dotsGrid);
+      
+      card.addEventListener('click', () => {
+        AudioPlayer.playClick();
+        this.activeBoard = b;
+        this.repaintAll();
+      });
+      
+      container.appendChild(card);
+    }
+  },
+
+  renderActiveBoard() {
+    const label = document.getElementById('octordle-active-label');
+    const boardStateText = this.solved[this.activeBoard] 
+      ? 'SOLVED' 
+      : (this.guesses.length >= 13 ? 'FAILED' : 'IN PROGRESS');
+    label.innerText = `BOARD ${this.activeBoard + 1} (${boardStateText})`;
+    
+    const board = document.getElementById('board-octordle-active');
+    board.innerHTML = '';
+    board.className = 'game-board octordle-grid';
+    
+    const target = this.targets[this.activeBoard];
+    
+    // Render 13 rows
+    for (let r = 0; r < 13; r++) {
+      const row = document.createElement('div');
+      row.className = 'board-row';
+      row.id = `octordle-row-${r}`;
+      
+      const guess = this.guesses[r];
+      // Draw tiles if guess exists and it is before or equal to the winning guess
+      const hasGuess = guess && (!this.solved[this.activeBoard] || this.guesses.indexOf(target) >= r);
+      let evals = [];
+      if (hasGuess) {
+        evals = gradeGuess(guess, target);
+      }
+      
+      for (let c = 0; c < 5; c++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.id = `octordle-tile-${r}-${c}`;
+        
+        if (hasGuess) {
+          tile.innerText = guess[c].toUpperCase();
+          tile.classList.add(`${evals[c]}-state`);
+        } else if (r === this.guesses.length && this.status === 'IN_PROGRESS') {
+          // Current editing row
+          if (c < this.current.length) {
+            tile.innerText = this.current[c].toUpperCase();
+            tile.classList.add('active-input');
+          }
+        }
+        
+        row.appendChild(tile);
+      }
+      board.appendChild(row);
+    }
+  },
+
+  updateKeyboard() {
+    clearKeyboardStates();
+    
+    // Keyboard key evaluations should reflect states across ALL UNSOLVED boards!
+    const keyScores = {}; // map key -> best state score: correct=3, present=2, absent=1
+    
+    for (let b = 0; b < 8; b++) {
+      if (this.solved[b]) continue; // Skip already solved boards!
+      
+      const target = this.targets[b];
+      this.guesses.forEach((guess) => {
+        const evals = gradeGuess(guess, target);
+        for (let i = 0; i < 5; i++) {
+          const char = guess[i];
+          const state = evals[i];
+          const score = state === 'correct' ? 3 : (state === 'present' ? 2 : 1);
+          
+          if (!keyScores[char] || score > keyScores[char]) {
+            keyScores[char] = score;
+          }
+        }
+      });
+    }
+    
+    // Apply styling to keyboard keys
+    Object.keys(keyScores).forEach((char) => {
+      const score = keyScores[char];
+      const state = score === 3 ? 'correct' : (score === 2 ? 'present' : 'absent');
+      updateKeyStyle(char, state);
+    });
+  },
+
+  handleInput(char) {
+    if (this.status !== 'IN_PROGRESS' || this.isAnimating) return;
+    if (this.current.length >= 5) return;
+    
+    AudioPlayer.playKey();
+    this.current += char;
+    this.renderActiveBoard();
+  },
+
+  handleBackspace() {
+    if (this.current.length === 0) return;
+    
+    AudioPlayer.playClick();
+    this.current = this.current.slice(0, -1);
+    this.renderActiveBoard();
+  },
+
+  submitGuess() {
+    if (this.status !== 'IN_PROGRESS' || this.isAnimating) return;
+    const guess = this.current;
+    
+    if (guess.length < 5) {
+      showToast('Not enough letters');
+      AudioPlayer.playError();
+      return;
+    }
+    
+    if (!VALID_GUESSES.has(guess)) {
+      showToast('Not in word list');
+      AudioPlayer.playError();
+      return;
+    }
+    
+    this.guesses.push(guess);
+    this.current = '';
+    
+    // Check solutions for all 8 boards
+    this.targets.forEach((tar, idx) => {
+      if (guess === tar) {
+        this.solved[idx] = true;
+      }
+    });
+    
+    const allSolved = this.solved.every(val => val === true);
+    
+    this.isAnimating = true;
+    this.repaintAll();
+    
+    setTimeout(() => {
+      this.isAnimating = false;
+      if (allSolved) {
+        this.status = 'WON';
+        AudioPlayer.playWin();
+        showToast('Victory!');
+        this.saveResults();
+      } else if (this.guesses.length >= 13) {
+        this.status = 'LOST';
+        AudioPlayer.playLoss();
+        showToast('Failed to solve all boards');
+        this.saveResults();
+      }
+    }, 300);
+  },
+
+  saveResults() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    const statsObj = GameHubState.stats.octordle[mode][diff];
+    
+    if (mode === 'daily') {
+      statsObj.lastPlayedDay = GameHubState.dailyIndex;
+      statsObj.lastResult = this.status;
+      statsObj.savedGuesses = [...this.guesses];
+    }
+    
+    statsObj.played++;
+    if (this.status === 'WON') {
+      statsObj.won++;
+      statsObj.currentStreak++;
+      if (statsObj.currentStreak > statsObj.maxStreak) statsObj.maxStreak = statsObj.currentStreak;
+      statsObj.guessDistribution[this.guesses.length - 1]++;
+    } else {
+      statsObj.currentStreak = 0;
+    }
+    saveStats();
+    
+    setTimeout(() => {
+      updateStatsModal();
+      openModal(document.getElementById('modal-stats'));
+    }, 1200);
+  }
+};
+
+// ==========================================================================
+// GAME 3: Crossword Engine
+// ==========================================================================
+const CrosswordEngine = {
+  size: 10,
+  puzzleIndex: 0,
+  placedWords: [],
+  playerGrid: [], // 2D array of chars typed by player
+  gridnums: [],   // 2D grid containing cell clue numbers
+  solution: [],   // 2D correct answers grid
+  selectedCell: { r: -1, c: -1 },
+  selectedDir: 'A', // 'A' (Across) or 'D' (Down)
+  isChecked: false,
+
+  start() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    
+    // Set level index
+    if (mode === 'daily') {
+      this.puzzleIndex = GameHubState.dailyIndex % 500;
+    } else {
+      this.puzzleIndex = GameHubState.stats.crossword.practice[diff].levelIndex % 500;
+    }
+    
+    // Load puzzle from database
+    const db = diff === 'easy' 
+      ? EASY_CROSSWORDS 
+      : (diff === 'medium' ? MEDIUM_CROSSWORDS : HARD_CROSSWORDS);
+    
+    const puzzle = db[this.puzzleIndex];
+    this.placedWords = puzzle;
+    this.size = diff === 'easy' ? 10 : (diff === 'medium' ? 15 : 25);
+    this.isChecked = false;
+    this.selectedCell = { r: -1, c: -1 };
+    
+    // Sync indicator badge
+    const badge = document.getElementById('level-indicator');
+    badge.classList.remove('hidden');
+    badge.innerText = `Level ${this.puzzleIndex + 1}/500`;
+    
+    // Build grids
+    this.solution = Array(this.size).fill(null).map(() => Array(this.size).fill('.'));
+    this.gridnums = Array(this.size).fill(null).map(() => Array(this.size).fill(0));
+    this.playerGrid = Array(this.size).fill(null).map(() => Array(this.size).fill(''));
+    
+    // Fill solution grid
+    puzzle.forEach((entry) => {
+      const len = entry.w.length;
+      for (let i = 0; i < len; i++) {
+        const curr_r = entry.d === 'D' ? entry.r + i : entry.r;
+        const curr_c = entry.d === 'D' ? entry.c : entry.c + i;
+        this.solution[curr_r][curr_c] = entry.w[i];
+        this.playerGrid[curr_r][curr_c] = ' '; // empty space stands for white playable cell
+      }
+    });
+    
+    // Calculate cell clue numbers
+    let clueNum = 1;
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        if (this.solution[r][c] === '.') continue;
+        
+        // Check if this is the start of any Across or Down word
+        let isAcrossStart = puzzle.some(p => p.r === r && p.c === c && p.d === 'A');
+        let isDownStart = puzzle.some(p => p.r === r && p.c === c && p.d === 'D');
+        
+        if (isAcrossStart || isDownStart) {
+          this.gridnums[r][c] = clueNum;
+          clueNum++;
+        }
+      }
+    }
+    
+    this.renderBoard();
+    this.renderCluesModal();
+    this.updateActiveClueLabel();
+  },
+
+  renderBoard() {
+    const board = document.getElementById('board-crossword');
+    board.innerHTML = '';
+    board.style.gridTemplateColumns = `repeat(${this.size}, 1fr)`;
+    
+    // Set board sizing based on density
+    const cellSize = this.size === 10 ? 32 : (this.size === 15 ? 24 : 15);
+    board.style.width = `${this.size * cellSize}px`;
+    
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'crossword-cell';
+        cell.id = `crossword-cell-${r}-${c}`;
+        cell.dataset.r = r;
+        cell.dataset.c = c;
+        
+        if (this.solution[r][c] === '.') {
+          cell.classList.add('black-cell');
+        } else {
+          // Display clue index numbers in corners
+          if (this.gridnums[r][c] > 0) {
+            const numLabel = document.createElement('span');
+            numLabel.className = 'cell-number';
+            numLabel.innerText = this.gridnums[r][c];
+            cell.appendChild(numLabel);
+          }
+          
+          // Display current text entered
+          const textVal = this.playerGrid[r][c].trim();
+          if (textVal) {
+            const charSpan = document.createElement('span');
+            charSpan.innerText = textVal.toUpperCase();
+            cell.appendChild(charSpan);
+          }
+          
+          // Selection highlights
+          if (this.selectedCell.r !== -1) {
+            if (this.selectedCell.r === r && this.selectedCell.c === c) {
+              cell.classList.add('highlight-cell');
+            } else if (this.isCellInActiveWord(r, c)) {
+              cell.classList.add('highlight-word');
+            }
+          }
+          
+          // Check validations styling
+          if (this.isChecked && textVal) {
+            if (textVal === this.solution[r][c]) {
+              cell.classList.add('checked-correct');
+            } else {
+              cell.classList.add('checked-wrong');
+            }
+          }
+          
+          // Double click or tap toggles input directions
+          cell.addEventListener('click', (e) => {
+            AudioPlayer.playClick();
+            this.handleCellSelection(r, c);
+          });
+        }
+        board.appendChild(cell);
+      }
+    }
+  },
+
+  isCellInActiveWord(r, c) {
+    const activeWord = this.getActiveWordForSelection();
+    if (!activeWord) return false;
+    
+    const len = activeWord.w.length;
+    for (let i = 0; i < len; i++) {
+      const wr = activeWord.d === 'D' ? activeWord.r + i : activeWord.r;
+      const wc = activeWord.d === 'D' ? activeWord.c : activeWord.c + i;
+      if (wr === r && wc === c) return true;
+    }
+    return false;
+  },
+
+  getActiveWordForSelection() {
+    if (this.selectedCell.r === -1) return null;
+    const r = this.selectedCell.r;
+    const c = this.selectedCell.c;
+    
+    // Find placed word matching selected cell and direction
+    let match = this.placedWords.find(p => p.d === this.selectedDir && this.isCellPartOfWord(p, r, c));
+    if (!match) {
+      // Fallback to alternative direction word
+      match = this.placedWords.find(p => this.isCellPartOfWord(p, r, c));
+      if (match) this.selectedDir = match.d;
+    }
+    return match;
+  },
+
+  isCellPartOfWord(wordPlacement, r, c) {
+    const len = wordPlacement.w.length;
+    for (let i = 0; i < len; i++) {
+      const wr = wordPlacement.d === 'D' ? wordPlacement.r + i : wordPlacement.r;
+      const wc = wordPlacement.d === 'D' ? wordPlacement.c : wordPlacement.c + i;
+      if (wr === r && wc === c) return true;
+    }
+    return false;
+  },
+
+  handleCellSelection(r, c) {
+    this.isChecked = false;
+    
+    if (this.selectedCell.r === r && this.selectedCell.c === c) {
+      // Toggle typing direction if tapped again
+      this.selectedDir = this.selectedDir === 'A' ? 'D' : 'A';
+    } else {
+      this.selectedCell = { r, c };
+      // Choose best direction for selected cell
+      const fitsAcross = this.placedWords.some(p => p.d === 'A' && this.isCellPartOfWord(p, r, c));
+      const fitsDown = this.placedWords.some(p => p.d === 'D' && this.isCellPartOfWord(p, r, c));
+      
+      if (fitsAcross && !fitsDown) this.selectedDir = 'A';
+      else if (fitsDown && !fitsAcross) this.selectedDir = 'D';
+    }
+    
+    this.renderBoard();
+    this.updateActiveClueLabel();
+  },
+
+  updateActiveClueLabel() {
+    const label = document.getElementById('crossword-active-clue-label');
+    const word = this.getActiveWordForSelection();
+    
+    if (word) {
+      const startNum = this.gridnums[word.r][word.c];
+      const dirText = word.d === 'A' ? 'Across' : 'Down';
+      label.innerHTML = `<strong>${startNum} ${dirText}:</strong> ${word.c}`;
+    } else {
+      label.innerHTML = 'Tap a white cell to see the clue';
+    }
+  },
+
+  // Builds the full scroll lists of clues
+  renderCluesModal() {
+    const acrossList = document.getElementById('clues-across-list');
+    const downList = document.getElementById('clues-down-list');
+    acrossList.innerHTML = '';
+    downList.innerHTML = '';
+    
+    // Sort words by grid numbering
+    const sorted = [...this.placedWords].sort((a,b) => this.gridnums[a.r][a.c] - this.gridnums[b.r][b.c]);
+    
+    sorted.forEach((entry) => {
+      const num = this.gridnums[entry.r][entry.c];
+      const li = document.createElement('li');
+      li.innerHTML = `<strong>${num}:</strong> ${entry.c}`;
+      li.addEventListener('click', () => {
+        closeModal(document.getElementById('modal-crossword-clues'));
+        this.selectedCell = { r: entry.r, c: entry.c };
+        this.selectedDir = entry.d;
+        this.renderBoard();
+        this.updateActiveClueLabel();
+      });
+      
+      if (entry.d === 'A') acrossList.appendChild(li);
+      else downList.appendChild(li);
+    });
+  },
+
+  handleInput(char) {
+    if (this.selectedCell.r === -1) return;
+    AudioPlayer.playKey();
+    
+    const r = this.selectedCell.r;
+    const c = this.selectedCell.c;
+    this.playerGrid[r][c] = char.toLowerCase();
+    
+    // Auto advance focus to next letter cell in word
+    this.advanceFocus(1);
+    this.renderBoard();
+  },
+
+  handleBackspace() {
+    if (this.selectedCell.r === -1) return;
+    AudioPlayer.playClick();
+    
+    const r = this.selectedCell.r;
+    const c = this.selectedCell.c;
+    this.playerGrid[r][c] = ' ';
+    
+    // Auto shift focus backward
+    this.advanceFocus(-1);
+    this.renderBoard();
+  },
+
+  advanceFocus(offset) {
+    const word = this.getActiveWordForSelection();
+    if (!word) return;
+    
+    // Find index of current cell in word
+    let wordIdx = -1;
+    const len = word.w.length;
+    for (let i = 0; i < len; i++) {
+      const wr = word.d === 'D' ? word.r + i : word.r;
+      const wc = word.d === 'D' ? word.c : word.c + i;
+      if (wr === this.selectedCell.r && wc === this.selectedCell.c) {
+        wordIdx = i;
+        break;
+      }
+    }
+    
+    const nextIdx = wordIdx + offset;
+    if (nextIdx >= 0 && nextIdx < len) {
+      this.selectedCell.r = word.d === 'D' ? word.r + nextIdx : word.r;
+      this.selectedCell.c = word.d === 'D' ? word.c : word.c + nextIdx;
+    }
+  },
+
+  // Manual grid arrows controller
+  moveSelection(rowOffset, colOffset) {
+    if (this.selectedCell.r === -1) return;
+    let nextR = this.selectedCell.r + rowOffset;
+    let nextC = this.selectedCell.c + colOffset;
+    
+    if (nextR >= 0 && nextR < this.size && nextC >= 0 && nextC < this.size) {
+      if (this.solution[nextR][nextC] !== '.') {
+        this.selectedCell = { r: nextR, c: nextC };
+        this.renderBoard();
+        this.updateActiveClueLabel();
+      }
+    }
+  },
+
+  checkBoard() {
+    this.isChecked = true;
+    this.renderBoard();
+    
+    // Verify win
+    let allCorrect = true;
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        if (this.solution[r][c] === '.') continue;
+        if (this.playerGrid[r][c].trim() !== this.solution[r][c]) {
+          allCorrect = false;
+          break;
+        }
+      }
+    }
+    
+    if (allCorrect) {
+      AudioPlayer.playWin();
+      showToast('Solved Successfully!');
+      this.handleWin();
+    } else {
+      AudioPlayer.playError();
+      showToast('Some cells are incorrect');
+    }
+  },
+
+  handleWin() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    const statObj = GameHubState.stats.crossword[mode][diff];
+    
+    statObj.played++;
+    statObj.won++;
+    statObj.currentStreak++;
+    if (statObj.currentStreak > statObj.maxStreak) statObj.maxStreak = statObj.currentStreak;
+    
+    if (mode === 'practice') {
+      statObj.levelIndex++; // unlock next level
+    }
+    saveStats();
+    
+    setTimeout(() => {
+      updateStatsModal();
+      openModal(document.getElementById('modal-stats'));
+    }, 1200);
+  }
+};
+
+// ==========================================================================
+// GAME 4: Sudoku Engine
+// ==========================================================================
+const SudokuEngine = {
+  puzzleIndex: 0,
+  initialBoard: [],  // 2D grid containing original puzzle layout
+  playerBoard: [],   // 2D grid tracking player entry values
+  solutionBoard: [], // 2D resolved grid answers
+  notes: [],         // 3D grid containing Sets of note digits
+  selectedCell: { r: -1, c: -1 },
+  mistakes: 0,
+  notesMode: false,
+
+  start() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    
+    if (mode === 'daily') {
+      this.puzzleIndex = GameHubState.dailyIndex % 500;
+    } else {
+      this.puzzleIndex = GameHubState.stats.sudoku.practice[diff].levelIndex % 500;
+    }
+    
+    const db = diff === 'easy' 
+      ? EASY_SUDOKUS 
+      : (diff === 'medium' ? MEDIUM_SUDOKUS : HARD_SUDOKUS);
+    
+    const puzzleStr = db[this.puzzleIndex];
+    this.mistakes = 0;
+    this.notesMode = false;
+    this.selectedCell = { r: -1, c: -1 };
+    
+    // Sync indicator badge & Mistakes Counter
+    const indicator = document.getElementById('level-indicator');
+    indicator.classList.remove('hidden');
+    indicator.innerText = `Level ${this.puzzleIndex + 1}/500`;
+    
+    const mistakesEl = document.getElementById('sudoku-mistakes-counter');
+    mistakesEl.classList.remove('hidden');
+    mistakesEl.innerText = `Mistakes: 0/3`;
+    
+    // Parse puzzle layout strings
+    this.initialBoard = Array(9).fill(null).map(() => Array(9).fill(0));
+    this.playerBoard = Array(9).fill(null).map(() => Array(9).fill(0));
+    this.solutionBoard = Array(9).fill(null).map(() => Array(9).fill(0));
+    this.notes = Array(9).fill(null).map(() => Array(9).fill(null).map(() => new Set()));
+    
+    const initialPart = puzzleStr.slice(0, 81);
+    const solutionPart = puzzleStr.slice(81);
+    
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const idx = r * 9 + c;
+        const initialVal = parseInt(initialPart[idx]);
+        const solutionVal = parseInt(solutionPart[idx]);
+        
+        this.initialBoard[r][c] = initialVal;
+        this.playerBoard[r][c] = initialVal;
+        this.solutionBoard[r][c] = solutionVal;
+      }
+    }
+    
+    // Reset toggle Notes button styling
+    document.getElementById('key-sudoku-notes').classList.remove('active');
+    
+    this.renderBoard();
+  },
+
+  renderBoard() {
+    const board = document.getElementById('board-sudoku');
+    board.innerHTML = '';
+    
+    const r = this.selectedCell.r;
+    const c = this.selectedCell.c;
+    const focusedValue = (r !== -1) ? this.playerBoard[r][c] : 0;
+    
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        const cell = document.createElement('div');
+        cell.className = 'sudoku-cell';
+        cell.id = `sudoku-cell-${row}-${col}`;
+        
+        // Add divider classes for block borders
+        if (row === 2 || row === 5) cell.classList.add('row-divider');
+        
+        const val = this.playerBoard[row][col];
+        const isGiven = this.initialBoard[row][col] > 0;
+        
+        if (isGiven) {
+          cell.classList.add('given');
+          cell.innerText = val;
+        } else if (val > 0) {
+          cell.classList.add('user-entered');
+          cell.innerText = val;
+          // Check solution match for incorrect values highlight
+          if (val !== this.solutionBoard[row][col]) {
+            cell.classList.add('incorrect-value');
+          }
+        } else {
+          // Render candidate pencil notes sub-grid
+          const notesSet = this.notes[row][col];
+          if (notesSet.size > 0) {
+            const noteGrid = document.createElement('div');
+            noteGrid.className = 'sudoku-cell-note-grid';
+            for (let i = 1; i <= 9; i++) {
+              const noteDot = document.createElement('span');
+              noteDot.className = 'note-digit';
+              if (notesSet.has(i)) noteDot.innerText = i;
+              noteGrid.appendChild(noteDot);
+            }
+            cell.appendChild(noteGrid);
+          }
+        }
+        
+        // Selection Helpers Highlightings
+        if (r !== -1) {
+          const isSameRow = (r === row);
+          const isSameCol = (c === col);
+          const isSameBlock = (Math.floor(r/3) === Math.floor(row/3) && Math.floor(c/3) === Math.floor(col/3));
+          
+          if (r === row && c === col) {
+            cell.classList.add('highlight-selected');
+          } else if (isSameRow || isSameCol || isSameBlock || (focusedValue > 0 && val === focusedValue)) {
+            cell.classList.add('highlight-cell');
+          }
+        }
+        
+        cell.addEventListener('click', () => {
+          AudioPlayer.playClick();
+          this.selectedCell = { r: row, c: col };
+          this.renderBoard();
+        });
+        
+        board.appendChild(cell);
+      }
+    }
+  },
+
+  toggleNotesMode() {
+    AudioPlayer.playClick();
+    this.notesMode = !this.notesMode;
+    const btn = document.getElementById('key-sudoku-notes');
+    if (this.notesMode) btn.classList.add('active');
+    else btn.classList.remove('active');
+  },
+
+  handleInput(num) {
+    if (this.selectedCell.r === -1) return;
+    const r = this.selectedCell.r;
+    const c = this.selectedCell.c;
+    
+    // Ignore input on given cells
+    if (this.initialBoard[r][c] > 0) return;
+    
+    if (this.notesMode) {
+      // Toggle note candidate digit
+      if (this.playerBoard[r][c] > 0) {
+        this.playerBoard[r][c] = 0;
+      }
+      const notesSet = this.notes[r][c];
+      if (notesSet.has(num)) {
+        notesSet.delete(num);
+      } else {
+        notesSet.add(num);
+      }
+      AudioPlayer.playKey();
+      this.renderBoard();
+    } else {
+      // Direct number input
+      this.notes[r][c].clear();
+      this.playerBoard[r][c] = num;
+      
+      // Validate mistake
+      const correctVal = this.solutionBoard[r][c];
+      if (num !== correctVal) {
+        this.mistakes++;
+        document.getElementById('sudoku-mistakes-counter').innerText = `Mistakes: ${this.mistakes}/3`;
+        AudioPlayer.playError();
+        this.renderBoard();
+        
+        if (this.mistakes >= 3) {
+          setTimeout(() => {
+            this.handleSudokuFailure();
+          }, 400);
+        }
+      } else {
+        AudioPlayer.playKey();
+        this.renderBoard();
+        
+        // Verify win
+        if (this.checkSudokuWin()) {
+          AudioPlayer.playWin();
+          showToast('Puzzle Solved!');
+          this.handleWin();
+        }
+      }
+    }
+  },
+
+  eraseCell() {
+    if (this.selectedCell.r === -1) return;
+    const r = this.selectedCell.r;
+    const c = this.selectedCell.c;
+    if (this.initialBoard[r][c] > 0) return;
+    
+    AudioPlayer.playClick();
+    this.playerBoard[r][c] = 0;
+    this.notes[r][c].clear();
+    this.renderBoard();
+  },
+
+  checkSudokuWin() {
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        if (this.playerBoard[r][c] !== this.solutionBoard[r][c]) return false;
+      }
+    }
+    return true;
+  },
+
+  handleSudokuFailure() {
+    openModal(document.getElementById('modal-gameover-prompt'));
+    
+    // Bind prompt actions
+    document.getElementById('btn-prompt-retry').onclick = () => {
+      closeModal(document.getElementById('modal-gameover-prompt'));
+      this.mistakes = 0;
+      document.getElementById('sudoku-mistakes-counter').innerText = `Mistakes: 0/3`;
+      // Clear user entries
+      for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+          this.playerBoard[r][c] = this.initialBoard[r][c];
+          this.notes[r][c].clear();
+        }
+      }
+      this.renderBoard();
+    };
+    
+    document.getElementById('btn-prompt-different').onclick = () => {
+      closeModal(document.getElementById('modal-gameover-prompt'));
+      
+      const mode = GameHubState.gameMode;
+      const diff = GameHubState.difficulty;
+      if (mode === 'practice') {
+        GameHubState.stats.sudoku.practice[diff].levelIndex++;
+      } else {
+        // Daily wrap
+        GameHubState.dailyIndex++;
+      }
+      startActiveGame();
+    };
+  },
+
+  handleWin() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    const statObj = GameHubState.stats.sudoku[mode][diff];
+    
+    statObj.played++;
+    statObj.won++;
+    statObj.currentStreak++;
+    if (statObj.currentStreak > statObj.maxStreak) statObj.maxStreak = statObj.currentStreak;
+    
+    if (mode === 'practice') {
+      statObj.levelIndex++; // unlock next level
+    }
+    saveStats();
+    
+    setTimeout(() => {
+      updateStatsModal();
+      openModal(document.getElementById('modal-stats'));
+    }, 1200);
+  }
+};
+
+// ==========================================================================
+// Help Modals Content Builders
+// ==========================================================================
+function openHelpModal() {
+  const title = document.getElementById('help-modal-title');
+  const body = document.getElementById('help-modal-body');
+  
+  const game = GameHubState.activeGame;
+  if (!game) {
+    // Menu rules
+    title.innerText = 'Welcome to Gamebox Pro';
+    body.innerHTML = `
+      <p>Select any game from the main menu and choose a difficulty (Easy, Medium, Hard) to begin.</p>
+      <p>All stats and game progresses are stored locally on your device.</p>
+      <h3>Offline Access:</h3>
+      <p>To play 100% offline, tap the **Download App** prompt or add the page to your Home Screen in iOS Safari.</p>
+    `;
+  } else if (game === 'wordle') {
+    title.innerText = 'How To Play Wordle';
+    body.innerHTML = `
+      <p>Guess the word in 6 tries. Each guess must be a valid 5-letter word.</p>
+      <p>Tile colors change to show proximity to target:</p>
+      <ul>
+        <li><span style="color:var(--color-correct)">■</span> <strong>Green:</strong> Letter is correct and in the right spot.</li>
+        <li><span style="color:var(--color-present)">■</span> <strong>Yellow:</strong> Letter is in the word but in the wrong spot.</li>
+        <li><span style="color:var(--color-absent)">■</span> <strong>Gray:</strong> Letter is not in the word.</li>
+      </ul>
+    `;
+  } else if (game === 'octordle') {
+    title.innerText = 'How To Play Octordle';
+    body.innerHTML = `
+      <p>Guess all <strong>8 Wordle words</strong> at the same time in <strong>13 tries</strong>.</p>
+      <p>Each guess applies to all 8 boards simultaneously.</p>
+      <p>Tap the tiny board cards at the top of the grid to focus on a board and inspect its row guesses.</p>
+    `;
+  } else if (game === 'crossword') {
+    title.innerText = 'How To Play Crossword';
+    body.innerHTML = `
+      <p>Fill in the blank grids with letters to form intersecting words based on the clues list.</p>
+      <p>Tap any cell to display its Across or Down clue in the top bar.</p>
+      <p>Click **Check Answers** to verify. Correct letters turn green, wrong cells turn red.</p>
+    `;
+  } else if (game === 'sudoku') {
+    title.innerText = 'How To Play Sudoku';
+    body.innerHTML = `
+      <p>Fill the 9x9 grid with numbers 1 to 9 so that each row, column, and 3x3 block contains all digits exactly once.</p>
+      <p>Toggle **Notes** mode to enter small candidate pencil notes inside blank cells.</p>
+      <p style="color:#ef4444"><strong>Rule:</strong> You are allowed a maximum of 3 mistakes. If you reach 3 mistakes, the game ends!</p>
+    `;
+  }
+  
+  openModal(document.getElementById('modal-help'));
+}
+
+// Bind clues modal
+document.getElementById('btn-crossword-clues').addEventListener('click', () => {
+  openModal(document.getElementById('modal-crossword-clues'));
+});
+document.getElementById('btn-close-crossword-clues').addEventListener('click', () => {
+  closeModal(document.getElementById('modal-crossword-clues'));
+});
+
+// Bind check answers button in Crossword
+document.getElementById('btn-crossword-check').addEventListener('click', () => {
+  CrosswordEngine.checkBoard();
+});
+
+// ==========================================================================
+// Stats Dashboard Metrics Setup
+// ==========================================================================
+function updateStatsModal() {
+  const game = GameHubState.activeGame || 'wordle';
+  const mode = GameHubState.gameMode;
+  const diff = GameHubState.difficulty;
+  
+  const statObj = GameHubState.stats[game][mode][diff];
+  
+  // Set titles
+  document.getElementById('stats-title').innerText = `${game.toUpperCase()} STATS (${diff.toUpperCase()})`;
+  document.getElementById('stat-played').innerText = statObj.played;
+  
+  const winPct = statObj.played > 0 ? Math.round((statObj.won / statObj.played) * 100) : 0;
+  document.getElementById('stat-win-pct').innerText = `${winPct}%`;
+  document.getElementById('stat-streak').innerText = statObj.currentStreak;
+  document.getElementById('stat-max-streak').innerText = statObj.maxStreak;
+  
+  // Render bars distributions for Wordle & Octordle
+  const dist = document.getElementById('guess-distribution-section');
+  const bars = document.getElementById('guess-bars');
+  const nextLevelBtn = document.getElementById('btn-next-level');
+  const practiceAgainBtn = document.getElementById('btn-practice-again');
+  
+  nextLevelBtn.classList.add('hidden');
+  practiceAgainBtn.classList.add('hidden');
+  
+  if (game === 'wordle' || game === 'octordle') {
+    dist.classList.remove('hidden');
+    bars.innerHTML = '';
+    
+    const rowsCount = game === 'wordle' ? 6 : 13;
+    const maxVal = Math.max(1, ...statObj.guessDistribution);
+    
+    // Choose active match guess highlight
+    const guessCount = game === 'wordle' ? WordleEngine.guesses.length : OctordleEngine.guesses.length;
+    const isWon = game === 'wordle' ? WordleEngine.status === 'WON' : OctordleEngine.status === 'WON';
+    
+    for (let i = 0; i < rowsCount; i++) {
+      const brow = document.createElement('div');
+      brow.className = 'guess-bar-row';
+      const count = statObj.guessDistribution[i];
+      const pct = Math.round((count / maxVal) * 100);
+      const isHigh = isWon && guessCount === (i + 1);
+      
+      brow.innerHTML = `
+        <span class="guess-label">${i+1}</span>
+        <div class="guess-track">
+          <div class="guess-fill ${isHigh ? 'highlight' : ''}" style="width: ${pct}%">${count}</div>
+        </div>
+      `;
+      bars.appendChild(brow);
+    }
+  } else {
+    // Hide distributions for Sudoku and Crossword
+    dist.classList.add('hidden');
+  }
+
+  // Next level toggles (Practice mode for Sudoku and Crossword)
+  const isGameOver = (game === 'wordle' ? WordleEngine.status !== 'IN_PROGRESS' :
+                     (game === 'octordle' ? OctordleEngine.status !== 'IN_PROGRESS' :
+                     (game === 'crossword' ? (CrosswordEngine.isChecked && !document.getElementById('modal-stats').classList.contains('hidden')) :
+                     (SudokuEngine.checkSudokuWin()))));
+                     
+  if (isGameOver) {
+    if (game === 'sudoku' || game === 'crossword') {
+      if (mode === 'practice') {
+        nextLevelBtn.classList.remove('hidden');
+        nextLevelBtn.onclick = () => {
+          closeModal(document.getElementById('modal-stats'));
+          startActiveGame();
+        };
+      } else {
+        practiceAgainBtn.classList.remove('hidden');
+      }
+    } else {
+      practiceAgainBtn.classList.remove('hidden');
+    }
+  }
+
+  // Daily Timer setup
+  const timer = document.getElementById('timer-container');
+  const share = document.getElementById('share-action-container');
+  
+  if (mode === 'daily') {
+    timer.classList.remove('hidden');
+    if (isGameOver) share.classList.remove('hidden');
+    else share.classList.add('hidden');
+  } else {
+    timer.classList.add('hidden');
+    share.classList.add('hidden');
+  }
+}
+
+// Generate share score card
+function getShareContent() {
+  const game = GameHubState.activeGame;
+  const diff = GameHubState.difficulty.toUpperCase();
+  const mode = GameHubState.gameMode === 'daily' ? `Daily #${GameHubState.dailyIndex}` : 'Practice';
+  
+  if (game === 'wordle') {
+    const res = WordleEngine.status === 'WON' ? WordleEngine.guesses.length : 'X';
+    return `Wordle Pro (${diff}) - ${mode} - ${res}/6\nPlay offline at Gamebox Pro!`;
+  } else if (game === 'octordle') {
+    const res = OctordleEngine.status === 'WON' ? OctordleEngine.guesses.length : 'X';
+    return `Octordle Pro (${diff}) - ${mode} - ${res}/13\nPlay offline at Gamebox Pro!`;
+  } else if (game === 'crossword') {
+    return `Mini Crossword (${diff}) - ${mode} Solved!\nPlay offline at Gamebox Pro!`;
+  } else if (game === 'sudoku') {
+    return `Sudoku Master (${diff}) - ${mode} Solved with ${SudokuEngine.mistakes} mistakes!\nPlay offline at Gamebox Pro!`;
+  }
+  return '';
 }

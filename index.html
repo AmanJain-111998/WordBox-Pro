@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Wordle Pro | Easy, Medium, Hard Wordle Game</title>
+  <title>Gamebox Pro | Offline Wordle, Octordle, Crossword & Sudoku</title>
   
   <!-- SEO Meta Tags -->
-  <meta name="description" content="Wordle Pro - Play Wordle with Easy, Medium, and Hard difficulty levels. Featuring 1500+ curated words, practice mode, daily challenges, detailed stats, and full offline support.">
+  <meta name="description" content="Gamebox Pro - Play Wordle, Octordle, Mini Crossword, and Sudoku offline. Three difficulty categories (Easy, Medium, Hard) with 500 levels each. Fully responsive PWA.">
   <meta name="theme-color" content="#0f172a">
   
   <!-- PWA & Apple Meta Tags -->
@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="./icon.svg">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Wordle Pro">
+  <meta name="apple-mobile-web-app-title" content="Gamebox Pro">
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,17 +31,20 @@
     <!-- Top Navigation Bar -->
     <header class="app-header">
       <div class="header-left">
+        <button id="btn-home" class="icon-button hidden" aria-label="Go to Main Menu">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        </button>
         <button id="btn-help" class="icon-button" aria-label="How to play">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </button>
       </div>
       
       <div class="header-center">
-        <h1 class="logo-text">WORDLE<span class="logo-accent">PRO</span></h1>
+        <h1 id="logo-main" class="logo-text">GAMEBOX<span class="logo-accent">PRO</span></h1>
       </div>
       
       <div class="header-right">
-        <button id="btn-stats" class="icon-button" aria-label="Game Statistics">
+        <button id="btn-stats" class="icon-button hidden" aria-label="Game Statistics">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </button>
         <button id="btn-settings" class="icon-button" aria-label="Settings">
@@ -53,38 +56,169 @@
     <!-- Toast Message Container -->
     <div id="toast-container" class="toast-container"></div>
     
-    <!-- Game Mode & Difficulty Controls -->
-    <section class="game-controls">
-      <div class="mode-indicator" id="mode-indicator">
-        <span id="current-mode-label" class="mode-label">PRACTICE MODE</span>
+    <!-- ==========================================================================
+         VIEW 1: Main Dashboard (Game Selection Menu)
+         ========================================================================== -->
+    <main id="view-dashboard" class="dashboard-container">
+      <div class="dashboard-intro">
+        <h2>Choose a Game</h2>
+        <p>Challenge your mind with 4 offline puzzles</p>
       </div>
       
-      <div class="difficulty-tabs">
-        <button id="tab-easy" class="tab-button active" data-difficulty="easy">
-          <span class="tab-label">EASY</span>
-        </button>
-        <button id="tab-medium" class="tab-button" data-difficulty="medium">
-          <span class="tab-label">MEDIUM</span>
-        </button>
-        <button id="tab-hard" class="tab-button" data-difficulty="hard">
-          <span class="tab-label">HARD</span>
-        </button>
-      </div>
-    </section>
-    
-    <!-- Wordle Letter Board Grid -->
-    <main class="game-board-wrapper">
-      <div id="game-board" class="game-board" aria-label="Wordle Grid">
-        <!-- 6 Rows of 5 tiles will be generated dynamically by JavaScript -->
+      <div class="games-grid">
+        <!-- Wordle Card -->
+        <div class="game-card" data-game="wordle">
+          <div class="card-icon wordle-color">W</div>
+          <div class="card-info">
+            <h3>Wordle Pro</h3>
+            <p>Guess the 5-letter word in 6 tries.</p>
+            <span class="badge">500 Levels</span>
+          </div>
+          <button class="play-btn">Play</button>
+        </div>
+        
+        <!-- Octordle Card -->
+        <div class="game-card" data-game="octordle">
+          <div class="card-icon octordle-color">8</div>
+          <div class="card-info">
+            <h3>Octordle Pro</h3>
+            <p>Solve 8 Wordles simultaneously in 13 tries.</p>
+            <span class="badge">500 Levels</span>
+          </div>
+          <button class="play-btn">Play</button>
+        </div>
+        
+        <!-- Crossword Card -->
+        <div class="game-card" data-game="crossword">
+          <div class="card-icon crossword-color">C</div>
+          <div class="card-info">
+            <h3>Mini Crossword</h3>
+            <p>10x10, 15x15, &amp; 25x25 grids with clues.</p>
+            <span class="badge">500 Levels</span>
+          </div>
+          <button class="play-btn">Play</button>
+        </div>
+        
+        <!-- Sudoku Card -->
+        <div class="game-card" data-game="sudoku">
+          <div class="card-icon sudoku-color">S</div>
+          <div class="card-info">
+            <h3>Sudoku Master</h3>
+            <p>Classical logic grid. 3 strikes and you're out.</p>
+            <span class="badge">500 Levels</span>
+          </div>
+          <button class="play-btn">Play</button>
+        </div>
       </div>
     </main>
     
-    <!-- On-screen Virtual Keyboard -->
-    <footer class="game-keyboard-wrapper">
-      <div id="game-keyboard" class="game-keyboard" aria-label="Onscreen Keyboard">
-        <!-- Keyboard rows will be generated dynamically by JavaScript -->
-      </div>
-    </footer>
+    <!-- ==========================================================================
+         VIEW 2: Game Board Page (Dynamically Swapped Content)
+         ========================================================================== -->
+    <div id="view-game" class="game-container hidden">
+      <!-- Game Mode & Difficulty Controls -->
+      <section class="game-controls">
+        <div class="mode-indicator">
+          <span id="current-mode-label" class="mode-label">PRACTICE MODE</span>
+          <span id="level-indicator" class="level-indicator-badge hidden">Level 1/500</span>
+          <span id="sudoku-mistakes-counter" class="sudoku-mistakes hidden">Mistakes: 0/3</span>
+        </div>
+        
+        <div class="difficulty-tabs">
+          <button id="tab-easy" class="tab-button active" data-difficulty="easy">
+            <span class="tab-label">EASY</span>
+          </button>
+          <button id="tab-medium" class="tab-button" data-difficulty="medium">
+            <span class="tab-label">MEDIUM</span>
+          </button>
+          <button id="tab-hard" class="tab-button" data-difficulty="hard">
+            <span class="tab-label">HARD</span>
+          </button>
+        </div>
+      </section>
+      
+      <!-- Primary Game Boards Content Area -->
+      <main class="game-board-wrapper">
+        
+        <!-- GAME A: Wordle Board -->
+        <div id="game-wordle" class="game-board-panel hidden">
+          <div id="board-wordle" class="game-board" aria-label="Wordle Grid"></div>
+        </div>
+        
+        <!-- GAME B: Octordle Board -->
+        <div id="game-octordle" class="game-board-panel hidden">
+          <!-- 2x4 Grid of Tiny Boards Previews -->
+          <div id="octordle-previews" class="octordle-previews-grid">
+            <!-- 8 Previews created dynamically -->
+          </div>
+          <!-- Full Size Focused Board Grid -->
+          <div class="octordle-active-header">
+            <span id="octordle-active-label">BOARD 1 (IN PROGRESS)</span>
+          </div>
+          <div id="board-octordle-active" class="game-board octordle-grid" aria-label="Octordle Active Grid"></div>
+        </div>
+        
+        <!-- GAME C: Crossword Board -->
+        <div id="game-crossword" class="game-board-panel hidden">
+          <!-- Focused Clue Banner -->
+          <div class="crossword-focused-clue">
+            <span id="crossword-active-clue-label">Tap a cell to show clue</span>
+          </div>
+          
+          <!-- Zoom/Scroll wrapper for Crossword Grid -->
+          <div class="crossword-viewport">
+            <div id="board-crossword" class="crossword-grid"></div>
+          </div>
+          
+          <!-- Action buttons for Crossword -->
+          <div class="crossword-actions">
+            <button id="btn-crossword-check" class="crossword-action-button">Check Answers</button>
+            <button id="btn-crossword-clues" class="crossword-action-button text-btn">View All Clues</button>
+          </div>
+        </div>
+        
+        <!-- GAME D: Sudoku Board -->
+        <div id="game-sudoku" class="game-board-panel hidden">
+          <div id="board-sudoku" class="sudoku-grid" aria-label="Sudoku Grid"></div>
+        </div>
+        
+      </main>
+      
+      <!-- Shared Keyboard / Controls Footer -->
+      <footer id="game-keyboard-area" class="game-keyboard-wrapper">
+        <!-- QWERTY Keyboard (Wordle, Octordle, Crossword) -->
+        <div id="keyboard-qwerty" class="game-keyboard">
+          <!-- QWERTY keys rendered dynamically -->
+        </div>
+        
+        <!-- Numeric Number Pad (Sudoku) -->
+        <div id="keyboard-numeric" class="game-keyboard hidden">
+          <div class="keyboard-row">
+            <button class="key-btn num-key" data-num="1">1</button>
+            <button class="key-btn num-key" data-num="2">2</button>
+            <button class="key-btn num-key" data-num="3">3</button>
+            <button class="key-btn num-key" data-num="4">4</button>
+            <button class="key-btn num-key" data-num="5">5</button>
+          </div>
+          <div class="keyboard-row">
+            <button class="key-btn num-key" data-num="6">6</button>
+            <button class="key-btn num-key" data-num="7">7</button>
+            <button class="key-btn num-key" data-num="8">8</button>
+            <button class="key-btn num-key" data-num="9">9</button>
+            <button id="key-sudoku-notes" class="key-btn key-wide toggle-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Notes</span>
+            </button>
+          </div>
+          <div class="keyboard-row">
+            <button id="key-sudoku-erase" class="key-btn key-wide danger-btn-outline">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              <span>Erase</span>
+            </button>
+          </div>
+        </div>
+      </footer>
+    </div>
     
     <!-- PWA Install Banner -->
     <div id="install-banner" class="install-banner hidden">
@@ -97,70 +231,42 @@
     
   </div>
 
-  <!-- HOW TO PLAY MODAL -->
+  <!-- HOW TO PLAY MODAL (Dynamic depending on game) -->
   <div id="modal-help" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
-        <h2>How To Play</h2>
+        <h2 id="help-modal-title">How To Play</h2>
         <button id="btn-close-help" class="modal-close" aria-label="Close dialog">×</button>
       </div>
-      <div class="modal-body">
-        <p>Guess the word in 6 tries. Each guess must be a valid 5-letter word.</p>
-        <p>The color of the tiles will change to show how close your guess was to the word.</p>
-        
-        <div class="examples-container">
-          <h3>Examples</h3>
-          <div class="example-item">
-            <div class="example-grid">
-              <div class="tile correct-state">W</div>
-              <div class="tile">E</div>
-              <div class="tile">A</div>
-              <div class="tile">R</div>
-              <div class="tile">Y</div>
-            </div>
-            <p><strong>W</strong> is in the word and in the correct spot.</p>
+      <div id="help-modal-body" class="modal-body">
+        <!-- Injected dynamically by JavaScript depending on active game -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CROSSWORD CLUES OVERLAY MODAL -->
+  <div id="modal-crossword-clues" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Crossword Clues</h2>
+        <button id="btn-close-crossword-clues" class="modal-close" aria-label="Close dialog">×</button>
+      </div>
+      <div class="modal-body scrollable-clues-list">
+        <div class="clues-split">
+          <div class="clues-column">
+            <h3>Across</h3>
+            <ul id="clues-across-list" class="modal-clues-ul"></ul>
           </div>
-          
-          <div class="example-item">
-            <div class="example-grid">
-              <div class="tile">P</div>
-              <div class="tile present-state">I</div>
-              <div class="tile">L</div>
-              <div class="tile">O</div>
-              <div class="tile">T</div>
-            </div>
-            <p><strong>I</strong> is in the word but in the wrong spot.</p>
+          <div class="clues-column">
+            <h3>Down</h3>
+            <ul id="clues-down-list" class="modal-clues-ul"></ul>
           </div>
-          
-          <div class="example-item">
-            <div class="example-grid">
-              <div class="tile">V</div>
-              <div class="tile">A</div>
-              <div class="tile">G</div>
-              <div class="tile absent-state">U</div>
-              <div class="tile">E</div>
-            </div>
-            <p><strong>U</strong> is not in the word in any spot.</p>
-          </div>
-        </div>
-        
-        <div class="difficulty-explanation">
-          <h3>Difficulty Levels</h3>
-          <ul>
-            <li><strong>Easy:</strong> High-frequency words with common letters. Great for starting out.</li>
-            <li><strong>Medium:</strong> Common words with moderate letter variations and occasional traps.</li>
-            <li><strong>Hard:</strong> Uncommon words, double letters, or rare letters (Q, Z, X, J, K). A true challenge!</li>
-          </ul>
-        </div>
-        
-        <div class="modal-footer-info">
-          <p>This app works 100% offline! Install it to your home screen to play anywhere.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- STATISTICS MODAL -->
+  <!-- STATISTICS / GAME COMPLETED MODAL -->
   <div id="modal-stats" class="modal-overlay hidden">
     <div class="modal-card">
       <div class="modal-header">
@@ -188,11 +294,9 @@
           </div>
         </div>
 
-        <div class="guess-distribution-section">
-          <h3>GUESS DISTRIBUTION</h3>
-          <div id="guess-bars" class="guess-bars">
-            <!-- 6 Guess bars rendered dynamically -->
-          </div>
+        <div id="guess-distribution-section" class="guess-distribution-section">
+          <h3 id="distribution-title">GUESS DISTRIBUTION</h3>
+          <div id="guess-bars" class="guess-bars"></div>
         </div>
         
         <div class="stats-footer-controls">
@@ -210,7 +314,27 @@
         </div>
         
         <div class="action-footer">
+          <button id="btn-next-level" class="primary-button hidden">Next Level</button>
           <button id="btn-practice-again" class="primary-button hidden">Practice Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER / RE-TRY PROMPT MODAL (Specifically for Sudoku mistakes) -->
+  <div id="modal-gameover-prompt" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 id="gameover-title">Sudoku Failed!</h2>
+      </div>
+      <div class="modal-body text-center">
+        <p class="warning-text large-warning">You made 3 mistakes!</p>
+        <p>Would you like to try this puzzle again, or load a different level?</p>
+        
+        <div class="prompt-buttons">
+          <button id="btn-prompt-retry" class="primary-button">Retry Level</button>
+          <button id="btn-prompt-different" class="secondary-button">Get Different Level</button>
+          <button id="btn-prompt-exit" class="danger-button">Exit to Menu</button>
         </div>
       </div>
     </div>
@@ -292,7 +416,7 @@
         </div>
         
         <div class="modal-footer-credit">
-          <p>Wordle Pro v1.0.0 • Offline Ready PWA</p>
+          <p>Gamebox Pro v1.1.0 • Offline Ready PWA</p>
         </div>
       </div>
     </div>
@@ -300,6 +424,8 @@
 
   <!-- Javascript Modules -->
   <script src="./words.js"></script>
+  <script src="./crosswords.js"></script>
+  <script src="./sudokus.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

@@ -991,7 +991,635 @@ body.light-theme .install-banner {
 }
 
 /* ==========================================================================
-   Breakpoints for Small Screens
+   Dashboard View Styles
+   ========================================================================== */
+.dashboard-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  overflow-y: auto;
+  gap: 20px;
+}
+
+.dashboard-intro {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.dashboard-intro h2 {
+  font-family: var(--font-logo);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.dashboard-intro p {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.games-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.game-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--backdrop-blur);
+  cursor: pointer;
+  position: relative;
+  transition: transform var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+  overflow: hidden;
+}
+
+.game-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+body.light-theme .game-card:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.05);
+}
+
+.game-card:active {
+  transform: scale(0.98);
+}
+
+/* Card Icons */
+.card-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  font-family: var(--font-logo);
+  font-size: 24px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--white);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  flex-shrink: 0;
+}
+
+.wordle-color {
+  background: linear-gradient(135deg, #10b981, #059669);
+  text-shadow: 0 0 10px var(--color-correct-glow);
+}
+
+.octordle-color {
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+  text-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+.crossword-color {
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.4);
+}
+
+.sudoku-color {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  text-shadow: 0 0 10px var(--color-present-glow);
+}
+
+.card-info {
+  flex: 1;
+  margin-left: 16px;
+  margin-right: 12px;
+}
+
+.card-info h3 {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.card-info p {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  border: var(--glass-border);
+}
+
+body.light-theme .badge {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.play-btn {
+  background: var(--key-bg);
+  color: var(--key-text);
+  border: none;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.game-card:hover .play-btn {
+  background-color: var(--color-correct);
+  color: var(--white);
+  box-shadow: 0 4px 12px var(--color-correct-glow);
+}
+
+/* ==========================================================================
+   Octordle Board View Styles
+   ========================================================================== */
+.octordle-previews-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 6px;
+  width: 100%;
+  padding: 0 4px;
+  margin-bottom: 12px;
+}
+
+.octordle-preview-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-align: center;
+}
+
+.octordle-preview-card.active {
+  border-color: var(--color-present);
+  box-shadow: 0 0 8px var(--color-present-glow);
+}
+
+.octordle-preview-card.solved {
+  border-color: var(--color-correct);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+.octordle-preview-card.failed {
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.05);
+}
+
+.preview-label {
+  font-size: 9px;
+  font-weight: 800;
+  margin-bottom: 3px;
+  color: var(--text-muted);
+}
+
+.octordle-preview-card.active .preview-label {
+  color: var(--color-present);
+}
+
+.octordle-preview-card.solved .preview-label {
+  color: var(--color-correct);
+}
+
+.octordle-preview-card.failed .preview-label {
+  color: #ef4444;
+}
+
+/* Visual dot grid representing guess history in miniature */
+.preview-dot-board {
+  display: grid;
+  grid-template-rows: repeat(13, 1fr);
+  grid-gap: 1px;
+  width: 24px;
+  height: 52px;
+}
+
+.preview-dot-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-gap: 1px;
+}
+
+.preview-dot {
+  width: 4px;
+  height: 3px;
+  background-color: var(--border-color);
+  border-radius: 0.5px;
+}
+
+.preview-dot.correct {
+  background-color: var(--color-correct);
+}
+
+.preview-dot.present {
+  background-color: var(--color-present);
+}
+
+.preview-dot.absent {
+  background-color: var(--color-absent);
+}
+
+.octordle-active-header {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  color: var(--color-present);
+}
+
+.octordle-grid {
+  max-height: 290px !important; /* Muted board height to fit previews and keyboard */
+}
+
+/* ==========================================================================
+   Crossword Board View Styles
+   ========================================================================== */
+.crossword-focused-clue {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 8px 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.crossword-viewport {
+  flex: 1;
+  width: 100%;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 10px;
+  min-height: 180px;
+  max-height: 340px;
+  border-radius: 12px;
+  border: var(--glass-border);
+  background-color: rgba(15, 23, 42, 0.1);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+body.light-theme .crossword-viewport {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.crossword-grid {
+  display: grid;
+  grid-gap: 2px;
+  background-color: var(--border-color);
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.crossword-cell {
+  background-color: var(--bg-main);
+  aspect-ratio: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: var(--font-logo);
+  color: var(--text-main);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--transition-fast);
+}
+
+/* Blank block cell */
+.crossword-cell.black-cell {
+  background-color: var(--border-color) !important;
+  cursor: default;
+}
+
+/* Numbers in cell corners */
+.cell-number {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Cell Selection Colors */
+.crossword-cell.highlight-word {
+  background-color: rgba(6, 182, 212, 0.15); /* Muted cyan focus */
+}
+
+.crossword-cell.highlight-cell {
+  background-color: rgba(6, 182, 212, 0.35) !important;
+}
+
+/* Check validations colors */
+.crossword-cell.checked-correct {
+  color: var(--color-correct);
+  background-color: var(--color-correct-glow);
+}
+
+.crossword-cell.checked-wrong {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.crossword-actions {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  margin-top: 12px;
+  margin-bottom: 4px;
+  padding: 0 4px;
+}
+
+.crossword-action-button {
+  flex: 1;
+  background-color: var(--key-bg);
+  color: var(--key-text);
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.crossword-action-button:hover {
+  background-color: var(--color-correct);
+  color: var(--white);
+}
+
+.crossword-action-button.text-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.crossword-action-button.text-btn:hover {
+  border-color: var(--text-main);
+  background: none;
+}
+
+/* Clues Modal layout */
+.clues-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 20px;
+}
+
+.clues-column h3 {
+  font-family: var(--font-logo);
+  font-size: 14px;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 6px;
+  margin-bottom: 12px;
+}
+
+.modal-clues-ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-clues-ul li {
+  font-size: 11px;
+  line-height: 1.4;
+  border-bottom: var(--glass-border);
+  padding-bottom: 6px;
+}
+
+/* ==========================================================================
+   Sudoku Board View Styles
+   ========================================================================== */
+.sudoku-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-gap: 1px;
+  background-color: var(--border-color);
+  border: 3px solid var(--text-main);
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+}
+
+body.light-theme .sudoku-grid {
+  border-color: #0f172a;
+}
+
+.sudoku-cell {
+  background-color: var(--bg-main);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: var(--font-logo);
+  color: var(--text-main);
+  cursor: pointer;
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+
+/* Thick borders for 3x3 subdivisions */
+.sudoku-cell:nth-child(3n) {
+  border-right: 2px solid var(--text-main);
+}
+body.light-theme .sudoku-cell:nth-child(3n) {
+  border-right-color: #0f172a;
+}
+
+.sudoku-cell:nth-child(9n) {
+  border-right: none;
+}
+
+/* Row-based thick borders separating 3x3 block rows */
+.sudoku-cell.row-divider {
+  border-bottom: 2px solid var(--text-main);
+}
+body.light-theme .sudoku-cell.row-divider {
+  border-bottom-color: #0f172a;
+}
+
+/* Cell states colors */
+.sudoku-cell.given {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+body.light-theme .sudoku-cell.given {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.sudoku-cell.highlight-cell {
+  background-color: rgba(245, 158, 11, 0.1) !important; /* Muted amber highlights */
+}
+
+.sudoku-cell.highlight-selected {
+  background-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.sudoku-cell.user-entered {
+  color: #3b82f6; /* Modern Blue for player entries */
+}
+
+.sudoku-cell.incorrect-value {
+  color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* 3x3 subgrid for Sudoku candidate notes */
+.sudoku-cell-note-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  pointer-events: none;
+}
+
+.note-digit {
+  font-size: 8px;
+  font-weight: 500;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* Sudoku Mistakes and indicator styling */
+.sudoku-mistakes {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.level-indicator-badge {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border: var(--glass-border);
+}
+
+body.light-theme .level-indicator-badge {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Erase/Notes Buttons in Sudoku Number Pad */
+.key-btn.toggle-btn.active {
+  background-color: var(--color-correct) !important;
+  color: var(--white) !important;
+  box-shadow: 0 0 10px var(--color-correct-glow);
+}
+
+.danger-btn-outline {
+  background: none;
+  border: 1px solid #ef4444;
+  color: #ef4444;
+}
+
+.danger-btn-outline:hover {
+  background-color: #ef4444;
+  color: var(--white);
+}
+
+/* ==========================================================================
+   Prompt Overlay Modal (Mistakes fail popups)
+   ========================================================================== */
+.text-center {
+  text-align: center;
+}
+
+.large-warning {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.prompt-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.secondary-button {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--text-main);
+}
+
+body.light-theme .secondary-button:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Scroll list of clues in Mini Crossword */
+.scrollable-clues-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* ==========================================================================
+   Breakpoints & Responsiveness Adjustments
    ========================================================================== */
 @media (max-height: 650px) {
   .app-header {
@@ -1010,4 +1638,39 @@ body.light-theme .install-banner {
   .key-btn.key-wide {
     font-size: 10px;
   }
+  .sudoku-grid {
+    max-width: 270px;
+  }
+  .sudoku-cell {
+    font-size: 16px;
+  }
+  .crossword-viewport {
+    max-height: 220px;
+  }
 }
+
+@media (min-width: 480px) {
+  .games-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 16px;
+  }
+  
+  .game-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 12px;
+  }
+  
+  .card-info {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .play-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+

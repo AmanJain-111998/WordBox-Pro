@@ -1318,7 +1318,10 @@ const CrosswordEngine = {
           }
           
           // Check validations styling
-          if (this.isChecked && textVal) {
+          const isCorrectWord = this.isCellPartOfCorrectWord(r, c);
+          if (isCorrectWord) {
+            cell.classList.add('checked-correct');
+          } else if (this.isChecked && textVal) {
             if (textVal === this.solution[r][c]) {
               cell.classList.add('checked-correct');
             } else {
@@ -1373,6 +1376,21 @@ const CrosswordEngine = {
       if (wr === r && wc === c) return true;
     }
     return false;
+  },
+
+  isCellPartOfCorrectWord(r, c) {
+    return this.placedWords.some((word) => {
+      if (!this.isCellPartOfWord(word, r, c)) return false;
+      const len = word.w.length;
+      for (let i = 0; i < len; i++) {
+        const wr = word.d === 'D' ? word.r + i : word.r;
+        const wc = word.d === 'D' ? word.c : word.c + i;
+        if (this.playerGrid[wr][wc].trim() !== word.w[i]) {
+          return false;
+        }
+      }
+      return true;
+    });
   },
 
   handleCellSelection(r, c) {
@@ -1446,6 +1464,7 @@ const CrosswordEngine = {
     // Auto advance focus to next letter cell in word
     this.advanceFocus(1);
     this.renderBoard();
+    this.checkWinOnInput();
   },
 
   handleBackspace() {
@@ -1496,6 +1515,24 @@ const CrosswordEngine = {
         this.renderBoard();
         this.updateActiveClueLabel();
       }
+    }
+  },
+
+  checkWinOnInput() {
+    let allCorrect = true;
+    for (let r = 0; r < this.size; r++) {
+      for (let c = 0; c < this.size; c++) {
+        if (this.solution[r][c] === '.') continue;
+        if (this.playerGrid[r][c].trim() !== this.solution[r][c]) {
+          allCorrect = false;
+          break;
+        }
+      }
+    }
+    if (allCorrect) {
+      AudioPlayer.playWin();
+      showToast('Solved Successfully!');
+      this.handleWin();
     }
   },
 

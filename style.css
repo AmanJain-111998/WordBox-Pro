@@ -1651,15 +1651,49 @@ body.light-theme .sudoku-cell.given {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  padding: 4px 10px;
+  padding: 2px 6px;
   border-radius: 20px;
   background-color: rgba(255, 255, 255, 0.05);
   color: var(--text-main);
   border: var(--glass-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 body.light-theme .level-indicator-badge {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.level-nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--transition-fast), transform 0.1s ease;
+}
+
+.level-nav-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.level-nav-btn:active {
+  transform: scale(0.9);
+}
+
+body.light-theme .level-nav-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#level-indicator-label {
+  cursor: pointer;
+  padding: 2px 4px;
 }
 
 /* Erase/Notes Buttons in Sudoku Number Pad */

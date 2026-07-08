@@ -204,8 +204,49 @@ document.addEventListener('DOMContentLoaded', () => {
   renderQWERTYKeyboard();
   showView('dashboard');
   
-  // Click level badge to select level (1-500)
-  document.getElementById('level-indicator').addEventListener('click', () => {
+  // Previous level handlers
+  const handlePrevLevel = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (GameHubState.gameMode !== 'practice') return;
+    const game = GameHubState.activeGame;
+    const diff = GameHubState.difficulty;
+    if (!game) return;
+    
+    let statsObj = GameHubState.stats[game].practice[diff];
+    let lvlIdx = statsObj.levelIndex;
+    lvlIdx = (lvlIdx - 1 + 500) % 500;
+    statsObj.levelIndex = lvlIdx;
+    saveStats();
+    startActiveGame();
+    AudioPlayer.playClick();
+  };
+
+  // Next level handlers
+  const handleNextLevel = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (GameHubState.gameMode !== 'practice') return;
+    const game = GameHubState.activeGame;
+    const diff = GameHubState.difficulty;
+    if (!game) return;
+    
+    let statsObj = GameHubState.stats[game].practice[diff];
+    let lvlIdx = statsObj.levelIndex;
+    lvlIdx = (lvlIdx + 1) % 500;
+    statsObj.levelIndex = lvlIdx;
+    saveStats();
+    startActiveGame();
+    AudioPlayer.playClick();
+  };
+
+  document.getElementById('btn-level-prev').addEventListener('click', handlePrevLevel);
+  document.getElementById('btn-level-prev').addEventListener('touchstart', handlePrevLevel, { passive: false });
+  document.getElementById('btn-level-next').addEventListener('click', handleNextLevel);
+  document.getElementById('btn-level-next').addEventListener('touchstart', handleNextLevel, { passive: false });
+
+  // Click level badge label to jump directly to any level (1-500)
+  document.getElementById('level-indicator-label').addEventListener('click', () => {
     if (GameHubState.gameMode !== 'practice') return;
     const game = GameHubState.activeGame;
     const diff = GameHubState.difficulty;
@@ -370,7 +411,7 @@ function showView(view) {
       const diff = GameHubState.difficulty;
       const statsObj = GameHubState.stats[view].practice[diff];
       const lvlIdx = ((statsObj ? statsObj.levelIndex : 0) % 500) + 1;
-      levelInd.innerText = `Level ${lvlIdx}/500`;
+      document.getElementById('level-indicator-label').innerText = `Level ${lvlIdx}/500`;
       levelInd.classList.remove('hidden');
     } else {
       levelInd.classList.add('hidden');
@@ -392,7 +433,7 @@ function startActiveGame() {
       const diff = GameHubState.difficulty;
       const statsObj = GameHubState.stats[view].practice[diff];
       const lvlIdx = ((statsObj ? statsObj.levelIndex : 0) % 500) + 1;
-      levelInd.innerText = `Level ${lvlIdx}/500`;
+      document.getElementById('level-indicator-label').innerText = `Level ${lvlIdx}/500`;
       levelInd.classList.remove('hidden');
     } else {
       levelInd.classList.add('hidden');
@@ -1307,7 +1348,7 @@ const CrosswordEngine = {
     // Sync indicator badge
     const badge = document.getElementById('level-indicator');
     badge.classList.remove('hidden');
-    badge.innerText = `Level ${this.puzzleIndex + 1}/500`;
+    document.getElementById('level-indicator-label').innerText = `Level ${this.puzzleIndex + 1}/500`;
     
     // Build grids
     this.solution = Array(this.size).fill(null).map(() => Array(this.size).fill('.'));
@@ -1413,6 +1454,11 @@ const CrosswordEngine = {
             AudioPlayer.playClick();
             this.handleCellSelection(r, c);
           });
+          cell.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            AudioPlayer.playClick();
+            this.handleCellSelection(r, c);
+          }, { passive: false });
         }
         board.appendChild(cell);
       }
@@ -1464,7 +1510,7 @@ const CrosswordEngine = {
       for (let i = 0; i < len; i++) {
         const wr = word.d === 'D' ? word.r + i : word.r;
         const wc = word.d === 'D' ? word.c : word.c + i;
-        if (this.playerGrid[wr][wc].trim() !== word.w[i]) {
+        if (!this.playerGrid[wr] || this.playerGrid[wr][wc] === undefined || this.playerGrid[wr][wc].trim() !== word.w[i]) {
           return false;
         }
       }
@@ -1473,23 +1519,28 @@ const CrosswordEngine = {
   },
 
   handleCellSelection(r, c) {
-    this.isChecked = false;
-    
-    if (this.selectedCell.r === r && this.selectedCell.c === c) {
-      // Toggle typing direction if tapped again
-      this.selectedDir = this.selectedDir === 'A' ? 'D' : 'A';
-    } else {
-      this.selectedCell = { r, c };
-      // Choose best direction for selected cell
-      const fitsAcross = this.placedWords.some(p => p.d === 'A' && this.isCellPartOfWord(p, r, c));
-      const fitsDown = this.placedWords.some(p => p.d === 'D' && this.isCellPartOfWord(p, r, c));
+    try {
+      this.isChecked = false;
       
-      if (fitsAcross && !fitsDown) this.selectedDir = 'A';
-      else if (fitsDown && !fitsAcross) this.selectedDir = 'D';
+      if (this.selectedCell.r === r && this.selectedCell.c === c) {
+        // Toggle typing direction if tapped again
+        this.selectedDir = this.selectedDir === 'A' ? 'D' : 'A';
+      } else {
+        this.selectedCell = { r, c };
+        // Choose best direction for selected cell
+        const fitsAcross = this.placedWords.some(p => p.d === 'A' && this.isCellPartOfWord(p, r, c));
+        const fitsDown = this.placedWords.some(p => p.d === 'D' && this.isCellPartOfWord(p, r, c));
+        
+        if (fitsAcross && !fitsDown) this.selectedDir = 'A';
+        else if (fitsDown && !fitsAcross) this.selectedDir = 'D';
+      }
+      
+      this.renderBoard();
+      this.updateActiveClueLabel();
+    } catch (e) {
+      console.error('[Crossword Selection Error]:', e);
+      showToast('Selection error: ' + e.message);
     }
-    
-    this.renderBoard();
-    this.updateActiveClueLabel();
   },
 
   updateActiveClueLabel() {
@@ -1715,7 +1766,7 @@ const SudokuEngine = {
     // Sync indicator badge & Mistakes Counter
     const indicator = document.getElementById('level-indicator');
     indicator.classList.remove('hidden');
-    indicator.innerText = `Level ${this.puzzleIndex + 1}/500`;
+    document.getElementById('level-indicator-label').innerText = `Level ${this.puzzleIndex + 1}/500`;
     
     const mistakesEl = document.getElementById('sudoku-mistakes-counter');
     mistakesEl.classList.remove('hidden');

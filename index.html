@@ -120,7 +120,11 @@
       <section class="game-controls">
         <div class="mode-indicator">
           <span id="current-mode-label" class="mode-label">PRACTICE MODE</span>
-          <span id="level-indicator" class="level-indicator-badge hidden">Level 1/500</span>
+          <div id="level-indicator" class="level-indicator-badge hidden">
+            <button id="btn-level-prev" class="level-nav-btn" aria-label="Previous Level">◀</button>
+            <span id="level-indicator-label">Level 1/500</span>
+            <button id="btn-level-next" class="level-nav-btn" aria-label="Next Level">▶</button>
+          </div>
           <span id="sudoku-mistakes-counter" class="sudoku-mistakes hidden">Mistakes: 0/3</span>
         </div>
         

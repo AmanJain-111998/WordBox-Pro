@@ -34,7 +34,7 @@
         <button id="btn-home" class="icon-button hidden" aria-label="Go to Main Menu">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         </button>
-        <button id="btn-help" class="icon-button" aria-label="How to play">
+        <button id="btn-help" class="icon-button hidden" style="display: none !important;" aria-label="How to play">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </button>
       </div>
@@ -44,7 +44,7 @@
       </div>
       
       <div class="header-right">
-        <button id="btn-stats" class="icon-button hidden" aria-label="Game Statistics">
+        <button id="btn-stats" class="icon-button hidden" style="display: none !important;" aria-label="Game Statistics">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </button>
         <button id="btn-settings" class="icon-button" aria-label="Settings">
@@ -349,6 +349,26 @@
       <div class="modal-body">
         
         <div class="settings-list">
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>How to Play</h3>
+              <p>View gameplay instructions and rules</p>
+            </div>
+            <div class="setting-control">
+              <button id="btn-settings-help" class="danger-button" style="background-color: var(--color-correct) !important; color: white !important;">View Rules</button>
+            </div>
+          </div>
+          
+          <div class="setting-item">
+            <div class="setting-info">
+              <h3>Game Statistics</h3>
+              <p>Check streaks and guess distributions</p>
+            </div>
+            <div class="setting-control">
+              <button id="btn-settings-stats" class="danger-button" style="background-color: var(--color-correct) !important; color: white !important;">View Stats</button>
+            </div>
+          </div>
           
           <div class="setting-item">
             <div class="setting-info">

@@ -464,6 +464,17 @@ function bindOrchestratorEvents() {
   
   document.getElementById('btn-settings').addEventListener('click', () => openModal(document.getElementById('modal-settings')));
   document.getElementById('btn-close-settings').addEventListener('click', () => closeModal(document.getElementById('modal-settings')));
+
+  // Inside-settings links
+  document.getElementById('btn-settings-help').addEventListener('click', () => {
+    closeModal(document.getElementById('modal-settings'));
+    openHelpModal();
+  });
+  document.getElementById('btn-settings-stats').addEventListener('click', () => {
+    closeModal(document.getElementById('modal-settings'));
+    updateStatsModal();
+    openModal(document.getElementById('modal-stats'));
+  });
   
   // Exit buttons
   document.getElementById('btn-prompt-exit').addEventListener('click', () => {

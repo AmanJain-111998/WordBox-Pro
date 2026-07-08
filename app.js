@@ -1029,6 +1029,9 @@ const OctordleEngine = {
     // Evaluate key statuses segment by segment across all 8 boards
     const alphabet = 'abcdefghijklmnopqrstuvwxyz';
     for (let char of alphabet) {
+      let hasBeenGuessed = false;
+      let isPresentOrCorrectAnywhere = false;
+      
       for (let b = 0; b < 8; b++) {
         const target = this.targets[b];
         let bestState = null;
@@ -1037,11 +1040,16 @@ const OctordleEngine = {
           const evals = gradeGuess(guess, target);
           for (let i = 0; i < 5; i++) {
             if (guess[i] === char) {
+              hasBeenGuessed = true;
               const state = evals[i];
               if (state === 'correct') {
                 bestState = 'correct';
-              } else if (state === 'present' && bestState !== 'correct') {
-                bestState = 'present';
+                isPresentOrCorrectAnywhere = true;
+              } else if (state === 'present') {
+                isPresentOrCorrectAnywhere = true;
+                if (bestState !== 'correct') {
+                  bestState = 'present';
+                }
               } else if (state === 'absent' && !bestState) {
                 bestState = 'absent';
               }
@@ -1052,6 +1060,16 @@ const OctordleEngine = {
         if (bestState) {
           const seg = document.getElementById(`key-seg-${char}-${b}`);
           if (seg) seg.classList.add(bestState);
+        }
+      }
+      
+      // If it has been guessed, but never found correct/present on any of the 8 boards
+      const keyBtn = document.getElementById(`key-${char}`);
+      if (keyBtn) {
+        if (hasBeenGuessed && !isPresentOrCorrectAnywhere) {
+          keyBtn.classList.add('fully-absent');
+        } else {
+          keyBtn.classList.remove('fully-absent');
         }
       }
     }

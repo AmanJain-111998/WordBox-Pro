@@ -406,6 +406,12 @@ body.light-theme .game-keyboard-wrapper {
   opacity: 0.7;
 }
 
+.key-btn.fully-absent {
+  background-color: var(--key-absent-bg) !important;
+  color: var(--key-absent-text) !important;
+  opacity: 0.3 !important;
+}
+
 /* ==========================================================================
    Toast Messages System
    ========================================================================== */

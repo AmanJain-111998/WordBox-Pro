@@ -1934,19 +1934,7 @@ body.light-theme .secondary-button:hover {
   stroke: #3b82f6 !important;
 }
 
-/* Sudoku 1-9 Number Keys style (matches native mobile apps) */
-#keyboard-numeric .num-key {
-  background-color: transparent !important;
-  border: none !important;
-  font-size: 26px !important;
-  font-weight: 600 !important;
-  color: #3b82f6 !important; /* Premium Blue */
-  height: 48px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50% !important;
-/* Dialer keyboard grid spacing */
+/* Sudoku 1-9 Number Keys style (dialer circles, no letters) */
 .dialer-keyboard {
   display: flex;
   flex-direction: column;
@@ -1969,32 +1957,20 @@ body.light-theme .secondary-button:hover {
   height: 58px;
   flex: none; /* Keep circular */
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   border-radius: 50% !important;
-  padding: 0;
+  font-size: 24px !important;
+  font-weight: 500 !important;
+  color: var(--text-main) !important;
   cursor: pointer;
   transition: background-color 0.15s, transform 0.1s;
+  padding: 0;
 }
 
 body.light-theme #keyboard-numeric .dialer-key {
   background-color: rgba(0, 0, 0, 0.06) !important;
-}
-
-.dialer-key .dialer-num {
-  font-size: 24px;
-  font-weight: 400;
-  color: var(--text-main);
-  line-height: 1.1;
-}
-
-.dialer-key .dialer-letters {
-  font-size: 8px;
-  font-weight: 600;
-  color: var(--text-muted);
-  letter-spacing: 0.5px;
-  margin-top: -2px;
+  color: var(--text-main) !important;
 }
 
 #keyboard-numeric .dialer-key:active {
@@ -2018,12 +1994,7 @@ body.light-theme #keyboard-numeric .dialer-key:active {
   #keyboard-numeric .dialer-key {
     width: 48px;
     height: 48px;
-  }
-  .dialer-key .dialer-num {
-    font-size: 20px;
-  }
-  .dialer-key .dialer-letters {
-    font-size: 7px;
+    font-size: 20px !important;
   }
   .key-action-btn {
     height: 40px;
@@ -2042,12 +2013,7 @@ body.light-theme #keyboard-numeric .dialer-key:active {
   #keyboard-numeric .dialer-key {
     width: 42px;
     height: 42px;
-  }
-  .dialer-key .dialer-num {
-    font-size: 17px;
-  }
-  .dialer-key .dialer-letters {
-    font-size: 6px;
+    font-size: 17px !important;
   }
   .key-action-btn {
     height: 34px;

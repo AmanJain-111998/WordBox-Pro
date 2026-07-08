@@ -1615,23 +1615,23 @@ body.light-theme .sudoku-cell.given {
 
 /* Cell Highlights (similar to sudoku.com) */
 .sudoku-cell.highlight-selected {
-  background-color: rgba(59, 130, 246, 0.35) !important; /* Selected cell in dark mode */
+  background-color: rgba(59, 130, 246, 0.22) !important; /* Selected cell in dark mode */
 }
 .sudoku-cell.highlight-match {
-  background-color: rgba(59, 130, 246, 0.2) !important;  /* Matching numbers in dark mode */
+  background-color: rgba(59, 130, 246, 0.12) !important;  /* Matching numbers in dark mode */
 }
 .sudoku-cell.highlight-related {
-  background-color: rgba(255, 255, 255, 0.04) !important; /* Row/col/box crosshairs in dark mode */
+  background-color: rgba(255, 255, 255, 0.02) !important; /* Row/col/box crosshairs in dark mode */
 }
 
 body.light-theme .sudoku-cell.highlight-selected {
-  background-color: #a0c3ff !important; /* Selected cell in light mode */
+  background-color: rgba(59, 130, 246, 0.14) !important; /* Soft transparent blue focus in light mode */
 }
 body.light-theme .sudoku-cell.highlight-match {
-  background-color: #cbdbec !important; /* Matching numbers in light mode */
+  background-color: rgba(59, 130, 246, 0.07) !important;  /* Soft transparent blue match in light mode */
 }
 body.light-theme .sudoku-cell.highlight-related {
-  background-color: #e2ebf3 !important; /* Row/col/box crosshairs in light mode */
+  background-color: rgba(59, 130, 246, 0.03) !important;  /* Soft transparent blue crosshairs in light mode */
 }
 
 .sudoku-cell.user-entered {

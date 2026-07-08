@@ -1571,7 +1571,6 @@ body.light-theme .sudoku-grid {
 
 .sudoku-cell {
   background-color: var(--bg-main);
-  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;

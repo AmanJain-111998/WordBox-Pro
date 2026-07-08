@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamebox-pro-v2.0';
+const CACHE_NAME = 'gamebox-pro-v2.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -41,36 +41,23 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Cache-first strategy with network fallback
+// Fetch Event - Network-first strategy with cache fallback (ensures immediate updates when online)
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and local/same-origin assets
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        // Return cached response instantly
-        return cachedResponse;
-      }
-
-      // Fallback to network
-      return fetch(event.request).then((networkResponse) => {
-        // Check if response is valid
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
-        }
-
-        // Cache the newly fetched asset dynamically (if it's same-origin)
+    fetch(event.request).then((networkResponse) => {
+      // If response is valid, update the cache
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
           cache.put(event.request, responseToCache);
         });
-
-        return networkResponse;
-      }).catch(() => {
-        // If offline and request fails
-        console.log('[Service Worker] Fetch failed offline:', event.request.url);
-      });
+      }
+      return networkResponse;
+    }).catch(() => {
+      // If network fails (offline), load from cache
+      return caches.match(event.request);
     })
   );
 });

@@ -11,6 +11,14 @@ if ('serviceWorker' in navigator) {
       .then((reg) => console.log('[Service Worker] Registered:', reg.scope))
       .catch((err) => console.error('[Service Worker] Registration failed:', err));
   });
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!refreshing) {
+      refreshing = true;
+      window.location.reload();
+    }
+  });
 }
 
 window.addEventListener('beforeinstallprompt', (e) => {

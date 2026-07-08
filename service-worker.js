@@ -1,9 +1,11 @@
-const CACHE_NAME = 'wordle-pro-v1';
+const CACHE_NAME = 'gamebox-pro-v1.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './words.js',
+  './crosswords.js',
+  './sudokus.js',
   './app.js',
   './manifest.json',
   './icon.svg'

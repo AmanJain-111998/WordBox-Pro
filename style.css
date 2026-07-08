@@ -1912,14 +1912,10 @@ body.light-theme .secondary-button:hover {
   font-weight: 500;
   color: var(--text-muted);
   background-color: transparent !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: none !important; /* No outlines for a clean mobile app look */
   border-radius: 8px;
   flex: 1;
   max-width: 80px;
-}
-
-body.light-theme .key-action-btn {
-  border-color: rgba(0, 0, 0, 0.08) !important;
 }
 
 .key-action-btn svg {
@@ -1929,14 +1925,37 @@ body.light-theme .key-action-btn {
 
 .key-action-btn:active,
 .key-action-btn.active {
-  background-color: rgba(59, 130, 246, 0.15) !important;
+  background-color: rgba(59, 130, 246, 0.1) !important;
   color: #3b82f6 !important;
-  border-color: #3b82f6 !important;
 }
 
 .key-action-btn:active svg,
 .key-action-btn.active svg {
   stroke: #3b82f6 !important;
+}
+
+/* Sudoku 1-9 Number Keys style (matches native mobile apps) */
+#keyboard-numeric .num-key {
+  background-color: transparent !important;
+  border: none !important;
+  font-size: 26px !important;
+  font-weight: 600 !important;
+  color: #3b82f6 !important; /* Premium Blue */
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50% !important;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+body.light-theme #keyboard-numeric .num-key {
+  color: #1e3a8a !important; /* Rich Indigo in light mode */
+}
+
+#keyboard-numeric .num-key:active {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  transform: scale(0.9);
 }
 
 /* Adjust button height on max-height 650px */
@@ -1945,12 +1964,20 @@ body.light-theme .key-action-btn {
     height: 40px;
     font-size: 10px !important;
   }
+  #keyboard-numeric .num-key {
+    height: 40px;
+    font-size: 22px !important;
+  }
 }
 
 @media (max-height: 570px) {
   .key-action-btn {
     height: 34px;
     font-size: 9px !important;
+  }
+  #keyboard-numeric .num-key {
+    height: 34px;
+    font-size: 18px !important;
   }
 }
 

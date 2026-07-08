@@ -704,6 +704,20 @@ function bindOrchestratorEvents() {
       });
     }
   });
+
+  // Clear Sudoku active highlights when clicking outside the board or controls
+  document.addEventListener('click', (e) => {
+    if (GameHubState.activeGame === 'sudoku') {
+      const grid = document.getElementById('board-sudoku');
+      const keyboard = document.getElementById('keyboard-numeric');
+      if (grid && !grid.contains(e.target) && keyboard && !keyboard.contains(e.target)) {
+        if (!e.target.closest('.app-header') && !e.target.closest('.game-controls')) {
+          SudokuEngine.selectedCell = { r: -1, c: -1 };
+          SudokuEngine.renderBoard();
+        }
+      }
+    }
+  });
 }
 
 // Router forwards for Wordle / Octordle
@@ -1843,7 +1857,7 @@ const SudokuEngine = {
             cell.classList.add('highlight-selected');
           } else if (isValueMatch) {
             cell.classList.add('highlight-match');
-          } else if (isSameRow || isSameCol || isSameBlock) {
+          } else if ((isSameRow || isSameCol || isSameBlock) && !isGiven) {
             cell.classList.add('highlight-related');
           }
         }

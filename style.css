@@ -1613,12 +1613,25 @@ body.light-theme .sudoku-cell.given {
   background-color: rgba(0, 0, 0, 0.02);
 }
 
-.sudoku-cell.highlight-cell {
-  background-color: rgba(245, 158, 11, 0.1) !important; /* Muted amber highlights */
+/* Cell Highlights (similar to sudoku.com) */
+.sudoku-cell.highlight-selected {
+  background-color: rgba(59, 130, 246, 0.35) !important; /* Selected cell in dark mode */
+}
+.sudoku-cell.highlight-match {
+  background-color: rgba(59, 130, 246, 0.2) !important;  /* Matching numbers in dark mode */
+}
+.sudoku-cell.highlight-related {
+  background-color: rgba(255, 255, 255, 0.04) !important; /* Row/col/box crosshairs in dark mode */
 }
 
-.sudoku-cell.highlight-selected {
-  background-color: rgba(245, 158, 11, 0.3) !important;
+body.light-theme .sudoku-cell.highlight-selected {
+  background-color: #a0c3ff !important; /* Selected cell in light mode */
+}
+body.light-theme .sudoku-cell.highlight-match {
+  background-color: #cbdbec !important; /* Matching numbers in light mode */
+}
+body.light-theme .sudoku-cell.highlight-related {
+  background-color: #e2ebf3 !important; /* Row/col/box crosshairs in light mode */
 }
 
 .sudoku-cell.user-entered {
@@ -1878,6 +1891,66 @@ body.light-theme .secondary-button:hover {
   .play-btn {
     width: 100%;
     text-align: center;
+  }
+}
+
+/* Sudoku controls layout (Undo, Erase, Notes) */
+.sudoku-controls-row {
+  margin-bottom: 8px;
+  justify-content: center;
+  gap: 12px;
+}
+
+.key-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 48px;
+  font-size: 11px !important;
+  font-weight: 500;
+  color: var(--text-muted);
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+  flex: 1;
+  max-width: 80px;
+}
+
+body.light-theme .key-action-btn {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.key-action-btn svg {
+  stroke: var(--text-muted);
+  transition: stroke var(--transition-fast);
+}
+
+.key-action-btn:active,
+.key-action-btn.active {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #3b82f6 !important;
+  border-color: #3b82f6 !important;
+}
+
+.key-action-btn:active svg,
+.key-action-btn.active svg {
+  stroke: #3b82f6 !important;
+}
+
+/* Adjust button height on max-height 650px */
+@media (max-height: 650px) {
+  .key-action-btn {
+    height: 40px;
+    font-size: 10px !important;
+  }
+}
+
+@media (max-height: 570px) {
+  .key-action-btn {
+    height: 34px;
+    font-size: 9px !important;
   }
 }
 

@@ -196,28 +196,32 @@
         
         <!-- Numeric Number Pad (Sudoku) -->
         <div id="keyboard-numeric" class="game-keyboard hidden">
+          <!-- Action Buttons Row -->
+          <div class="keyboard-row sudoku-controls-row">
+            <button id="key-sudoku-undo" class="key-btn key-action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+              <span>Undo</span>
+            </button>
+            <button id="key-sudoku-erase" class="key-btn key-action-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              <span>Erase</span>
+            </button>
+            <button id="key-sudoku-notes" class="key-btn key-action-btn toggle-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              <span>Notes</span>
+            </button>
+          </div>
+          <!-- Number Keys Row -->
           <div class="keyboard-row">
             <button class="key-btn num-key" data-num="1">1</button>
             <button class="key-btn num-key" data-num="2">2</button>
             <button class="key-btn num-key" data-num="3">3</button>
             <button class="key-btn num-key" data-num="4">4</button>
             <button class="key-btn num-key" data-num="5">5</button>
-          </div>
-          <div class="keyboard-row">
             <button class="key-btn num-key" data-num="6">6</button>
             <button class="key-btn num-key" data-num="7">7</button>
             <button class="key-btn num-key" data-num="8">8</button>
             <button class="key-btn num-key" data-num="9">9</button>
-            <button id="key-sudoku-notes" class="key-btn key-wide toggle-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              <span>Notes</span>
-            </button>
-          </div>
-          <div class="keyboard-row">
-            <button id="key-sudoku-erase" class="key-btn key-wide danger-btn-outline">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-              <span>Erase</span>
-            </button>
           </div>
         </div>
       </footer>

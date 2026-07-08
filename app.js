@@ -685,6 +685,8 @@ function bindOrchestratorEvents() {
       SudokuEngine.toggleNotesMode();
     } else if (btn.id === 'key-sudoku-erase') {
       SudokuEngine.eraseCell();
+    } else if (btn.id === 'key-sudoku-undo') {
+      SudokuEngine.handleUndo();
     }
   });
 
@@ -1726,6 +1728,7 @@ const SudokuEngine = {
   selectedCell: { r: -1, c: -1 },
   mistakes: 0,
   notesMode: false,
+  history: [],       // stack of board states for Undo functionality
 
   start() {
     const mode = GameHubState.gameMode;
@@ -1745,6 +1748,7 @@ const SudokuEngine = {
     this.mistakes = 0;
     this.notesMode = false;
     this.selectedCell = { r: -1, c: -1 };
+    this.history = [];
     
     // Sync indicator badge & Mistakes Counter
     const indicator = document.getElementById('level-indicator');
@@ -1833,11 +1837,14 @@ const SudokuEngine = {
           const isSameRow = (r === row);
           const isSameCol = (c === col);
           const isSameBlock = (Math.floor(r/3) === Math.floor(row/3) && Math.floor(c/3) === Math.floor(col/3));
+          const isValueMatch = (focusedValue > 0 && val === focusedValue);
           
           if (r === row && c === col) {
             cell.classList.add('highlight-selected');
-          } else if (isSameRow || isSameCol || isSameBlock || (focusedValue > 0 && val === focusedValue)) {
-            cell.classList.add('highlight-cell');
+          } else if (isValueMatch) {
+            cell.classList.add('highlight-match');
+          } else if (isSameRow || isSameCol || isSameBlock) {
+            cell.classList.add('highlight-related');
           }
         }
         
@@ -1850,6 +1857,29 @@ const SudokuEngine = {
         board.appendChild(cell);
       }
     }
+  },
+
+  pushHistory() {
+    this.history.push({
+      playerBoard: this.playerBoard.map(row => [...row]),
+      notes: this.notes.map(row => row.map(set => new Set(set))),
+      mistakes: this.mistakes
+    });
+    if (this.history.length > 50) this.history.shift();
+  },
+
+  handleUndo() {
+    if (this.history.length === 0) return;
+    AudioPlayer.playClick();
+    const prev = this.history.pop();
+    this.playerBoard = prev.playerBoard;
+    this.notes = prev.notes;
+    this.mistakes = prev.mistakes;
+    
+    const mistakesEl = document.getElementById('sudoku-mistakes-counter');
+    mistakesEl.innerText = `Mistakes: ${this.mistakes}/3`;
+    
+    this.renderBoard();
   },
 
   toggleNotesMode() {
@@ -1867,6 +1897,8 @@ const SudokuEngine = {
     
     // Ignore input on given cells
     if (this.initialBoard[r][c] > 0) return;
+    
+    this.pushHistory();
     
     if (this.notesMode) {
       // Toggle note candidate digit
@@ -1919,6 +1951,7 @@ const SudokuEngine = {
     const c = this.selectedCell.c;
     if (this.initialBoard[r][c] > 0) return;
     
+    this.pushHistory();
     AudioPlayer.playClick();
     this.playerBoard[r][c] = 0;
     this.notes[r][c].clear();

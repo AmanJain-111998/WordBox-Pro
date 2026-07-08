@@ -1280,6 +1280,49 @@ body.light-theme .octordle-scroll-container {
   font-weight: 700;
 }
 
+/* Indicators shortcuts row */
+.octordle-shortcuts {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.octordle-shortcut-btn {
+  flex: 1;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: var(--key-bg);
+  color: var(--key-text);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.octordle-shortcut-btn.solved {
+  background-color: var(--color-correct) !important;
+  color: var(--white) !important;
+  border-color: var(--color-correct) !important;
+  box-shadow: 0 0 8px var(--color-correct-glow);
+}
+
+.octordle-shortcut-btn.failed {
+  background-color: #ef4444 !important;
+  color: var(--white) !important;
+  border-color: #ef4444 !important;
+}
+
+.octordle-shortcut-btn:active {
+  transform: scale(0.95);
+}
+
 /* ==========================================================================
    Crossword Board View Styles
    ========================================================================== */

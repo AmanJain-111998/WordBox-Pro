@@ -307,12 +307,20 @@ function showView(view) {
     // Keyboard layouts
     const qwertyKb = document.getElementById('keyboard-qwerty');
     const numericKb = document.getElementById('keyboard-numeric');
+    const octordleShortcuts = document.getElementById('octordle-shortcuts-bar');
+    
     if (view === 'sudoku') {
       qwertyKb.classList.add('hidden');
       numericKb.classList.remove('hidden');
+      octordleShortcuts.classList.add('hidden');
     } else {
       qwertyKb.classList.remove('hidden');
       numericKb.classList.add('hidden');
+      if (view === 'octordle') {
+        octordleShortcuts.classList.remove('hidden');
+      } else {
+        octordleShortcuts.classList.add('hidden');
+      }
     }
     
     // Difficulty labels wraps
@@ -874,6 +882,24 @@ const OctordleEngine = {
     this.status = 'IN_PROGRESS';
     this.isAnimating = false;
     
+    // Render 1-8 navigation shortcuts indicators bar
+    const shortcuts = document.getElementById('octordle-shortcuts-bar');
+    shortcuts.innerHTML = '';
+    for (let b = 0; b < 8; b++) {
+      const btn = document.createElement('button');
+      btn.className = 'octordle-shortcut-btn';
+      btn.id = `octordle-shortcut-btn-${b}`;
+      btn.innerText = b + 1;
+      btn.addEventListener('click', () => {
+        AudioPlayer.playClick();
+        const targetCard = document.getElementById(`octordle-board-card-${b}`);
+        if (targetCard) {
+          targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+      shortcuts.appendChild(btn);
+    }
+
     const list = difficultyWordLists[GameHubState.difficulty];
     if (GameHubState.gameMode === 'daily') {
       // Pick 8 deterministic words
@@ -917,6 +943,7 @@ const OctordleEngine = {
   repaintAll() {
     this.renderBoards();
     this.updateKeyboard();
+    this.updateShortcutsBar();
   },
 
   renderBoards() {
@@ -926,6 +953,7 @@ const OctordleEngine = {
     for (let b = 0; b < 8; b++) {
       const card = document.createElement('div');
       card.className = 'octordle-board-card';
+      card.id = `octordle-board-card-${b}`;
       
       const target = this.targets[b];
       const isSolved = this.solved[b];
@@ -1024,6 +1052,20 @@ const OctordleEngine = {
         if (bestState) {
           const seg = document.getElementById(`key-seg-${char}-${b}`);
           if (seg) seg.classList.add(bestState);
+        }
+      }
+    }
+  },
+
+  updateShortcutsBar() {
+    for (let b = 0; b < 8; b++) {
+      const btn = document.getElementById(`octordle-shortcut-btn-${b}`);
+      if (btn) {
+        btn.classList.remove('solved', 'failed');
+        if (this.solved[b]) {
+          btn.classList.add('solved');
+        } else if (this.guesses.length >= 13) {
+          btn.classList.add('failed');
         }
       }
     }

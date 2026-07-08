@@ -203,6 +203,29 @@ document.addEventListener('DOMContentLoaded', () => {
   bindOrchestratorEvents();
   renderQWERTYKeyboard();
   showView('dashboard');
+  
+  // Click level badge to select level (1-500)
+  document.getElementById('level-indicator').addEventListener('click', () => {
+    if (GameHubState.gameMode !== 'practice') return;
+    const game = GameHubState.activeGame;
+    const diff = GameHubState.difficulty;
+    if (!game) return;
+    
+    const statsObj = GameHubState.stats[game].practice[diff];
+    const currentLvl = ((statsObj ? statsObj.levelIndex : 0) % 500) + 1;
+    const input = prompt(`Enter Level Number (1-500):`, currentLvl);
+    if (input === null) return;
+    
+    const lvlNum = parseInt(input, 10);
+    if (!isNaN(lvlNum) && lvlNum >= 1 && lvlNum <= 500) {
+      GameHubState.stats[game].practice[diff].levelIndex = lvlNum - 1;
+      saveStats();
+      startActiveGame();
+      showToast(`Loaded Level ${lvlNum}`);
+    } else {
+      showToast('Please enter a valid number from 1 to 500');
+    }
+  });
 });
 
 function loadUserSettings() {
@@ -244,6 +267,16 @@ function loadStats() {
     for (const game of ['wordle', 'octordle', 'crossword', 'sudoku']) {
       if (!GameHubState.stats[game]) {
         GameHubState.stats[game] = JSON.parse(JSON.stringify(defaultStatsSchema[game]));
+      } else {
+        // Ensure levelIndex exists in practice stats for each difficulty
+        if (!GameHubState.stats[game].practice) {
+          GameHubState.stats[game].practice = JSON.parse(JSON.stringify(defaultStatsSchema[game].practice));
+        }
+        for (const diff of ['easy', 'medium', 'hard']) {
+          if (GameHubState.stats[game].practice[diff] && GameHubState.stats[game].practice[diff].levelIndex === undefined) {
+            GameHubState.stats[game].practice[diff].levelIndex = 0;
+          }
+        }
       }
     }
   } else {
@@ -323,8 +356,26 @@ function showView(view) {
       }
     }
     
-    // Difficulty labels wraps
-    document.getElementById('level-indicator').classList.add('hidden');
+    // Manage level badge and crossword clue bar
+    const levelInd = document.getElementById('level-indicator');
+    const crosswordClueBar = document.getElementById('crossword-clue-bar');
+    
+    if (view === 'crossword') {
+      crosswordClueBar.classList.remove('hidden');
+    } else {
+      crosswordClueBar.classList.add('hidden');
+    }
+    
+    if (GameHubState.gameMode === 'practice') {
+      const diff = GameHubState.difficulty;
+      const statsObj = GameHubState.stats[view].practice[diff];
+      const lvlIdx = ((statsObj ? statsObj.levelIndex : 0) % 500) + 1;
+      levelInd.innerText = `Level ${lvlIdx}/500`;
+      levelInd.classList.remove('hidden');
+    } else {
+      levelInd.classList.add('hidden');
+    }
+    
     document.getElementById('sudoku-mistakes-counter').classList.add('hidden');
     
     startActiveGame();
@@ -333,6 +384,20 @@ function showView(view) {
 
 function startActiveGame() {
   GameHubState.dailyIndex = getDailyIndex();
+  
+  const view = GameHubState.activeGame;
+  if (view) {
+    const levelInd = document.getElementById('level-indicator');
+    if (GameHubState.gameMode === 'practice') {
+      const diff = GameHubState.difficulty;
+      const statsObj = GameHubState.stats[view].practice[diff];
+      const lvlIdx = ((statsObj ? statsObj.levelIndex : 0) % 500) + 1;
+      levelInd.innerText = `Level ${lvlIdx}/500`;
+      levelInd.classList.remove('hidden');
+    } else {
+      levelInd.classList.add('hidden');
+    }
+  }
   
   if (GameHubState.activeGame === 'wordle') {
     WordleEngine.start();
@@ -723,7 +788,9 @@ const WordleEngine = {
         return;
       }
     } else {
-      this.target = list[Math.floor(Math.random() * list.length)];
+      const statsObj = GameHubState.stats.wordle.practice[GameHubState.difficulty];
+      const lvlIdx = (statsObj.levelIndex || 0) % list.length;
+      this.target = list[lvlIdx];
     }
     console.log('[Wordle Target]:', this.target.toUpperCase());
   },
@@ -841,6 +908,9 @@ const WordleEngine = {
       statsObj.currentStreak++;
       if (statsObj.currentStreak > statsObj.maxStreak) statsObj.maxStreak = statsObj.currentStreak;
       statsObj.guessDistribution[this.guesses.length - 1]++;
+      if (mode === 'practice') {
+        statsObj.levelIndex++;
+      }
     } else {
       statsObj.currentStreak = 0;
     }
@@ -941,10 +1011,12 @@ const OctordleEngine = {
         return;
       }
     } else {
-      // Practice: random 8 words
+      // Practice: sequential 8 words based on levelIndex
       this.targets = [];
+      const statsObj = GameHubState.stats.octordle.practice[GameHubState.difficulty];
+      const startIdx = ((statsObj.levelIndex || 0) * 8) % list.length;
       for (let i = 0; i < 8; i++) {
-        this.targets.push(list[Math.floor(Math.random() * list.length)]);
+        this.targets.push(list[(startIdx + i) % list.length]);
       }
     }
     
@@ -1181,6 +1253,9 @@ const OctordleEngine = {
       statsObj.currentStreak++;
       if (statsObj.currentStreak > statsObj.maxStreak) statsObj.maxStreak = statsObj.currentStreak;
       statsObj.guessDistribution[this.guesses.length - 1]++;
+      if (mode === 'practice') {
+        statsObj.levelIndex++;
+      }
     } else {
       statsObj.currentStreak = 0;
     }
@@ -1496,10 +1571,27 @@ const CrosswordEngine = {
       }
     }
     
-    const nextIdx = wordIdx + offset;
-    if (nextIdx >= 0 && nextIdx < len) {
-      this.selectedCell.r = word.d === 'D' ? word.r + nextIdx : word.r;
-      this.selectedCell.c = word.d === 'D' ? word.c : word.c + nextIdx;
+    // Skip already correct cells when advancing
+    let nextIdx = wordIdx;
+    for (let steps = 0; steps < len; steps++) {
+      nextIdx += offset;
+      if (nextIdx < 0 || nextIdx >= len) break;
+      
+      const wr = word.d === 'D' ? word.r + nextIdx : word.r;
+      const wc = word.d === 'D' ? word.c : word.c + nextIdx;
+      
+      if (!this.isCellPartOfCorrectWord(wr, wc)) {
+        this.selectedCell.r = wr;
+        this.selectedCell.c = wc;
+        return;
+      }
+    }
+    
+    // Fallback: move to boundary
+    const boundIdx = wordIdx + offset;
+    if (boundIdx >= 0 && boundIdx < len) {
+      this.selectedCell.r = word.d === 'D' ? word.r + boundIdx : word.r;
+      this.selectedCell.c = word.d === 'D' ? word.c : word.c + boundIdx;
     }
   },
 

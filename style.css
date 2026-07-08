@@ -1357,20 +1357,26 @@ body.light-theme .octordle-scroll-container {
 /* ==========================================================================
    Crossword Board View Styles
    ========================================================================== */
-.crossword-focused-clue {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  padding: 8px 12px;
-  border-radius: 10px;
+.crossword-keyboard-clue {
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: var(--glass-border);
+  padding: 10px 16px;
   text-align: center;
   font-size: 13px;
   font-weight: 600;
-  min-height: 40px;
+  color: var(--text-main);
+  min-height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
   width: 100%;
+  box-sizing: border-box;
+}
+
+body.light-theme .crossword-keyboard-clue {
+  background: rgba(255, 255, 255, 0.6);
 }
 
 .crossword-viewport {
@@ -1378,27 +1384,20 @@ body.light-theme .octordle-scroll-container {
   width: 100%;
   overflow: auto;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: 10px;
   min-height: 180px;
-  max-height: 340px;
+  max-height: 380px;
   border-radius: 12px;
-  border: var(--glass-border);
-  background-color: rgba(15, 23, 42, 0.1);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-body.light-theme .crossword-viewport {
-  background-color: rgba(0, 0, 0, 0.02);
+  background: transparent;
 }
 
 .crossword-grid {
   display: grid;
-  grid-gap: 2px;
-  background-color: var(--border-color);
-  border: 2px solid var(--border-color);
-  border-radius: 4px;
+  grid-gap: 0px;
+  background-color: transparent !important;
+  border: none !important;
 }
 
 .crossword-cell {
@@ -1414,22 +1413,23 @@ body.light-theme .crossword-viewport {
   color: #0f172a;
   cursor: pointer;
   user-select: none;
+  border: 1px solid #cbd5e1;
+  margin: -0.5px;
   transition: background-color var(--transition-fast);
 }
 
 body.dark-theme .crossword-cell {
   background-color: #e2e8f0;
   color: #0f172a;
+  border-color: #475569;
 }
 
-/* Blank block cell */
+/* Blank block cell - transparent and hidden */
 .crossword-cell.black-cell {
-  background-color: #090d16 !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
   cursor: default;
-}
-
-body.light-theme .crossword-cell.black-cell {
-  background-color: #1e293b !important;
+  pointer-events: none;
 }
 
 /* Numbers in cell corners */

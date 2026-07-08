@@ -154,11 +154,6 @@
         
         <!-- GAME C: Crossword Board -->
         <div id="game-crossword" class="game-board-panel hidden">
-          <!-- Focused Clue Banner -->
-          <div class="crossword-focused-clue">
-            <span id="crossword-active-clue-label">Tap a cell to show clue</span>
-          </div>
-          
           <!-- Zoom/Scroll wrapper for Crossword Grid -->
           <div class="crossword-viewport">
             <div id="board-crossword" class="crossword-grid"></div>
@@ -180,6 +175,11 @@
       
       <!-- Shared Keyboard / Controls Footer -->
       <footer id="game-keyboard-area" class="game-keyboard-wrapper">
+        <!-- Crossword Clue Bar (above keyboard) -->
+        <div id="crossword-clue-bar" class="crossword-keyboard-clue hidden">
+          <span id="crossword-active-clue-label">Tap a white cell to see the clue</span>
+        </div>
+
         <!-- Octordle Board Indicators / Shortcuts Bar -->
         <div id="octordle-shortcuts-bar" class="octordle-shortcuts hidden">
           <!-- 8 shortcut buttons rendered dynamically -->

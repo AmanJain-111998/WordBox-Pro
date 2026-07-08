@@ -389,6 +389,24 @@ body.light-theme .game-keyboard-wrapper {
   text-transform: uppercase;
 }
 
+.key-btn[data-key="enter"] {
+  max-width: 240px;
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-correct) 0%, #059669 100%) !important;
+  color: var(--white) !important;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  font-size: 13px !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  transition: all var(--transition-fast) !important;
+}
+
+.key-btn[data-key="enter"]:active {
+  transform: scale(0.95) !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2) !important;
+}
+
 /* Keyboard States colors mapping */
 .key-btn.correct-state {
   background-color: var(--color-correct);

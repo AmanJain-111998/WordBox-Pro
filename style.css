@@ -265,9 +265,9 @@ body.light-theme .difficulty-tabs {
   grid-template-rows: repeat(6, 1fr);
   grid-gap: 6px;
   width: 100%;
-  max-width: 330px;
+  max-width: 270px; /* Reduced from 330px for perfect mobile viewport fitting */
   height: 100%;
-  max-height: 400px;
+  max-height: 330px; /* Reduced from 400px to match cell aspect ratios */
 }
 
 .board-row {
@@ -1853,6 +1853,10 @@ body.light-theme .secondary-button:hover {
 }
 
 @media (min-width: 480px) {
+  .game-board {
+    max-width: 330px;
+    max-height: 400px;
+  }
   .games-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

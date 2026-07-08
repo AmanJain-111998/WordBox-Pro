@@ -160,6 +160,12 @@ const AudioPlayer = new SoundSynth();
 // ==========================================================================
 // Central State & Configuration
 // ==========================================================================
+const difficultyWordLists = {
+  easy: EASY_WORDS,
+  medium: MEDIUM_WORDS,
+  hard: HARD_WORDS
+};
+
 const GameHubState = {
   activeGame: null,        // null (Dashboard), 'wordle', 'octordle', 'crossword', 'sudoku'
   difficulty: 'easy',      // 'easy', 'medium', 'hard'

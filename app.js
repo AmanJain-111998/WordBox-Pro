@@ -351,6 +351,7 @@ function renderQWERTYKeyboard() {
       btn.className = 'key-btn';
       btn.dataset.key = key;
       btn.id = `key-${key}`;
+      
       if (key === 'enter' || key === 'backspace') {
         btn.classList.add('key-wide');
         if (key === 'backspace') {
@@ -359,7 +360,21 @@ function renderQWERTYKeyboard() {
           btn.innerText = 'ENTER';
         }
       } else {
-        btn.innerText = key.toUpperCase();
+        // Absolute segmented background for Octordle indicators
+        const bgGrid = document.createElement('div');
+        bgGrid.className = 'key-bg-grid';
+        for (let b = 0; b < 8; b++) {
+          const seg = document.createElement('div');
+          seg.className = 'key-bg-seg';
+          seg.id = `key-seg-${key}-${b}`;
+          bgGrid.appendChild(seg);
+        }
+        btn.appendChild(bgGrid);
+        
+        const label = document.createElement('span');
+        label.className = 'key-text';
+        label.innerText = key.toUpperCase();
+        btn.appendChild(label);
       }
       row.appendChild(btn);
     });
@@ -370,7 +385,13 @@ function renderQWERTYKeyboard() {
 function clearKeyboardStates() {
   document.querySelectorAll('#keyboard-qwerty .key-btn').forEach(k => {
     k.className = 'key-btn';
-    if (k.dataset.key === 'enter' || k.dataset.key === 'backspace') k.classList.add('key-wide');
+    if (k.dataset.key === 'enter' || k.dataset.key === 'backspace') {
+      k.classList.add('key-wide');
+    }
+  });
+  // Clear all Octordle grid segment indicators
+  document.querySelectorAll('.key-bg-seg').forEach(seg => {
+    seg.className = 'key-bg-seg';
   });
 }
 
@@ -837,7 +858,6 @@ const OctordleEngine = {
   guesses: [],
   current: '',
   solved: [], // array of 8 booleans
-  activeBoard: 0, // 0 to 7
   status: 'IN_PROGRESS',
   isAnimating: false,
 
@@ -845,7 +865,6 @@ const OctordleEngine = {
     this.guesses = [];
     this.current = '';
     this.solved = Array(8).fill(false);
-    this.activeBoard = 0;
     this.status = 'IN_PROGRESS';
     this.isAnimating = false;
     
@@ -890,145 +909,118 @@ const OctordleEngine = {
   },
 
   repaintAll() {
-    this.renderPreviews();
-    this.renderActiveBoard();
+    this.renderBoards();
     this.updateKeyboard();
   },
 
-  renderPreviews() {
-    const container = document.getElementById('octordle-previews');
+  renderBoards() {
+    const container = document.getElementById('octordle-boards-container');
     container.innerHTML = '';
     
     for (let b = 0; b < 8; b++) {
       const card = document.createElement('div');
-      card.className = 'octordle-preview-card';
-      if (b === this.activeBoard) card.classList.add('active');
-      if (this.solved[b]) card.classList.add('solved');
-      else if (this.guesses.length >= 13 && !this.solved[b]) card.classList.add('failed');
+      card.className = 'octordle-board-card';
       
-      card.dataset.board = b;
+      const target = this.targets[b];
+      const isSolved = this.solved[b];
+      const winIdx = isSolved ? this.guesses.indexOf(target) : -1;
+      const isFailed = !isSolved && this.guesses.length >= 13;
       
-      const label = document.createElement('span');
-      label.className = 'preview-label';
-      label.innerText = `B${b + 1}`;
-      card.appendChild(label);
+      if (isSolved) card.classList.add('solved');
+      if (isFailed) card.classList.add('failed');
       
-      // Draw tiny mini-dots representing guess validations
-      const dotsGrid = document.createElement('div');
-      dotsGrid.className = 'preview-dot-board';
+      // Board Card Header
+      const header = document.createElement('div');
+      header.className = 'octordle-board-header';
       
-      for (let r = 0; r < 13; r++) {
-        const drow = document.createElement('div');
-        drow.className = 'preview-dot-row';
+      const titleSpan = document.createElement('span');
+      titleSpan.innerText = `BOARD ${b + 1}`;
+      header.appendChild(titleSpan);
+      
+      const statusSpan = document.createElement('span');
+      if (isSolved) {
+        statusSpan.innerText = `SOLVED IN ${winIdx + 1}`;
+      } else if (isFailed) {
+        statusSpan.innerText = `FAILED (Word: ${target.toUpperCase()})`;
+      } else {
+        statusSpan.innerText = `IN PROGRESS`;
+      }
+      header.appendChild(statusSpan);
+      card.appendChild(header);
+      
+      // Board Grid Layout (CSS Grid of rows)
+      const grid = document.createElement('div');
+      grid.className = 'octordle-board-grid';
+      
+      // Render guesses up to solved guess to save scroll space
+      const totalRows = isSolved ? (winIdx + 1) : 13;
+      
+      for (let r = 0; r < totalRows; r++) {
+        const row = document.createElement('div');
+        row.className = 'board-row';
         
         const guess = this.guesses[r];
-        const hasEvaluations = guess && (!this.solved[b] || this.guesses.indexOf(this.targets[b]) >= r);
+        const hasGuess = guess && (!isSolved || r <= winIdx);
         let evals = [];
-        if (hasEvaluations) {
-          evals = gradeGuess(guess, this.targets[b]);
+        if (hasGuess) {
+          evals = gradeGuess(guess, target);
         }
         
         for (let c = 0; c < 5; c++) {
-          const dot = document.createElement('div');
-          dot.className = 'preview-dot';
-          if (hasEvaluations) {
-            dot.classList.add(evals[c]);
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          
+          if (hasGuess) {
+            tile.innerText = guess[c].toUpperCase();
+            tile.classList.add(`${evals[c]}-state`);
+          } else if (r === this.guesses.length && this.status === 'IN_PROGRESS') {
+            // Typing letters
+            if (c < this.current.length) {
+              tile.innerText = this.current[c].toUpperCase();
+              tile.classList.add('active-input');
+            }
           }
-          drow.appendChild(dot);
+          row.appendChild(tile);
         }
-        dotsGrid.appendChild(drow);
+        grid.appendChild(row);
       }
-      card.appendChild(dotsGrid);
-      
-      card.addEventListener('click', () => {
-        AudioPlayer.playClick();
-        this.activeBoard = b;
-        this.repaintAll();
-      });
-      
+      card.appendChild(grid);
       container.appendChild(card);
-    }
-  },
-
-  renderActiveBoard() {
-    const label = document.getElementById('octordle-active-label');
-    const boardStateText = this.solved[this.activeBoard] 
-      ? 'SOLVED' 
-      : (this.guesses.length >= 13 ? 'FAILED' : 'IN PROGRESS');
-    label.innerText = `BOARD ${this.activeBoard + 1} (${boardStateText})`;
-    
-    const board = document.getElementById('board-octordle-active');
-    board.innerHTML = '';
-    board.className = 'game-board octordle-grid';
-    
-    const target = this.targets[this.activeBoard];
-    
-    // Render 13 rows
-    for (let r = 0; r < 13; r++) {
-      const row = document.createElement('div');
-      row.className = 'board-row';
-      row.id = `octordle-row-${r}`;
-      
-      const guess = this.guesses[r];
-      // Draw tiles if guess exists and it is before or equal to the winning guess
-      const hasGuess = guess && (!this.solved[this.activeBoard] || this.guesses.indexOf(target) >= r);
-      let evals = [];
-      if (hasGuess) {
-        evals = gradeGuess(guess, target);
-      }
-      
-      for (let c = 0; c < 5; c++) {
-        const tile = document.createElement('div');
-        tile.className = 'tile';
-        tile.id = `octordle-tile-${r}-${c}`;
-        
-        if (hasGuess) {
-          tile.innerText = guess[c].toUpperCase();
-          tile.classList.add(`${evals[c]}-state`);
-        } else if (r === this.guesses.length && this.status === 'IN_PROGRESS') {
-          // Current editing row
-          if (c < this.current.length) {
-            tile.innerText = this.current[c].toUpperCase();
-            tile.classList.add('active-input');
-          }
-        }
-        
-        row.appendChild(tile);
-      }
-      board.appendChild(row);
     }
   },
 
   updateKeyboard() {
     clearKeyboardStates();
     
-    // Keyboard key evaluations should reflect states across ALL UNSOLVED boards!
-    const keyScores = {}; // map key -> best state score: correct=3, present=2, absent=1
-    
-    for (let b = 0; b < 8; b++) {
-      if (this.solved[b]) continue; // Skip already solved boards!
-      
-      const target = this.targets[b];
-      this.guesses.forEach((guess) => {
-        const evals = gradeGuess(guess, target);
-        for (let i = 0; i < 5; i++) {
-          const char = guess[i];
-          const state = evals[i];
-          const score = state === 'correct' ? 3 : (state === 'present' ? 2 : 1);
-          
-          if (!keyScores[char] || score > keyScores[char]) {
-            keyScores[char] = score;
+    // Evaluate key statuses segment by segment across all 8 boards
+    const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    for (let char of alphabet) {
+      for (let b = 0; b < 8; b++) {
+        const target = this.targets[b];
+        let bestState = null;
+        
+        this.guesses.forEach((guess) => {
+          const evals = gradeGuess(guess, target);
+          for (let i = 0; i < 5; i++) {
+            if (guess[i] === char) {
+              const state = evals[i];
+              if (state === 'correct') {
+                bestState = 'correct';
+              } else if (state === 'present' && bestState !== 'correct') {
+                bestState = 'present';
+              } else if (state === 'absent' && !bestState) {
+                bestState = 'absent';
+              }
+            }
           }
+        });
+        
+        if (bestState) {
+          const seg = document.getElementById(`key-seg-${char}-${b}`);
+          if (seg) seg.classList.add(bestState);
         }
-      });
+      }
     }
-    
-    // Apply styling to keyboard keys
-    Object.keys(keyScores).forEach((char) => {
-      const score = keyScores[char];
-      const state = score === 3 ? 'correct' : (score === 2 ? 'present' : 'absent');
-      updateKeyStyle(char, state);
-    });
   },
 
   handleInput(char) {
@@ -1037,7 +1029,7 @@ const OctordleEngine = {
     
     AudioPlayer.playKey();
     this.current += char;
-    this.renderActiveBoard();
+    this.renderBoards();
   },
 
   handleBackspace() {
@@ -1045,7 +1037,7 @@ const OctordleEngine = {
     
     AudioPlayer.playClick();
     this.current = this.current.slice(0, -1);
-    this.renderActiveBoard();
+    this.renderBoards();
   },
 
   submitGuess() {
@@ -1067,7 +1059,7 @@ const OctordleEngine = {
     this.guesses.push(guess);
     this.current = '';
     
-    // Check solutions for all 8 boards
+    // Check solved status for all 8 boards
     this.targets.forEach((tar, idx) => {
       if (guess === tar) {
         this.solved[idx] = true;
@@ -1075,10 +1067,9 @@ const OctordleEngine = {
     });
     
     const allSolved = this.solved.every(val => val === true);
-    
-    this.isAnimating = true;
     this.repaintAll();
     
+    this.isAnimating = true;
     setTimeout(() => {
       this.isAnimating = false;
       if (allSolved) {
@@ -1092,7 +1083,7 @@ const OctordleEngine = {
         showToast('Failed to solve all boards');
         this.saveResults();
       }
-    }, 300);
+    }, 200);
   },
 
   saveResults() {

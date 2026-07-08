@@ -177,11 +177,11 @@ const GameHubState = {
 // Initial Multi-Game Stats Blueprint
 const defaultStatsSchema = {
   wordle: {
-    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0] } },
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], levelIndex: 0 }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], levelIndex: 0 }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], levelIndex: 0 } },
     daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: [0,0,0,0,0,0], lastPlayedDay: -1, lastResult: null, savedGuesses: [] } }
   },
   octordle: {
-    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0) }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0) }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0) } },
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), levelIndex: 0 }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), levelIndex: 0 }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), levelIndex: 0 } },
     daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), lastPlayedDay: -1, lastResult: null, savedGuesses: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, guessDistribution: Array(13).fill(0), lastPlayedDay: -1, lastResult: null, savedGuesses: [] } }
   },
   crossword: {
@@ -294,8 +294,11 @@ function loadStats() {
           GameHubState.stats[game].practice = JSON.parse(JSON.stringify(defaultStatsSchema[game].practice));
         }
         for (const diff of ['easy', 'medium', 'hard']) {
-          if (GameHubState.stats[game].practice[diff] && GameHubState.stats[game].practice[diff].levelIndex === undefined) {
-            GameHubState.stats[game].practice[diff].levelIndex = 0;
+          if (GameHubState.stats[game].practice[diff]) {
+            const lvl = GameHubState.stats[game].practice[diff].levelIndex;
+            if (lvl === undefined || isNaN(lvl)) {
+              GameHubState.stats[game].practice[diff].levelIndex = 0;
+            }
           }
         }
       }

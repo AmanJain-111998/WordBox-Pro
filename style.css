@@ -1785,29 +1785,70 @@ body.light-theme .secondary-button:hover {
    ========================================================================== */
 @media (max-height: 650px) {
   .app-header {
-    height: 50px;
+    height: 46px;
   }
   .game-controls {
-    padding: 8px 12px;
+    padding: 6px 12px;
+    gap: 4px;
+  }
+  .game-board {
+    max-width: 260px;
+    max-height: 310px;
   }
   .tile {
-    font-size: 20px;
+    font-size: 18px;
+    border-radius: 6px;
   }
   .key-btn {
-    height: 40px;
-    font-size: 12px;
+    height: 36px;
+    font-size: 11px;
   }
   .key-btn.key-wide {
-    font-size: 10px;
+    font-size: 9px;
   }
   .sudoku-grid {
-    max-width: 270px;
+    max-width: 250px;
   }
   .sudoku-cell {
-    font-size: 16px;
+    font-size: 14px;
   }
   .crossword-viewport {
-    max-height: 220px;
+    max-height: 200px;
+  }
+}
+
+@media (max-height: 570px) {
+  .app-header {
+    height: 38px;
+  }
+  .game-controls {
+    padding: 4px 10px;
+    gap: 2px;
+  }
+  .game-board {
+    max-width: 220px;
+    max-height: 255px;
+  }
+  .tile {
+    font-size: 16px;
+    border-width: 1.5px;
+    border-radius: 4px;
+  }
+  .key-btn {
+    height: 30px;
+    font-size: 10px;
+  }
+  .key-btn.key-wide {
+    font-size: 8px;
+  }
+  .sudoku-grid {
+    max-width: 220px;
+  }
+  .sudoku-cell {
+    font-size: 12px;
+  }
+  .crossword-viewport {
+    max-height: 160px;
   }
 }
 

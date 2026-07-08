@@ -1380,17 +1380,15 @@ body.light-theme .crossword-keyboard-clue {
 }
 
 .crossword-viewport {
-  flex: 1;
   width: 100%;
   overflow: auto;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 10px;
+  padding: 12px;
   min-height: 180px;
   max-height: 380px;
   border-radius: 12px;
   background: transparent;
+  display: block; /* Disable flexbox to prevent top/left clipping on mobile WebKit */
+  text-align: center;
 }
 
 .crossword-grid {
@@ -1398,7 +1396,7 @@ body.light-theme .crossword-keyboard-clue {
   grid-gap: 0px;
   background-color: transparent !important;
   border: none !important;
-  margin: auto;
+  margin: 0 auto; /* Center horizontally in block layout */
 }
 
 .crossword-cell {

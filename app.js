@@ -8,7 +8,19 @@ let deferredPrompt = null;
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js')
-      .then((reg) => console.log('[Service Worker] Registered:', reg.scope))
+      .then((reg) => {
+        console.log('[Service Worker] Registered:', reg.scope);
+        
+        // Notify the user when assets are fully pre-cached and ready to play offline
+        navigator.serviceWorker.ready.then(() => {
+          if (!sessionStorage.getItem('offline_ready_notified')) {
+            sessionStorage.setItem('offline_ready_notified', 'true');
+            setTimeout(() => {
+              showToast('Gamebox Pro is fully loaded! Ready to play offline! ✈️✅');
+            }, 1500);
+          }
+        });
+      })
       .catch((err) => console.error('[Service Worker] Registration failed:', err));
   });
 

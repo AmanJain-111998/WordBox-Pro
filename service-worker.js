@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamebox-pro-v4.9';
+const CACHE_NAME = 'gamebox-pro-v5.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -47,21 +47,31 @@ self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
       if (cachedResponse) {
         // Fetch fresh version in background to update cache for next time
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 0)) {
             const url = new URL(event.request.url);
             if (url.protocol.startsWith('http')) {
+              const responseToCache = networkResponse.clone();
               caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, networkResponse);
+                cache.put(event.request, responseToCache);
               });
             }
           }
         }).catch(() => { /* Ignore background fetch failures (offline) */ });
 
         return cachedResponse;
+      }
+
+      // Fallback for directory root requests in case caches.match failed to normalize
+      const url = new URL(event.request.url);
+      if (url.pathname.endsWith('/')) {
+        return caches.match(url.pathname + 'index.html', { ignoreSearch: true }).then((fallbackResponse) => {
+          if (fallbackResponse) return fallbackResponse;
+          return fetch(event.request);
+        });
       }
 
       // Fallback for requests not in cache

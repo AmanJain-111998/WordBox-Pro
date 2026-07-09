@@ -534,6 +534,27 @@ function bindOrchestratorEvents() {
       showView(card.dataset.game);
     });
   });
+
+  // Category tabs switcher
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      AudioPlayer.playClick();
+      
+      // Deactivate all tabs
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      // Activate clicked tab
+      tab.classList.add('active');
+      
+      // Hide all categories
+      document.querySelectorAll('.dashboard-category').forEach(cat => cat.classList.add('hidden'));
+      // Show selected category
+      const targetCat = tab.dataset.category;
+      const targetElement = document.getElementById(`cat-${targetCat}`);
+      if (targetElement) {
+        targetElement.classList.remove('hidden');
+      }
+    });
+  });
   
   // Navigation Home
   document.getElementById('btn-home').addEventListener('click', () => {

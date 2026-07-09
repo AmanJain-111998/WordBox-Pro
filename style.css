@@ -1069,33 +1069,77 @@ body.light-theme .install-banner {
   color: var(--text-muted);
 }
 
-.dashboard-category {
-  margin-bottom: 28px;
+.category-tabs {
+  display: flex;
+  justify-content: center;
+  background: rgba(30, 41, 59, 0.4);
+  padding: 4px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin: 8px auto 24px auto;
+  max-width: 420px;
   width: 100%;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.category-title {
-  font-family: var(--font-logo);
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--text-main);
+body.light-theme .category-tabs {
+  background: rgba(226, 232, 240, 0.6);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.category-tab {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  margin-bottom: 14px;
-  padding-bottom: 8px;
-  border-bottom: 1.5px solid rgba(255, 255, 255, 0.08);
-  letter-spacing: 0.5px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-family: var(--font-logo);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-body.light-theme .category-title {
-  border-bottom-color: rgba(0, 0, 0, 0.08);
+.category-tab:hover {
+  color: var(--text-main);
 }
 
-.category-icon {
-  width: 20px;
-  height: 20px;
-  color: #3b82f6; /* Premium Accent Blue */
+.category-tab.active {
+  background: var(--bg-card);
+  color: #3b82f6; /* Blue highlight */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body.light-theme .category-tab.active {
+  color: #1d4ed8;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  border-color: rgba(15, 23, 42, 0.03);
+}
+
+.tab-icon {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.2px;
+}
+
+.dashboard-category {
+  width: 100%;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.dashboard-category.hidden {
+  display: none !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .games-grid {

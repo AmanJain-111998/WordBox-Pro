@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamebox-pro-v4.8';
+const CACHE_NAME = 'gamebox-pro-v4.9';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -41,27 +41,42 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Network-first strategy with cache fallback (ensures immediate updates when online)
+// Fetch Event - Stale-While-Revalidate strategy
+// Returns cached assets instantly for offline reliability, while updating cache in background when online
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    fetch(event.request).then((networkResponse) => {
-      // If response is valid (including CORS/opaque for external fonts), update cache
-      if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 0)) {
-        const url = new URL(event.request.url);
-        // Only cache HTTP/HTTPS assets to avoid extension or internal scheme issues
-        if (url.protocol.startsWith('http')) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        // Fetch fresh version in background to update cache for next time
+        fetch(event.request).then((networkResponse) => {
+          if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 0)) {
+            const url = new URL(event.request.url);
+            if (url.protocol.startsWith('http')) {
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, networkResponse);
+              });
+            }
+          }
+        }).catch(() => { /* Ignore background fetch failures (offline) */ });
+
+        return cachedResponse;
       }
-      return networkResponse;
-    }).catch(() => {
-      // If network fails (offline or airplane mode), load from cache
-      return caches.match(event.request);
+
+      // Fallback for requests not in cache
+      return fetch(event.request).then((networkResponse) => {
+        if (networkResponse && (networkResponse.status === 200 || networkResponse.status === 0)) {
+          const url = new URL(event.request.url);
+          if (url.protocol.startsWith('http')) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+        }
+        return networkResponse;
+      });
     })
   );
 });

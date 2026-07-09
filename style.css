@@ -1645,8 +1645,9 @@ body.dark-theme .crossword-cell.checked-wrong {
   grid-gap: 1px;
   background-color: rgba(255, 255, 255, 0.16); /* Clearly visible thin lines in dark mode */
   border: 3px solid rgba(255, 255, 255, 0.45);  /* Clean white grid frame */
-  width: 100%;
-  max-width: 340px;
+  width: 92%;
+  max-width: 360px;
+  margin: 0 auto;
   aspect-ratio: 1;
   border-radius: 8px;
   overflow: hidden;
@@ -1910,10 +1911,10 @@ body.light-theme .secondary-button:hover {
     font-size: 9px;
   }
   .sudoku-grid {
-    max-width: 250px;
+    max-width: 320px;
   }
   .sudoku-cell {
-    font-size: 14px;
+    font-size: 19px;
   }
   .crossword-viewport {
     max-height: 200px;
@@ -1945,10 +1946,10 @@ body.light-theme .secondary-button:hover {
     font-size: 8px;
   }
   .sudoku-grid {
-    max-width: 220px;
+    max-width: 270px;
   }
   .sudoku-cell {
-    font-size: 12px;
+    font-size: 16px;
   }
   .crossword-viewport {
     max-height: 160px;

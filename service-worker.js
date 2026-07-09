@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamebox-pro-v5.5';
+const CACHE_NAME = 'gamebox-pro-v5.6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -8,7 +8,8 @@ const ASSETS_TO_CACHE = [
   './sudokus.js',
   './app.js',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js'
 ];
 
 // Install Event - Precache Assets

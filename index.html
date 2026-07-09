@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./style.css?v=5.5">
+  <link rel="stylesheet" href="./style.css?v=5.6">
 </head>
 <body class="dark-theme">
   <!-- Main App Shell -->
@@ -149,15 +149,37 @@
       <!-- Category 3: BoardBox -->
       <section class="dashboard-category hidden" id="cat-boardbox">
         <div class="games-grid">
-          <!-- Coming Soon Card -->
-          <div class="game-card coming-soon">
-            <div class="card-icon boardbox-color">B</div>
+          <!-- Chess Card -->
+          <div class="game-card" data-game="chess">
+            <div class="card-icon boardbox-color" style="font-size: 26px;">♞</div>
             <div class="card-info">
-              <h3>Board Classics</h3>
-              <p>Chess, Checkers, and other board games coming soon!</p>
-              <span class="badge">Coming Soon</span>
+              <h3>Chess Master</h3>
+              <p>Play against ELO bots (1300, 1800, 2200) with timers!</p>
+              <span class="badge">Bots up to 2200 ELO</span>
             </div>
-            <button class="play-btn" disabled>Locked</button>
+            <button class="play-btn">Play</button>
+          </div>
+
+          <!-- Ludo Card -->
+          <div class="game-card" data-game="ludo">
+            <div class="card-icon boardbox-color" style="font-size: 26px;">🎲</div>
+            <div class="card-info">
+              <h3>Ludo Royale</h3>
+              <p>Roll dice and race tokens against computer opponents.</p>
+              <span class="badge">2 or 4 Colors</span>
+            </div>
+            <button class="play-btn">Play</button>
+          </div>
+
+          <!-- Othello Card -->
+          <div class="game-card" data-game="othello">
+            <div class="card-icon boardbox-color" style="font-size: 26px;">⚪</div>
+            <div class="card-info">
+              <h3>Othello</h3>
+              <p>Sandwich opposing pieces to flip and control the board.</p>
+              <span class="badge">Easy, Medium, Hard</span>
+            </div>
+            <button class="play-btn">Play</button>
           </div>
         </div>
       </section>
@@ -276,6 +298,140 @@
           </div>
         </div>
         
+        <!-- GAME F: Chess Board -->
+        <div id="game-chess" class="game-board-panel hidden">
+          <!-- Chess Setup Screen -->
+          <div id="chess-setup" class="board-setup-card">
+            <h2>Chess Master Setup</h2>
+            <div class="setup-group">
+              <label>Bot Difficulty (ELO):</label>
+              <div class="selector-tabs">
+                <button class="setup-tab active" data-elo="1300">Easy (1300)</button>
+                <button class="setup-tab" data-elo="1800">Medium (1800)</button>
+                <button class="setup-tab" data-elo="2200">Hard (2200)</button>
+              </div>
+            </div>
+            <div class="setup-group">
+              <label>Time Control Preset:</label>
+              <select id="chess-preset-select" class="setup-select">
+                <option value="1+0">Bullet (1 min)</option>
+                <option value="2+1">Bullet (2 min + 1s)</option>
+                <option value="3+0">Blitz (3 min)</option>
+                <option value="5+3" selected>Blitz (5 min + 3s)</option>
+                <option value="10+0">Rapid (10 min)</option>
+                <option value="15+10">Rapid (15 min + 10s)</option>
+                <option value="30+0">Classical (30 min)</option>
+                <option value="custom">Custom Clock...</option>
+              </select>
+            </div>
+            <div id="chess-custom-time-inputs" class="setup-group hidden">
+              <div class="custom-time-row">
+                <div>
+                  <label>Minutes:</label>
+                  <input type="number" id="chess-custom-mins" value="10" min="1" max="180">
+                </div>
+                <div>
+                  <label>Increment (s):</label>
+                  <input type="number" id="chess-custom-inc" value="0" min="0" max="60">
+                </div>
+              </div>
+            </div>
+            <button id="btn-chess-start" class="setup-start-btn">Start Game</button>
+          </div>
+
+          <!-- Chess Play Screen -->
+          <div id="chess-play" class="chess-game-layout hidden">
+            <div class="chess-player-row opponent-row">
+              <span id="chess-opponent-name">Bot (1300 ELO)</span>
+              <span id="chess-opponent-clock" class="chess-clock">05:00</span>
+            </div>
+            
+            <div id="board-chess" class="chess-grid" aria-label="Chess Board"></div>
+            
+            <div class="chess-player-row player-row">
+              <span>You</span>
+              <span id="chess-player-clock" class="chess-clock">05:00</span>
+            </div>
+            
+            <div class="chess-game-controls">
+              <button id="btn-chess-resign" class="chess-control-btn resign">Resign</button>
+              <button id="btn-chess-abort" class="chess-control-btn">Abort</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GAME G: Ludo Board -->
+        <div id="game-ludo" class="game-board-panel hidden">
+          <!-- Ludo Setup Screen -->
+          <div id="ludo-setup" class="board-setup-card">
+            <h2>Ludo Royale Setup</h2>
+            <div class="setup-group">
+              <label>Select Player Mode:</label>
+              <div class="selector-tabs">
+                <button class="setup-tab active" data-players="2">2 Players (Red vs Green)</button>
+                <button class="setup-tab" data-players="4">4 Players (All Colors)</button>
+              </div>
+            </div>
+            <button id="btn-ludo-start" class="setup-start-btn">Start Game</button>
+          </div>
+
+          <!-- Ludo Play Screen -->
+          <div id="ludo-play" class="ludo-game-layout hidden">
+            <div class="ludo-board-wrapper">
+              <div id="board-ludo" class="ludo-grid" aria-label="Ludo Board">
+                <!-- 15x15 cells will be injected here dynamically -->
+              </div>
+            </div>
+            <div class="ludo-controls-row">
+              <div class="ludo-turn-info">
+                <span id="ludo-turn-indicator">Your Turn</span>
+              </div>
+              <div class="ludo-dice-container">
+                <div id="ludo-dice" class="ludo-dice-box">⚀</div>
+                <button id="btn-ludo-roll" class="ludo-roll-btn">Roll Dice</button>
+              </div>
+              <button id="btn-ludo-quit" class="chess-control-btn">Quit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GAME H: Othello Board -->
+        <div id="game-othello" class="game-board-panel hidden">
+          <!-- Othello Setup Screen -->
+          <div id="othello-setup" class="board-setup-card">
+            <h2>Othello (Reversi) Setup</h2>
+            <div class="setup-group">
+              <label>Bot Difficulty:</label>
+              <div class="selector-tabs">
+                <button class="setup-tab active" data-diff="easy">Easy</button>
+                <button class="setup-tab" data-diff="medium">Medium</button>
+                <button class="setup-tab" data-diff="hard">Hard</button>
+              </div>
+            </div>
+            <button id="btn-othello-start" class="setup-start-btn">Start Game</button>
+          </div>
+
+          <!-- Othello Play Screen -->
+          <div id="othello-play" class="othello-game-layout hidden">
+            <div class="othello-scoreboard">
+              <div class="score-pill black-score active" id="othello-black-score-card">
+                <span class="disc-dot black-dot"></span>
+                <span>Black: <b id="othello-score-black">2</b></span>
+              </div>
+              <div class="score-pill white-score" id="othello-white-score-card">
+                <span class="disc-dot white-dot"></span>
+                <span>White: <b id="othello-score-white">2</b></span>
+              </div>
+            </div>
+            
+            <div id="board-othello" class="othello-grid" aria-label="Othello Board"></div>
+            
+            <div class="othello-controls">
+              <button id="btn-othello-quit" class="chess-control-btn">Quit</button>
+              <button id="btn-othello-restart" class="chess-control-btn">Restart</button>
+            </div>
+          </div>
+        </div>
       </main>
       
       <!-- Shared Keyboard / Controls Footer -->
@@ -567,9 +723,10 @@
   </div>
 
   <!-- Javascript Modules -->
-  <script src="./words.js?v=5.5"></script>
-  <script src="./crosswords.js?v=5.5"></script>
-  <script src="./sudokus.js?v=5.5"></script>
-  <script src="./app.js?v=5.5"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <script src="./words.js?v=5.6"></script>
+  <script src="./crosswords.js?v=5.6"></script>
+  <script src="./sudokus.js?v=5.6"></script>
+  <script src="./app.js?v=5.6"></script>
 </body>
 </html>

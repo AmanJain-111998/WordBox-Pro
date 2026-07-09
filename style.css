@@ -2336,3 +2336,577 @@ body.light-theme .dpad-btn-center {
   }
 }
 
+
+
+/* ==========================================================================
+   Board Classics Category (Chess, Ludo, Othello) Styles
+   ========================================================================== */
+
+/* Setup Card styling */
+.board-setup-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  margin: auto;
+}
+.board-setup-card h2 {
+  font-family: var(--font-logo);
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: var(--text-main);
+}
+.setup-group {
+  margin-bottom: 18px;
+  text-align: left;
+}
+.setup-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+.selector-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+body.light-theme .selector-tabs {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.setup-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.setup-tab.active {
+  background: var(--text-main);
+  color: var(--bg-main);
+}
+.setup-select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 500;
+  outline: none;
+  font-size: 13px;
+}
+body.light-theme .setup-select {
+  background: white;
+  border-color: rgba(15, 23, 42, 0.15);
+}
+.custom-time-row {
+  display: flex;
+  gap: 12px;
+}
+.custom-time-row > div {
+  flex: 1;
+}
+.custom-time-row input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-main);
+  padding: 8px;
+  border-radius: 6px;
+  font-weight: 600;
+  outline: none;
+}
+body.light-theme .custom-time-row input {
+  background: white;
+  border-color: rgba(15, 23, 42, 0.15);
+}
+.setup-start-btn {
+  width: 100%;
+  background: var(--btn-primary-bg);
+  border: none;
+  color: white;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: 10px;
+}
+.setup-start-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* Chess Board Game Layout */
+.chess-game-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  margin: auto;
+}
+.chess-player-row {
+  width: 92%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+.chess-clock {
+  font-family: monospace;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 16px;
+  color: #10b981; /* Default neon green clock */
+}
+body.light-theme .chess-clock {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.chess-clock.low-time {
+  color: #ef4444; /* Neon Red clock alert */
+  animation: pulse-clock 1s infinite alternate;
+}
+@keyframes pulse-clock {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
+}
+
+.chess-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 92%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  box-shadow: var(--glass-shadow);
+  margin: 4px auto;
+}
+body.light-theme .chess-grid {
+  border-color: rgba(15, 23, 42, 0.45);
+}
+.chess-square {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  user-select: none;
+  cursor: pointer;
+  position: relative;
+}
+.chess-square.light {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+body.dark-theme .chess-square.light {
+  background-color: rgba(255, 255, 255, 0.75);
+}
+.chess-square.dark {
+  background-color: #64748b; /* Slate dark squares */
+}
+body.dark-theme .chess-square.dark {
+  background-color: #334155;
+}
+/* Piece Styles */
+.chess-piece {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  transition: transform var(--transition-fast);
+}
+.chess-piece.white-piece {
+  color: #f8fafc;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 6px rgba(255, 255, 255, 0.4);
+}
+.chess-piece.black-piece {
+  color: #ef4444; /* Neon Rose/Coral Black pieces for dark theme pop! */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 6px rgba(239, 68, 68, 0.4);
+}
+body.light-theme .chess-piece.black-piece {
+  color: #1e293b;
+  text-shadow: 0 0 1px rgba(255, 255, 255, 0.8);
+}
+.chess-square.selected {
+  background-color: rgba(59, 130, 246, 0.6) !important; /* Blue selection */
+}
+.chess-square.last-move {
+  background-color: rgba(234, 179, 8, 0.4) !important; /* Gold last-move highlighting */
+}
+.chess-square.valid-dot::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  background-color: rgba(16, 185, 129, 0.85); /* Emerald dot for moves */
+  border-radius: 50%;
+  position: absolute;
+  z-index: 2;
+}
+.chess-square.valid-capture {
+  box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.85) !important; /* Red inset ring for captures */
+}
+
+.chess-game-controls {
+  display: flex;
+  gap: 12px;
+  width: 92%;
+  margin-top: 10px;
+}
+.chess-control-btn {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-main);
+  padding: 8px 0;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+body.light-theme .chess-control-btn {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.chess-control-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.chess-control-btn.resign:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Ludo Game layout */
+.ludo-game-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  margin: auto;
+}
+.ludo-board-wrapper {
+  width: 92%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  margin-bottom: 12px;
+}
+body.light-theme .ludo-board-wrapper {
+  border-color: rgba(15, 23, 42, 0.45);
+}
+.ludo-grid {
+  display: grid;
+  grid-template-columns: repeat(15, 1fr);
+  grid-template-rows: repeat(15, 1fr);
+  width: 100%;
+  height: 100%;
+  background-color: var(--bg-main);
+}
+.ludo-cell {
+  border: 0.5px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background-color: var(--bg-main);
+}
+body.light-theme .ludo-cell {
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Ludo Base/Home styles */
+.ludo-cell.red-bg { background-color: #ef4444 !important; }
+.ludo-cell.green-bg { background-color: #10b981 !important; }
+.ludo-cell.yellow-bg { background-color: #f59e0b !important; }
+.ludo-cell.blue-bg { background-color: #3b82f6 !important; }
+
+/* Safe points / home base grids */
+.ludo-cell.red-home-inner { background-color: rgba(239, 68, 68, 0.25) !important; }
+.ludo-cell.green-home-inner { background-color: rgba(16, 185, 129, 0.25) !important; }
+.ludo-cell.yellow-home-inner { background-color: rgba(245, 158, 11, 0.25) !important; }
+.ludo-cell.blue-home-inner { background-color: rgba(59, 130, 246, 0.25) !important; }
+
+.ludo-cell.star-cell::after {
+  content: '★';
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.ludo-cell.star-cell.red-bg::after,
+.ludo-cell.star-cell.green-bg::after,
+.ludo-cell.star-cell.yellow-bg::after,
+.ludo-cell.star-cell.blue-bg::after {
+  color: white;
+}
+
+/* Ludo Tokens */
+.ludo-token {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  position: absolute;
+  z-index: 10;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.ludo-token.red-token { background-color: #ef4444; }
+.ludo-token.green-token { background-color: #10b981; }
+.ludo-token.yellow-token { background-color: #f59e0b; }
+.ludo-token.blue-token { background-color: #3b82f6; }
+
+.ludo-token.highlight-move {
+  animation: pulse-token 0.6s infinite alternate;
+  transform: scale(1.15);
+  z-index: 15;
+  box-shadow: 0 0 8px white;
+}
+@keyframes pulse-token {
+  0% { transform: scale(1.05); }
+  100% { transform: scale(1.25); }
+}
+
+/* Tokens stacking offset styles (when multiple on same cell) */
+.ludo-token.offset-0 { transform: translate(-3px, -3px) scale(0.85); }
+.ludo-token.offset-1 { transform: translate(3px, -3px) scale(0.85); }
+.ludo-token.offset-2 { transform: translate(-3px, 3px) scale(0.85); }
+.ludo-token.offset-3 { transform: translate(3px, 3px) scale(0.85); }
+
+/* Ludo controls footer */
+.ludo-controls-row {
+  width: 92%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.ludo-turn-info {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  flex: 1;
+}
+.ludo-dice-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ludo-dice-box {
+  width: 44px;
+  height: 44px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: var(--text-main);
+  box-shadow: var(--glass-shadow);
+  transition: transform 0.4s;
+  user-select: none;
+}
+.ludo-dice-box.rolling {
+  animation: dice-roll-spin 0.4s ease-out;
+}
+@keyframes dice-roll-spin {
+  0% { transform: rotate(0deg) scale(0.9); }
+  50% { transform: rotate(180deg) scale(1.2); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+.ludo-roll-btn {
+  background: var(--btn-primary-bg);
+  border: none;
+  color: white;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Othello Game layout */
+.othello-game-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  margin: auto;
+}
+.othello-scoreboard {
+  width: 92%;
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 8px;
+}
+.score-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+.score-pill.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: var(--text-main);
+  color: var(--text-main);
+}
+body.light-theme .score-pill {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+body.light-theme .score-pill.active {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(15, 23, 42, 0.4);
+}
+.disc-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+.disc-dot.black-dot {
+  background-color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+body.light-theme .disc-dot.black-dot {
+  border-color: transparent;
+}
+.disc-dot.white-dot {
+  background-color: #f9fafb;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.othello-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  width: 92%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  background-color: #064e3b; /* Premium forest green table */
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  margin-bottom: 12px;
+}
+body.light-theme .othello-grid {
+  border-color: rgba(15, 23, 42, 0.45);
+}
+.othello-square {
+  border: 0.5px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background-color var(--transition-fast);
+}
+.othello-square:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Othello Disks */
+.othello-disc {
+  width: 82%;
+  height: 82%;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.othello-disc.black-piece {
+  background: radial-gradient(circle at 30% 30%, #374151, #111827);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: rotateY(0deg);
+}
+.othello-disc.white-piece {
+  background: radial-gradient(circle at 30% 30%, #ffffff, #d1d5db);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  transform: rotateY(180deg);
+}
+.othello-disc.flipping {
+  transform: rotateY(90deg); /* CSS rotation flip animation */
+}
+
+/* Valid move dot indicator */
+.othello-square.valid-othello-move::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+body.light-theme .othello-square.valid-othello-move::after {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.othello-controls {
+  display: flex;
+  gap: 12px;
+  width: 92%;
+}
+
+/* Media Query Sizing Fixes for Small Viewports (board sizing) */
+@media (max-height: 800px) {
+  .chess-grid, .ludo-board-wrapper, .othello-grid {
+    max-width: 290px;
+  }
+  .chess-square {
+    font-size: 26px;
+  }
+  .ludo-token {
+    width: 13px;
+    height: 13px;
+  }
+}
+@media (max-height: 680px) {
+  .chess-grid, .ludo-board-wrapper, .othello-grid {
+    max-width: 240px;
+  }
+  .chess-square {
+    font-size: 22px;
+  }
+  .ludo-token {
+    width: 10px;
+    height: 10px;
+  }
+}

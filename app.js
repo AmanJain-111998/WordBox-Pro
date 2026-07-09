@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '5.5';
+const APP_VERSION = '5.6';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=5.5')
+    navigator.serviceWorker.register('./service-worker.js?v=5.6')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -221,6 +221,18 @@ const defaultStatsSchema = {
   game2048: {
     practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
     daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
+  },
+  chess: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
+  },
+  ludo: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
+  },
+  othello: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
   }
 };
 
@@ -315,7 +327,7 @@ function loadStats() {
   if (saved) {
     GameHubState.stats = JSON.parse(saved);
     // Ensure compatibility with previous formats by merging schemas
-    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku', 'game2048']) {
+    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku', 'game2048', 'chess', 'ludo', 'othello']) {
       if (!GameHubState.stats[game]) {
         GameHubState.stats[game] = JSON.parse(JSON.stringify(defaultStatsSchema[game]));
       } else {
@@ -347,7 +359,7 @@ function saveStats() {
 
 function updateLevelIndicator() {
   const view = GameHubState.activeGame;
-  if (!view || GameHubState.gameMode !== 'practice' || view === 'game2048') {
+  if (!view || GameHubState.gameMode !== 'practice' || view === 'game2048' || view === 'chess' || view === 'ludo' || view === 'othello') {
     document.getElementById('level-indicator').classList.add('hidden');
     return;
   }
@@ -404,7 +416,10 @@ function showView(view) {
       octordle: 'OCTORDLE<span class="logo-accent">PRO</span>',
       crossword: 'CROSSWORD<span class="logo-accent">PRO</span>',
       sudoku: 'SUDOKU<span class="logo-accent">PRO</span>',
-      game2048: '2048<span class="logo-accent">PRO</span>'
+      game2048: '2048<span class="logo-accent">PRO</span>',
+      chess: 'CHESS<span class="logo-accent">PRO</span>',
+      ludo: 'LUDO<span class="logo-accent">PRO</span>',
+      othello: 'OTHELLO<span class="logo-accent">PRO</span>'
     };
     document.getElementById('logo-main').innerHTML = gameTitles[view];
     
@@ -421,7 +436,7 @@ function showView(view) {
       qwertyKb.classList.add('hidden');
       numericKb.classList.remove('hidden');
       octordleShortcuts.classList.add('hidden');
-    } else if (view === 'game2048') {
+    } else if (view === 'game2048' || view === 'chess' || view === 'ludo' || view === 'othello') {
       qwertyKb.classList.add('hidden');
       numericKb.classList.add('hidden');
       octordleShortcuts.classList.add('hidden');
@@ -446,7 +461,7 @@ function showView(view) {
       crosswordClueBar.classList.add('hidden');
     }
     
-    if (view === 'game2048') {
+    if (view === 'game2048' || view === 'ludo') {
       if (diffTabs) diffTabs.classList.add('hidden');
     } else {
       if (diffTabs) diffTabs.classList.remove('hidden');
@@ -476,6 +491,12 @@ function startActiveGame() {
     SudokuEngine.start();
   } else if (GameHubState.activeGame === 'game2048') {
     Game2048Engine.start();
+  } else if (GameHubState.activeGame === 'chess') {
+    ChessEngine.start();
+  } else if (GameHubState.activeGame === 'ludo') {
+    LudoEngine.start();
+  } else if (GameHubState.activeGame === 'othello') {
+    OthelloEngine.start();
   }
 }
 
@@ -2393,7 +2414,10 @@ function updateStatsModal() {
                      (game === 'octordle' ? OctordleEngine.status !== 'IN_PROGRESS' :
                      (game === 'crossword' ? (CrosswordEngine.isChecked && !document.getElementById('modal-stats').classList.contains('hidden')) :
                      (game === 'sudoku' ? SudokuEngine.checkSudokuWin() :
-                     (game === 'game2048' ? Game2048Engine.isGameOver : false)))));
+                     (game === 'game2048' ? Game2048Engine.isGameOver :
+                     (game === 'chess' ? !ChessEngine.timerInterval :
+                     (game === 'ludo' ? LudoEngine.isGameOver :
+                     (game === 'othello' ? OthelloEngine.isGameOver : false))))))));
                      
   if (isGameOver) {
     if (game === 'sudoku' || game === 'crossword') {
@@ -2765,6 +2789,1284 @@ const Game2048Engine = {
     setTimeout(() => {
       showToast("No moves left! Game Over. 😢");
     }, 400);
+  }
+};
+
+// ==========================================================================
+// GAME 6: Chess Engine
+// ==========================================================================
+const ChessEngine = {
+  game: null,       // chess.js Chess object instance
+  elo: 1300,
+  timerInterval: null,
+  whiteTime: 300,
+  blackTime: 300,
+  increment: 3,
+  activePlayer: 'w',
+  selectedSquare: null,
+  lastMove: null,
+
+  start() {
+    this.showSetup();
+    this.setupListeners();
+  },
+
+  showSetup() {
+    document.getElementById('chess-setup').classList.remove('hidden');
+    document.getElementById('chess-play').classList.add('hidden');
+  },
+
+  setupListeners() {
+    // Tab selectors in setup card
+    const eloTabs = document.querySelectorAll('#chess-setup .selector-tabs button');
+    eloTabs.forEach(tab => {
+      tab.onclick = (e) => {
+        AudioPlayer.playClick();
+        eloTabs.forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        this.elo = parseInt(e.target.dataset.elo, 10);
+      };
+    });
+
+    const presetSelect = document.getElementById('chess-preset-select');
+    presetSelect.onchange = (e) => {
+      AudioPlayer.playClick();
+      const val = e.target.value;
+      const customDiv = document.getElementById('chess-custom-time-inputs');
+      if (val === 'custom') {
+        customDiv.classList.remove('hidden');
+      } else {
+        customDiv.classList.add('hidden');
+      }
+    };
+
+    document.getElementById('btn-chess-start').onclick = () => {
+      AudioPlayer.playClick();
+      this.initGame();
+    };
+
+    document.getElementById('btn-chess-resign').onclick = () => {
+      AudioPlayer.playClick();
+      this.endGame('resign');
+    };
+
+    document.getElementById('btn-chess-abort').onclick = () => {
+      AudioPlayer.playClick();
+      this.endGame('abort');
+    };
+  },
+
+  initGame() {
+    // 1. Determine clock settings
+    const preset = document.getElementById('chess-preset-select').value;
+    let mins = 5;
+    let inc = 3;
+
+    if (preset === 'custom') {
+      mins = parseInt(document.getElementById('chess-custom-mins').value, 10) || 10;
+      inc = parseInt(document.getElementById('chess-custom-inc').value, 10) || 0;
+    } else {
+      const parts = preset.split('+');
+      mins = parseInt(parts[0], 10);
+      inc = parseInt(parts[1], 10);
+    }
+
+    this.whiteTime = mins * 60;
+    this.blackTime = mins * 60;
+    this.increment = inc;
+    this.activePlayer = 'w';
+    this.selectedSquare = null;
+    this.lastMove = null;
+    
+    // Initialize chess.js
+    if (typeof Chess === 'function') {
+      this.game = new Chess();
+    } else {
+      showToast("Error: Chess engine did not load correctly. Reloading...");
+      return;
+    }
+
+    // Set bot difficulty display label
+    document.getElementById('chess-opponent-name').innerText = `Bot (${this.elo} ELO)`;
+
+    // Update Clocks display
+    this.updateClockDisplay('w');
+    this.updateClockDisplay('b');
+
+    // Switch view
+    document.getElementById('chess-setup').classList.add('hidden');
+    document.getElementById('chess-play').classList.remove('hidden');
+
+    this.renderBoard();
+    this.startClock();
+  },
+
+  renderBoard() {
+    const boardEl = document.getElementById('board-chess');
+    boardEl.innerHTML = '';
+    
+    const boardState = this.game.board(); // 8x8 array of cells (each cell is null or {type: 'p', color: 'w'})
+    const unicodePieces = {
+      p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚'
+    };
+
+    // Render from White's perspective (row 8 to 1, col a to h)
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const squareEl = document.createElement('div');
+        const squareColorClass = (r + c) % 2 === 0 ? 'light' : 'dark';
+        squareEl.className = `chess-square ${squareColorClass}`;
+        
+        // Map square name (e.g. 'e4')
+        const fileNames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+        const squareName = fileNames[c] + (8 - r);
+        squareEl.dataset.square = squareName;
+
+        const cell = boardState[r][c];
+        if (cell) {
+          const pieceEl = document.createElement('div');
+          pieceEl.className = `chess-piece ${cell.color === 'w' ? 'white-piece' : 'black-piece'}`;
+          pieceEl.innerText = unicodePieces[cell.type];
+          squareEl.appendChild(pieceEl);
+        }
+
+        // Selected highlight
+        if (this.selectedSquare === squareName) {
+          squareEl.classList.add('selected');
+        }
+
+        // Last move highlight
+        if (this.lastMove && (this.lastMove.from === squareName || this.lastMove.to === squareName)) {
+          squareEl.classList.add('last-move');
+        }
+
+        // Possible valid moves dot indicators
+        if (this.selectedSquare) {
+          const moves = this.game.moves({ square: this.selectedSquare, verbose: true });
+          const isPossible = moves.some(m => m.to === squareName);
+          if (isPossible) {
+            const hasOppPiece = cell && cell.color !== this.game.turn();
+            if (hasOppPiece) {
+              squareEl.classList.add('valid-capture');
+            } else {
+              squareEl.classList.add('valid-dot');
+            }
+          }
+        }
+
+        // Square click logic
+        squareEl.onclick = () => this.handleSquareClick(squareName);
+
+        boardEl.appendChild(squareEl);
+      }
+    }
+  },
+
+  handleSquareClick(square) {
+    if (this.game.game_over() || this.activePlayer !== 'w') return;
+
+    const piece = this.game.get(square);
+
+    if (this.selectedSquare === square) {
+      // Deselect
+      this.selectedSquare = null;
+      AudioPlayer.playClick();
+      this.renderBoard();
+      return;
+    }
+
+    if (piece && piece.color === 'w') {
+      // Select White piece
+      this.selectedSquare = square;
+      AudioPlayer.playClick();
+      this.renderBoard();
+    } else if (this.selectedSquare) {
+      // Attempt move to destination square
+      const moves = this.game.moves({ square: this.selectedSquare, verbose: true });
+      const move = moves.find(m => m.to === square);
+
+      if (move) {
+        // Trigger move
+        const moveDetails = {
+          from: this.selectedSquare,
+          to: square
+        };
+
+        // Pawn promotion auto-queen for simple playability
+        if (move.flags.includes('p')) {
+          moveDetails.promotion = 'q';
+        }
+
+        const result = this.game.move(moveDetails);
+        if (result) {
+          AudioPlayer.playClick();
+          this.lastMove = { from: moveDetails.from, to: moveDetails.to };
+          this.selectedSquare = null;
+          this.renderBoard();
+
+          // Add increment and toggle player
+          this.whiteTime += this.increment;
+          this.updateClockDisplay('w');
+
+          this.checkGameOverState();
+
+          if (!this.game.game_over()) {
+            this.activePlayer = 'b';
+            setTimeout(() => this.triggerBotMove(), 300);
+          }
+        }
+      } else {
+        // Clicked invalid destination -> clear selection
+        this.selectedSquare = null;
+        AudioPlayer.playClick();
+        this.renderBoard();
+      }
+    }
+  },
+
+  triggerBotMove() {
+    if (this.game.game_over()) return;
+
+    const possibleMoves = this.game.moves({ verbose: true });
+    if (possibleMoves.length === 0) return;
+
+    let bestMove = null;
+    
+    // Choose search depth based on ELO
+    // 1300 ELO -> Depth 2 search with random evaluation noise
+    // 1800 ELO -> Depth 3 search standard
+    // 2200 ELO -> Depth 4 search positional sorting
+    const depth = this.elo === 1300 ? 2 : (this.elo === 1800 ? 3 : 4);
+    
+    bestMove = this.getBestMove(depth);
+
+    if (bestMove) {
+      this.game.move(bestMove);
+      AudioPlayer.playClick();
+      this.lastMove = { from: bestMove.from, to: bestMove.to };
+      this.renderBoard();
+
+      // Add increment
+      this.blackTime += this.increment;
+      this.updateClockDisplay('b');
+
+      this.checkGameOverState();
+
+      if (!this.game.game_over()) {
+        this.activePlayer = 'w';
+      }
+    }
+  },
+
+  // Simplistic Minimax with Alpha-Beta Pruning
+  getBestMove(depth) {
+    const moves = this.game.moves({ verbose: true });
+    if (moves.length === 0) return null;
+
+    // Shuffle moves to make bot play varied games
+    moves.sort(() => Math.random() - 0.5);
+
+    let bestMove = moves[0];
+    let bestValue = -999999;
+    let alpha = -999999;
+    let beta = 999999;
+
+    for (let i = 0; i < moves.length; i++) {
+      const move = moves[i];
+      this.game.move(move);
+      const boardValue = -this.minimax(depth - 1, -beta, -alpha, false);
+      this.game.undo();
+
+      if (boardValue > bestValue) {
+        bestValue = boardValue;
+        bestMove = move;
+      }
+      alpha = Math.max(alpha, boardValue);
+    }
+    return bestMove;
+  },
+
+  minimax(depth, alpha, beta, isMaximizing) {
+    if (depth === 0) {
+      let val = this.evaluateBoard();
+      // Add ELO noise for Easy 1300 bot
+      if (this.elo === 1300) {
+        val += (Math.random() * 80) - 40; 
+      }
+      return val;
+    }
+
+    const moves = this.game.moves({ verbose: true });
+    if (moves.length === 0) {
+      if (this.game.in_checkmate()) {
+        return isMaximizing ? -50000 : 50000;
+      }
+      return 0; // Draw/Stalemate
+    }
+
+    if (isMaximizing) {
+      let bestValue = -999999;
+      for (let i = 0; i < moves.length; i++) {
+        this.game.move(moves[i]);
+        bestValue = Math.max(bestValue, this.minimax(depth - 1, alpha, beta, false));
+        this.game.undo();
+        alpha = Math.max(alpha, bestValue);
+        if (beta <= alpha) break;
+      }
+      return bestValue;
+    } else {
+      let bestValue = 999999;
+      for (let i = 0; i < moves.length; i++) {
+        this.game.move(moves[i]);
+        bestValue = Math.min(bestValue, this.minimax(depth - 1, alpha, beta, true));
+        this.game.undo();
+        beta = Math.min(beta, bestValue);
+        if (beta <= alpha) break;
+      }
+      return bestValue;
+    }
+  },
+
+  evaluateBoard() {
+    let totalScore = 0;
+    const board = this.game.board();
+    const pieceValues = {
+      p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000
+    };
+
+    // Positional matrices to evaluate piece developments
+    // High values encourage center dominance, safety, activity
+    const pawnPST = [
+      [0,  0,  0,  0,  0,  0,  0,  0],
+      [50, 50, 50, 50, 50, 50, 50, 50],
+      [10, 10, 20, 30, 30, 20, 10, 10],
+      [5,  5, 10, 25, 25, 10,  5,  5],
+      [0,  0,  0, 20, 20,  0,  0,  0],
+      [5, -5,-10,  0,  0,-10, -5,  5],
+      [5, 10, 10,-20,-20, 10, 10,  5],
+      [0,  0,  0,  0,  0,  0,  0,  0]
+    ];
+    const knightPST = [
+      [-50,-40,-30,-30,-30,-30,-40,-50],
+      [-40,-20,  0,  0,  0,  0,-20,-40],
+      [-30,  0, 10, 15, 15, 10,  0,-30],
+      [-30,  5, 15, 20, 20, 15,  5,-30],
+      [-30,  0, 15, 20, 20, 15,  0,-30],
+      [-30,  5, 10, 15, 15, 10,  5,-30],
+      [-40,-20,  0,  5,  5,  0,-20,-40],
+      [-50,-40,-30,-30,-30,-30,-40,-50]
+    ];
+    const bishopPST = [
+      [-20,-10,-10,-10,-10,-10,-10,-20],
+      [-10,  0,  0,  0,  0,  0,  0,-10],
+      [-10,  0,  5, 10, 10,  5,  0,-10],
+      [-10,  5,  5, 10, 10,  5,  5,-10],
+      [-10,  0, 10, 10, 10, 10,  0,-10],
+      [-10, 10, 10, 10, 10, 10, 10,-10],
+      [-10,  5,  0,  0,  0,  0,  5,-10],
+      [-20,-10,-10,-10,-10,-10,-10,-20]
+    ];
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cell = board[r][c];
+        if (cell) {
+          let score = pieceValues[cell.type];
+          
+          // Positional values addition
+          if (cell.type === 'p') {
+            score += cell.color === 'w' ? pawnPST[r][c] : pawnPST[7 - r][c];
+          } else if (cell.type === 'n') {
+            score += knightPST[r][c];
+          } else if (cell.type === 'b') {
+            score += bishopPST[r][c];
+          }
+
+          if (cell.color === 'w') {
+            totalScore += score;
+          } else {
+            totalScore -= score;
+          }
+        }
+      }
+    }
+    
+    // Return relative score depending on active player
+    return this.game.turn() === 'w' ? totalScore : -totalScore;
+  },
+
+  startClock() {
+    this.stopClock();
+    this.timerInterval = setInterval(() => {
+      if (this.activePlayer === 'w') {
+        this.whiteTime--;
+        this.updateClockDisplay('w');
+        if (this.whiteTime <= 0) {
+          this.endGame('timeout-black');
+        }
+      } else {
+        this.blackTime--;
+        this.updateClockDisplay('b');
+        if (this.blackTime <= 0) {
+          this.endGame('timeout-white');
+        }
+      }
+    }, 1000);
+  },
+
+  stopClock() {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  },
+
+  updateClockDisplay(color) {
+    const time = color === 'w' ? this.whiteTime : this.blackTime;
+    const mins = Math.floor(time / 60);
+    const secs = time % 60;
+    const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    
+    const clockEl = document.getElementById(color === 'w' ? 'chess-player-clock' : 'chess-opponent-clock');
+    clockEl.innerText = formatted;
+
+    if (time <= 20) {
+      clockEl.classList.add('low-time');
+    } else {
+      clockEl.classList.remove('low-time');
+    }
+  },
+
+  checkGameOverState() {
+    if (this.game.game_over()) {
+      this.stopClock();
+      if (this.game.in_checkmate()) {
+        const winner = this.game.turn() === 'w' ? 'Black' : 'White';
+        showToast(`Checkmate! ${winner} wins the game! 🏆`);
+        this.saveStats(winner === 'White');
+      } else if (this.game.in_draw() || this.game.in_stalemate() || this.game.in_threefold_repetition()) {
+        showToast("Game ended in a Draw! 🤝");
+        this.saveStats(false, true);
+      }
+    }
+  },
+
+  endGame(type) {
+    this.stopClock();
+    if (type === 'resign') {
+      showToast("You resigned! Black wins. 🏳️");
+      this.saveStats(false);
+    } else if (type === 'abort') {
+      showToast("Game aborted.");
+    } else if (type === 'timeout-black') {
+      showToast("White flagged! Black wins on time. ⏱️");
+      this.saveStats(false);
+    } else if (type === 'timeout-white') {
+      showToast("Black flagged! White wins on time! 🏆");
+      this.saveStats(true);
+    }
+    setTimeout(() => this.showSetup(), 2000);
+  },
+
+  saveStats(playerWon, isDraw = false) {
+    const diff = GameHubState.difficulty; // easy, medium, hard
+    const practiceObj = GameHubState.stats.chess.practice[diff];
+    practiceObj.played++;
+    if (playerWon) practiceObj.won++;
+    saveStats();
+  }
+};
+
+// ==========================================================================
+// GAME 7: Ludo Engine
+// ==========================================================================
+const LudoEngine = {
+  playerCount: 2,   // 2 or 4 players
+  diceValue: 1,
+  hasRolled: false,
+  activeColor: 'red', // red, green, yellow, blue
+  turnOrder: ['red', 'green', 'yellow', 'blue'],
+  // 4 tokens per color
+  tokens: {
+    red: [{ id: 0, pos: -1 }, { id: 1, pos: -1 }, { id: 2, pos: -1 }, { id: 3, pos: -1 }],
+    green: [{ id: 0, pos: -1 }, { id: 1, pos: -1 }, { id: 2, pos: -1 }, { id: 3, pos: -1 }],
+    yellow: [{ id: 0, pos: -1 }, { id: 1, pos: -1 }, { id: 2, pos: -1 }, { id: 3, pos: -1 }],
+    blue: [{ id: 0, pos: -1 }, { id: 1, pos: -1 }, { id: 2, pos: -1 }, { id: 3, pos: -1 }]
+  },
+  
+  // Safe cell coordinates (classic Ludo stars/bases)
+  safePositions: [0, 8, 13, 21, 26, 34, 39, 47],
+
+  // Track map (coordinates on 15x15 Ludo board)
+  // Maps standard track positions 0..51 to coordinates {r, c}
+  trackCoords: [
+    { r: 6, c: 1 }, { r: 6, c: 2 }, { r: 6, c: 3 }, { r: 6, c: 4 }, { r: 6, c: 5 }, // Red starting path
+    { r: 5, c: 6 }, { r: 4, c: 6 }, { r: 3, c: 6 }, { r: 2, c: 6 }, { r: 1, c: 6 }, { r: 0, c: 6 },
+    { r: 0, c: 7 },
+    { r: 0, c: 8 }, { r: 1, c: 8 }, { r: 2, c: 8 }, { r: 3, c: 8 }, { r: 4, c: 8 }, { r: 5, c: 8 }, // Green starting path
+    { r: 6, c: 9 }, { r: 6, c: 10 }, { r: 6, c: 11 }, { r: 6, c: 12 }, { r: 6, c: 13 }, { r: 6, c: 14 },
+    { r: 7, c: 14 },
+    { r: 8, c: 14 }, { r: 8, c: 13 }, { r: 8, c: 12 }, { r: 8, c: 11 }, { r: 8, c: 10 }, { r: 8, c: 9 }, // Yellow starting path
+    { r: 9, c: 8 }, { r: 10, c: 8 }, { r: 11, c: 8 }, { r: 12, c: 8 }, { r: 13, c: 8 }, { r: 14, c: 8 },
+    { r: 14, c: 7 },
+    { r: 14, c: 6 }, { r: 13, c: 6 }, { r: 12, c: 6 }, { r: 11, c: 6 }, { r: 10, c: 6 }, { r: 9, c: 6 }, // Blue starting path
+    { r: 8, c: 5 }, { r: 8, c: 4 }, { r: 8, c: 3 }, { r: 8, c: 2 }, { r: 8, c: 1 }, { r: 8, c: 0 },
+    { r: 7, c: 0 }, { r: 6, c: 0 }
+  ],
+
+  // Base coordinates mapping for tokens (4 tokens inside each home base)
+  baseCoords: {
+    red: [{ r: 2, c: 2 }, { r: 2, c: 3 }, { r: 3, c: 2 }, { r: 3, c: 3 }],
+    green: [{ r: 2, c: 11 }, { r: 2, c: 12 }, { r: 3, c: 11 }, { r: 3, c: 12 }],
+    yellow: [{ r: 11, c: 11 }, { r: 11, c: 12 }, { r: 12, c: 11 }, { r: 12, c: 12 }],
+    blue: [{ r: 11, c: 2 }, { r: 11, c: 3 }, { r: 12, c: 2 }, { r: 12, c: 3 }]
+  },
+
+  // Color start paths offsets (where each player starts on track)
+  startTrackIndices: {
+    red: 0,
+    green: 13,
+    yellow: 26,
+    blue: 39
+  },
+
+  // Color home paths coordinates (5 home path cells + 1 center cell)
+  homeCoords: {
+    red: [{ r: 7, c: 1 }, { r: 7, c: 2 }, { r: 7, c: 3 }, { r: 7, c: 4 }, { r: 7, c: 5 }, { r: 7, c: 6 }],
+    green: [{ r: 1, c: 7 }, { r: 2, c: 7 }, { r: 3, c: 7 }, { r: 4, c: 7 }, { r: 5, c: 7 }, { r: 6, c: 7 }],
+    yellow: [{ r: 7, c: 13 }, { r: 7, c: 12 }, { r: 7, c: 11 }, { r: 7, c: 10 }, { r: 7, c: 9 }, { r: 7, c: 8 }],
+    blue: [{ r: 13, c: 7 }, { r: 12, c: 7 }, { r: 11, c: 7 }, { r: 10, c: 7 }, { r: 9, c: 7 }, { r: 8, c: 7 }]
+  },
+
+  start() {
+    this.showSetup();
+    this.setupListeners();
+  },
+
+  showSetup() {
+    document.getElementById('ludo-setup').classList.remove('hidden');
+    document.getElementById('ludo-play').classList.add('hidden');
+  },
+
+  setupListeners() {
+    const tabs = document.querySelectorAll('#ludo-setup .selector-tabs button');
+    tabs.forEach(tab => {
+      tab.onclick = (e) => {
+        AudioPlayer.playClick();
+        tabs.forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        this.playerCount = parseInt(e.target.dataset.players, 10);
+      };
+    });
+
+    document.getElementById('btn-ludo-start').onclick = () => {
+      AudioPlayer.playClick();
+      this.initGame();
+    };
+
+    document.getElementById('btn-ludo-quit').onclick = () => {
+      AudioPlayer.playClick();
+      this.showSetup();
+    };
+
+    document.getElementById('btn-ludo-roll').onclick = () => {
+      this.rollDice();
+    };
+  },
+
+  initGame() {
+    this.hasRolled = false;
+    this.diceValue = 1;
+    this.activeColor = 'red';
+    this.isGameOver = false;
+    
+    // Set active colors in game order
+    this.turnOrder = this.playerCount === 2 ? ['red', 'green'] : ['red', 'green', 'yellow', 'blue'];
+
+    // Place all tokens back to base pos (-1)
+    for (const color of ['red', 'green', 'yellow', 'blue']) {
+      this.tokens[color] = [
+        { id: 0, pos: -1 },
+        { id: 1, pos: -1 },
+        { id: 2, pos: -1 },
+        { id: 3, pos: -1 }
+      ];
+    }
+
+    document.getElementById('ludo-setup').classList.add('hidden');
+    document.getElementById('ludo-play').classList.remove('hidden');
+
+    this.renderBoard();
+    this.updateStatusText("Your turn! Roll the dice.");
+    document.getElementById('btn-ludo-roll').disabled = false;
+  },
+
+  renderBoard() {
+    const boardEl = document.getElementById('board-ludo');
+    boardEl.innerHTML = '';
+
+    // Step 1: Render the static cell layouts
+    for (let r = 0; r < 15; r++) {
+      for (let c = 0; c < 15; c++) {
+        const cellEl = document.createElement('div');
+        cellEl.className = 'ludo-cell';
+        cellEl.dataset.r = r;
+        cellEl.dataset.c = c;
+
+        // Apply quadrant coloring rules for base squares
+        if (r < 6 && c < 6) cellEl.classList.add('red-bg');
+        else if (r < 6 && c > 8) cellEl.classList.add('green-bg');
+        else if (r > 8 && c > 8) cellEl.classList.add('yellow-bg');
+        else if (r > 8 && c < 6) cellEl.classList.add('blue-bg');
+
+        // Apply starting path safe star styling
+        if ((r === 6 && c === 1) || (r === 8 && c === 13) || (r === 1 && c === 8) || (r === 13 && c === 6)) {
+          cellEl.classList.add('star-cell');
+        }
+
+        // Home stretches mapping styling
+        if (r === 7 && c > 0 && c < 6) cellEl.classList.add('red-home-inner');
+        else if (c === 7 && r > 0 && r < 6) cellEl.classList.add('green-home-inner');
+        else if (r === 7 && c > 8 && c < 14) cellEl.classList.add('yellow-home-inner');
+        else if (c === 7 && r > 8 && r < 14) cellEl.classList.add('blue-home-inner');
+
+        // Main colored cell start tiles
+        if (r === 6 && c === 1) cellEl.classList.add('red-bg');
+        else if (r === 1 && c === 8) cellEl.classList.add('green-bg');
+        else if (r === 8 && c === 13) cellEl.classList.add('yellow-bg');
+        else if (r === 13 && c === 6) cellEl.classList.add('blue-bg');
+
+        // Center finish area cell styling
+        if (r >= 6 && r <= 8 && c >= 6 && c <= 8) {
+          if (r < 7) cellEl.classList.add('green-bg');
+          else if (r > 7) cellEl.classList.add('blue-bg');
+          else if (c < 7) cellEl.classList.add('red-bg');
+          else if (c > 7) cellEl.classList.add('yellow-bg');
+          else cellEl.style.backgroundColor = '#1e293b'; // Absolute center black dot
+        }
+
+        boardEl.appendChild(cellEl);
+      }
+    }
+
+    // Step 2: Inject all active tokens
+    for (const color of this.turnOrder) {
+      const playerTokens = this.tokens[color];
+      
+      // Group tokens by their rendered coordinate cell to handle overlapping stack offset spacing
+      const coordMap = {};
+
+      playerTokens.forEach(t => {
+        const coord = this.getTokenCoords(color, t);
+        if (coord) {
+          const key = `${coord.r}_${coord.c}`;
+          if (!coordMap[key]) coordMap[key] = [];
+          coordMap[key].push(t);
+        }
+      });
+
+      // Render tokens
+      Object.keys(coordMap).forEach(key => {
+        const list = coordMap[key];
+        const [r, c] = key.split('_').map(Number);
+        
+        // Find Ludo Grid cell element
+        const cellEl = boardEl.querySelector(`[data-r="${r}"][data-c="${c}"]`);
+        if (cellEl) {
+          list.forEach((t, index) => {
+            const tokenEl = document.createElement('div');
+            tokenEl.className = `ludo-token ${color}-token`;
+            
+            // If multiple tokens overlap, apply translation offsets to keep them visible
+            if (list.length > 1) {
+              tokenEl.classList.add(`offset-${index}`);
+            }
+
+            // Move highlight if token can legally move
+            if (this.activeColor === 'red' && color === 'red' && this.hasRolled && this.canMoveToken(color, t, this.diceValue)) {
+              tokenEl.classList.add('highlight-move');
+              tokenEl.onclick = () => this.moveTokenPlayer(t);
+            }
+
+            cellEl.appendChild(tokenEl);
+          });
+        }
+      });
+    }
+  },
+
+  getTokenCoords(color, token) {
+    if (token.pos === -1) {
+      // In base coords
+      return this.baseCoords[color][token.id];
+    } else if (token.pos >= 52) {
+      // In home stretch coords
+      const homeIdx = token.pos - 52;
+      return this.homeCoords[color][homeIdx];
+    } else {
+      // On outer track circle
+      return this.trackCoords[token.pos];
+    }
+  },
+
+  rollDice() {
+    if (this.hasRolled) return;
+    this.hasRolled = true;
+    document.getElementById('btn-ludo-roll').disabled = true;
+
+    AudioPlayer.playClick();
+    const diceEl = document.getElementById('ludo-dice');
+    diceEl.classList.add('rolling');
+
+    setTimeout(() => {
+      diceEl.classList.remove('rolling');
+      
+      // Roll random 1-6
+      this.diceValue = Math.floor(Math.random() * 6) + 1;
+      const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+      diceEl.innerText = diceFaces[this.diceValue - 1];
+
+      // Check valid moves
+      const moves = this.tokens[this.activeColor].filter(t => this.canMoveToken(this.activeColor, t, this.diceValue));
+
+      if (moves.length === 0) {
+        this.updateStatusText(`${this.activeColor.toUpperCase()} rolled a ${this.diceValue}. No moves available! Pass.`);
+        setTimeout(() => this.passTurn(), 1500);
+      } else {
+        if (this.activeColor === 'red') {
+          this.updateStatusText(`You rolled a ${this.diceValue}! Select a token to move.`);
+          this.renderBoard(); // highlights player pieces
+        } else {
+          this.updateStatusText(`${this.activeColor.toUpperCase()} rolled a ${this.diceValue}. Deciding...`);
+          setTimeout(() => this.makeComputerMove(moves), 1000);
+        }
+      }
+    }, 450);
+  },
+
+  canMoveToken(color, token, steps) {
+    if (token.pos === 57) return false; // Already finished
+
+    if (token.pos === -1) {
+      // Releasing piece requires a 6
+      return steps === 6;
+    }
+
+    // Inside track or home stretch
+    const targetPos = token.pos + steps;
+    return targetPos <= 57; // cannot exceed center finish block
+  },
+
+  moveTokenPlayer(token) {
+    this.executeMove(this.activeColor, token, this.diceValue);
+  },
+
+  makeComputerMove(validTokens) {
+    // Basic AI prioritizing capture moves first, then releasing out of base on 6s, then moving closest to finish
+    let chosenToken = validTokens[0];
+    
+    // 1. Try to find a move that captures an opponent
+    for (const t of validTokens) {
+      const targetPos = this.calculateTargetPosition(this.activeColor, t, this.diceValue);
+      if (this.wouldCaptureOpponent(targetPos, this.activeColor)) {
+        chosenToken = t;
+        break;
+      }
+    }
+
+    // 2. Otherwise prioritize releasing from base
+    if (this.diceValue === 6) {
+      const baseToken = validTokens.find(t => t.pos === -1);
+      if (baseToken) chosenToken = baseToken;
+    }
+
+    this.executeMove(this.activeColor, chosenToken, this.diceValue);
+  },
+
+  calculateTargetPosition(color, token, steps) {
+    if (token.pos === -1) return this.startTrackIndices[color];
+    
+    let currentRel = token.pos;
+    let newPos = token.pos + steps;
+    return newPos;
+  },
+
+  wouldCaptureOpponent(targetPos, color) {
+    if (targetPos >= 52) return false; // home path safe
+    if (this.safePositions.includes(targetPos)) return false; // safe stars
+
+    for (const col of this.turnOrder) {
+      if (col === color) continue;
+      if (this.tokens[col].some(t => t.pos === targetPos)) return true;
+    }
+    return false;
+  },
+
+  executeMove(color, token, steps) {
+    const isReleased = token.pos === -1 && steps === 6;
+    
+    if (isReleased) {
+      token.pos = this.startTrackIndices[color];
+      showToast(`${color.toUpperCase()} released a token! 🚀`);
+    } else {
+      token.pos += steps;
+    }
+
+    // Check collisions/captures
+    this.checkTokenCaptures(color, token.pos);
+
+    this.renderBoard();
+
+    // Check Win states
+    if (this.checkPlayerWin(color)) {
+      this.isGameOver = true;
+      showToast(`Congratulations! ${color.toUpperCase()} wins the Ludo game! 🏆🎉`);
+      this.saveStats(color === 'red');
+      setTimeout(() => this.showSetup(), 3000);
+      return;
+    }
+
+    // Toggles next turn. Re-rolls on 6!
+    if (steps === 6) {
+      this.hasRolled = false;
+      this.updateStatusText(`${color.toUpperCase()} rolled a 6 and gets another roll!`);
+      if (color === 'red') {
+        document.getElementById('btn-ludo-roll').disabled = false;
+      } else {
+        setTimeout(() => this.rollDice(), 1000);
+      }
+    } else {
+      this.passTurn();
+    }
+  },
+
+  checkTokenCaptures(color, pos) {
+    if (pos >= 52 || pos === -1) return;
+    if (this.safePositions.includes(pos)) return; // safe tiles
+
+    for (const col of this.turnOrder) {
+      if (col === color) continue;
+      this.tokens[col].forEach(t => {
+        if (t.pos === pos) {
+          t.pos = -1; // Send back to base!
+          showToast(`Boom! ${color.toUpperCase()} captured ${col.toUpperCase()}'s token! 💥`);
+        }
+      });
+    }
+  },
+
+  checkPlayerWin(color) {
+    return this.tokens[color].every(t => t.pos === 57);
+  },
+
+  passTurn() {
+    this.hasRolled = false;
+    const currentIdx = this.turnOrder.indexOf(this.activeColor);
+    const nextIdx = (currentIdx + 1) % this.turnOrder.length;
+    this.activeColor = this.turnOrder[nextIdx];
+
+    this.renderBoard();
+
+    if (this.activeColor === 'red') {
+      this.updateStatusText("Your turn! Roll the dice.");
+      document.getElementById('btn-ludo-roll').disabled = false;
+    } else {
+      this.updateStatusText(`${this.activeColor.toUpperCase()}'s turn.`);
+      document.getElementById('btn-ludo-roll').disabled = true;
+      setTimeout(() => this.rollDice(), 1000);
+    }
+  },
+
+  updateStatusText(txt) {
+    document.getElementById('ludo-turn-indicator').innerText = txt;
+  },
+
+  saveStats(playerWon) {
+    const practiceObj = GameHubState.stats.ludo.practice.easy; // single bucket for Ludo
+    practiceObj.played++;
+    if (playerWon) practiceObj.won++;
+    saveStats();
+  }
+};
+
+// ==========================================================================
+// GAME 8: Othello Engine
+// ==========================================================================
+const OthelloEngine = {
+  board: [], // 8x8 matrix representing cells (0: empty, 1: Black player, 2: White bot)
+  botDiff: 'easy',
+  activePlayer: 1, // 1 for Black (You), 2 for White (Bot)
+  isGameOver: false,
+
+  start() {
+    this.showSetup();
+    this.setupListeners();
+  },
+
+  showSetup() {
+    document.getElementById('othello-setup').classList.remove('hidden');
+    document.getElementById('othello-play').classList.add('hidden');
+  },
+
+  setupListeners() {
+    const tabs = document.querySelectorAll('#othello-setup .selector-tabs button');
+    tabs.forEach(tab => {
+      tab.onclick = (e) => {
+        AudioPlayer.playClick();
+        tabs.forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        this.botDiff = e.target.dataset.diff;
+      };
+    });
+
+    document.getElementById('btn-othello-start').onclick = () => {
+      AudioPlayer.playClick();
+      this.initGame();
+    };
+
+    document.getElementById('btn-othello-quit').onclick = () => {
+      AudioPlayer.playClick();
+      this.showSetup();
+    };
+
+    document.getElementById('btn-othello-restart').onclick = () => {
+      AudioPlayer.playClick();
+      this.initGame();
+    };
+  },
+
+  initGame() {
+    this.isGameOver = false;
+    this.activePlayer = 1; // Black always goes first
+    
+    // Create empty board
+    this.board = Array(8).fill(null).map(() => Array(8).fill(0));
+    
+    // Standard Othello starting configuration
+    this.board[3][3] = 2; // White
+    this.board[3][4] = 1; // Black
+    this.board[4][3] = 1; // Black
+    this.board[4][4] = 2; // White
+
+    document.getElementById('othello-setup').classList.add('hidden');
+    document.getElementById('othello-play').classList.remove('hidden');
+
+    this.renderBoard();
+    this.updateScorePillHighlights();
+  },
+
+  renderBoard() {
+    const boardEl = document.getElementById('board-othello');
+    boardEl.innerHTML = '';
+
+    const validMoves = this.getValidMoves(this.activePlayer);
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const squareEl = document.createElement('div');
+        squareEl.className = 'othello-square';
+        squareEl.dataset.r = r;
+        squareEl.dataset.c = c;
+
+        const cell = this.board[r][c];
+
+        if (cell > 0) {
+          const discEl = document.createElement('div');
+          discEl.className = `othello-disc ${cell === 1 ? 'black-piece' : 'white-piece'}`;
+          squareEl.appendChild(discEl);
+        }
+
+        // Highlight valid movements for player
+        if (this.activePlayer === 1 && validMoves.some(m => m.r === r && m.c === c)) {
+          squareEl.classList.add('valid-othello-move');
+          squareEl.onclick = () => this.handleSquareClick(r, c, validMoves);
+        }
+
+        boardEl.appendChild(squareEl);
+      }
+    }
+
+    this.updateScoreDisplay();
+  },
+
+  handleSquareClick(r, c, validMoves) {
+    if (this.activePlayer !== 1 || this.isGameOver) return;
+
+    const move = validMoves.find(m => m.r === r && m.c === c);
+    if (!move) return;
+
+    this.executeMove(r, c, move.flips, 1);
+    AudioPlayer.playClick();
+
+    this.renderBoard();
+
+    // Check next player's turns
+    setTimeout(() => this.togglePlayerTurn(), 500);
+  },
+
+  executeMove(r, c, flips, player) {
+    this.board[r][c] = player;
+
+    // Flip sandwiched opponent discs
+    flips.forEach(coord => {
+      this.board[coord.r][coord.c] = player;
+      
+      // Animate disc flips inside UI
+      const squareEl = document.querySelector(`.othello-square[data-r="${coord.r}"][data-c="${coord.c}"]`);
+      if (squareEl) {
+        const disc = squareEl.querySelector('.othello-disc');
+        if (disc) {
+          disc.classList.add('flipping');
+          setTimeout(() => {
+            disc.className = `othello-disc ${player === 1 ? 'black-piece' : 'white-piece'}`;
+          }, 300);
+        }
+      }
+    });
+  },
+
+  togglePlayerTurn() {
+    const nextPlayer = this.activePlayer === 1 ? 2 : 1;
+    const nextValid = this.getValidMoves(nextPlayer);
+
+    if (nextValid.length > 0) {
+      this.activePlayer = nextPlayer;
+      this.renderBoard();
+      this.updateScorePillHighlights();
+
+      if (this.activePlayer === 2) {
+        // Trigger Bot move automatically
+        setTimeout(() => this.triggerBotMove(nextValid), 600);
+      }
+    } else {
+      // Pass turn back to current player if opponent has no valid moves
+      const currentValid = this.getValidMoves(this.activePlayer);
+      if (currentValid.length > 0) {
+        showToast(`${nextPlayer === 1 ? 'BLACK' : 'WHITE'} has no valid moves. Pass!`);
+        this.renderBoard();
+      } else {
+        // Neither player has valid moves left -> Game Over
+        this.endGame();
+      }
+    }
+  },
+
+  triggerBotMove(validMoves) {
+    if (this.isGameOver) return;
+
+    let chosenMove = null;
+
+    if (this.botDiff === 'easy') {
+      // Easy AI -> Picks the move that captures the most pieces immediately (Greedy strategy)
+      validMoves.sort((a, b) => b.flips.length - a.flips.length);
+      chosenMove = validMoves[0];
+    } else if (this.botDiff === 'medium') {
+      // Medium AI -> Depth 2 search prioritizing corners
+      chosenMove = this.getBestBotMove(2, validMoves);
+    } else {
+      // Hard AI -> Depth 4 search valuing corner stability and mobility
+      chosenMove = this.getBestBotMove(4, validMoves);
+    }
+
+    if (chosenMove) {
+      this.executeMove(chosenMove.r, chosenMove.c, chosenMove.flips, 2);
+      AudioPlayer.playClick();
+      this.renderBoard();
+      
+      setTimeout(() => this.togglePlayerTurn(), 500);
+    }
+  },
+
+  // Simple Minimax search for Othello AI
+  getBestBotMove(depth, validMoves) {
+    let bestMove = validMoves[0];
+    let bestVal = -999999;
+
+    for (const move of validMoves) {
+      // Make move
+      const originalBoard = this.board.map(row => [...row]);
+      this.board[move.r][move.c] = 2;
+      move.flips.forEach(f => this.board[f.r][f.c] = 2);
+
+      const val = -this.minimaxOthello(depth - 1, -999999, 999999, false);
+      
+      // Undo move
+      this.board = originalBoard;
+
+      if (val > bestVal) {
+        bestVal = val;
+        bestMove = move;
+      }
+    }
+    return bestMove;
+  },
+
+  minimaxOthello(depth, alpha, beta, isMaximizing) {
+    if (depth === 0) {
+      return this.evaluateOthelloBoard();
+    }
+
+    const player = isMaximizing ? 2 : 1;
+    const moves = this.getValidMoves(player);
+
+    if (moves.length === 0) {
+      const oppMoves = this.getValidMoves(3 - player);
+      if (oppMoves.length === 0) {
+        // Terminal node -> Game Over scoring
+        const scores = this.getScores();
+        return isMaximizing ? (scores.white - scores.black) * 1000 : (scores.black - scores.white) * 1000;
+      }
+      return -this.minimaxOthello(depth - 1, alpha, beta, !isMaximizing);
+    }
+
+    if (isMaximizing) {
+      let maxVal = -999999;
+      for (const m of moves) {
+        const originalBoard = this.board.map(row => [...row]);
+        this.board[m.r][m.c] = 2;
+        m.flips.forEach(f => this.board[f.r][f.c] = 2);
+
+        maxVal = Math.max(maxVal, this.minimaxOthello(depth - 1, alpha, beta, false));
+        this.board = originalBoard;
+        alpha = Math.max(alpha, maxVal);
+        if (beta <= alpha) break;
+      }
+      return maxVal;
+    } else {
+      let minVal = 999999;
+      for (const m of moves) {
+        const originalBoard = this.board.map(row => [...row]);
+        this.board[m.r][m.c] = 1;
+        m.flips.forEach(f => this.board[f.r][f.c] = 1);
+
+        minVal = Math.min(minVal, this.minimaxOthello(depth - 1, alpha, beta, true));
+        this.board = originalBoard;
+        beta = Math.min(beta, minVal);
+        if (beta <= alpha) break;
+      }
+      return minVal;
+    }
+  },
+
+  evaluateOthelloBoard() {
+    // Positional value weights matrix. Corners and edges are highly valuable in Othello
+    const weights = [
+      [100, -20,  10,   5,   5,  10, -20, 100],
+      [-20, -50,  -2,  -2,  -2,  -2, -50, -20],
+      [ 10,  -2,   5,   1,   1,   5,  -2,  10],
+      [  5,  -2,   1,   1,   1,   1,  -2,   5],
+      [  5,  -2,   1,   1,   1,   1,  -2,   5],
+      [ 10,  -2,   5,   1,   1,   5,  -2,  10],
+      [-20, -50,  -2,  -2,  -2,  -2, -50, -20],
+      [100, -20,  10,   5,   5,  10, -20, 100]
+    ];
+
+    let score = 0;
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if (this.board[r][c] === 2) { // Bot
+          score += weights[r][c];
+        } else if (this.board[r][c] === 1) { // Player
+          score -= weights[r][c];
+        }
+      }
+    }
+    return score;
+  },
+
+  getScores() {
+    let black = 0;
+    let white = 0;
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if (this.board[r][c] === 1) black++;
+        else if (this.board[r][c] === 2) white++;
+      }
+    }
+    return { black, white };
+  },
+
+  updateScoreDisplay() {
+    const scores = this.getScores();
+    document.getElementById('othello-score-black').innerText = scores.black;
+    document.getElementById('othello-score-white').innerText = scores.white;
+  },
+
+  updateScorePillHighlights() {
+    const blackPill = document.getElementById('othello-black-score-card');
+    const whitePill = document.getElementById('othello-white-score-card');
+
+    if (this.activePlayer === 1) {
+      blackPill.classList.add('active');
+      whitePill.classList.remove('active');
+    } else {
+      whitePill.classList.add('active');
+      blackPill.classList.remove('active');
+    }
+  },
+
+  getValidMoves(player) {
+    const moves = [];
+    const opp = player === 1 ? 2 : 1;
+
+    // Directions vectors: Up, Down, Left, Right, Diagonals
+    const directions = [
+      { r: -1, c: 0 }, { r: 1, c: 0 }, { r: 0, c: -1 }, { r: 0, c: 1 },
+      { r: -1, c: -1 }, { r: -1, c: 1 }, { r: 1, c: -1 }, { r: 1, c: 1 }
+    ];
+
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if (this.board[r][c] !== 0) continue;
+
+        let totalFlips = [];
+
+        // Check if move sandwiches opponent disks in any direction
+        for (const dir of directions) {
+          let currR = r + dir.r;
+          let currC = c + dir.c;
+          let possibleFlips = [];
+
+          while (currR >= 0 && currR < 8 && currC >= 0 && currC < 8 && this.board[currR][currC] === opp) {
+            possibleFlips.push({ r: currR, c: currC });
+            currR += dir.r;
+            currC += dir.c;
+          }
+
+          if (currR >= 0 && currR < 8 && currC >= 0 && currC < 8 && this.board[currR][currC] === player) {
+            totalFlips = totalFlips.concat(possibleFlips);
+          }
+        }
+
+        if (totalFlips.length > 0) {
+          moves.push({ r, c, flips: totalFlips });
+        }
+      }
+    }
+    return moves;
+  },
+
+  endGame() {
+    this.isGameOver = true;
+    const scores = this.getScores();
+    
+    if (scores.black > scores.white) {
+      showToast(`Congratulations! You win ${scores.black} to ${scores.white}! 🏆🎉`);
+      this.saveStats(true);
+    } else if (scores.white > scores.black) {
+      showToast(`Othello Over! Bot wins ${scores.white} to ${scores.black}. 😢`);
+      this.saveStats(false);
+    } else {
+      showToast("Draw game! 🤝");
+    }
+  },
+
+  saveStats(playerWon) {
+    const diff = this.botDiff; // easy, medium, hard
+    const practiceObj = GameHubState.stats.othello.practice[diff];
+    practiceObj.played++;
+    if (playerWon) practiceObj.won++;
+    saveStats();
   }
 };
 

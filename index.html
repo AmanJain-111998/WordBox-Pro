@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./style.css?v=5.6">
+  <link rel="stylesheet" href="./style.css?v=5.7">
 </head>
 <body class="dark-theme">
   <!-- Main App Shell -->
@@ -377,20 +377,68 @@
 
           <!-- Ludo Play Screen -->
           <div id="ludo-play" class="ludo-game-layout hidden">
+            <!-- Top Player Cards Row -->
+            <div class="ludo-players-row top-row">
+              <!-- Red Player (Top Left) -->
+              <div class="ludo-player-card red-card" id="ludo-card-red">
+                <div class="ludo-avatar">🔴</div>
+                <div class="ludo-player-details">
+                  <span class="ludo-name">Red (You)</span>
+                  <div class="ludo-timer-track"><div class="ludo-timer-fill" id="ludo-timer-red"></div></div>
+                </div>
+                <div class="ludo-dice-slot" id="ludo-dice-red">⚀</div>
+              </div>
+
+              <!-- Green Player (Top Right) -->
+              <div class="ludo-player-card green-card" id="ludo-card-green">
+                <div class="ludo-avatar">🟢</div>
+                <div class="ludo-player-details">
+                  <span class="ludo-name">Green (CPU)</span>
+                  <div class="ludo-timer-track"><div class="ludo-timer-fill" id="ludo-timer-green"></div></div>
+                </div>
+                <div class="ludo-dice-slot" id="ludo-dice-green">⚀</div>
+              </div>
+            </div>
+
+            <!-- Board wrapper -->
             <div class="ludo-board-wrapper">
               <div id="board-ludo" class="ludo-grid" aria-label="Ludo Board">
                 <!-- 15x15 cells will be injected here dynamically -->
               </div>
             </div>
-            <div class="ludo-controls-row">
+
+            <!-- Bottom Player Cards Row -->
+            <div class="ludo-players-row bottom-row">
+              <!-- Blue Player (Bottom Left) -->
+              <div class="ludo-player-card blue-card" id="ludo-card-blue">
+                <div class="ludo-avatar">🔵</div>
+                <div class="ludo-player-details">
+                  <span class="ludo-name">Blue (CPU)</span>
+                  <div class="ludo-timer-track"><div class="ludo-timer-fill" id="ludo-timer-blue"></div></div>
+                </div>
+                <div class="ludo-dice-slot" id="ludo-dice-blue">⚀</div>
+              </div>
+
+              <!-- Yellow Player (Bottom Right) -->
+              <div class="ludo-player-card yellow-card" id="ludo-card-yellow">
+                <div class="ludo-avatar">🟡</div>
+                <div class="ludo-player-details">
+                  <span class="ludo-name">Yellow (CPU)</span>
+                  <div class="ludo-timer-track"><div class="ludo-timer-fill" id="ludo-timer-yellow"></div></div>
+                </div>
+                <div class="ludo-dice-slot" id="ludo-dice-yellow">⚀</div>
+              </div>
+            </div>
+
+            <!-- Controls row -->
+            <div class="ludo-actions-bar">
               <div class="ludo-turn-info">
-                <span id="ludo-turn-indicator">Your Turn</span>
+                <span id="ludo-turn-indicator">Your Turn! Roll the dice.</span>
               </div>
-              <div class="ludo-dice-container">
-                <div id="ludo-dice" class="ludo-dice-box">⚀</div>
+              <div class="ludo-action-buttons">
                 <button id="btn-ludo-roll" class="ludo-roll-btn">Roll Dice</button>
+                <button id="btn-ludo-quit" class="chess-control-btn">Quit</button>
               </div>
-              <button id="btn-ludo-quit" class="chess-control-btn">Quit</button>
             </div>
           </div>
         </div>
@@ -724,9 +772,9 @@
 
   <!-- Javascript Modules -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-  <script src="./words.js?v=5.6"></script>
-  <script src="./crosswords.js?v=5.6"></script>
-  <script src="./sudokus.js?v=5.6"></script>
-  <script src="./app.js?v=5.6"></script>
+  <script src="./words.js?v=5.7"></script>
+  <script src="./crosswords.js?v=5.7"></script>
+  <script src="./sudokus.js?v=5.7"></script>
+  <script src="./app.js?v=5.7"></script>
 </body>
 </html>

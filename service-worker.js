@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamebox-pro-v5.6';
+const CACHE_NAME = 'gamebox-pro-v5.7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

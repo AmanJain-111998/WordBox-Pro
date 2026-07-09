@@ -2612,18 +2612,133 @@ body.light-theme .chess-control-btn {
   max-width: 360px;
   margin: auto;
 }
+/* Ludo Game layout */
+.ludo-game-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  margin: auto;
+}
+
+/* Player Cards layout */
+.ludo-players-row {
+  display: flex;
+  justify-content: space-between;
+  width: 92%;
+  max-width: 340px;
+  margin-bottom: 6px;
+}
+.ludo-player-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 10px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 48%;
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-fast);
+  overflow: hidden;
+}
+body.light-theme .ludo-player-card {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+.ludo-avatar {
+  font-size: 18px;
+}
+.ludo-player-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.ludo-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ludo-timer-track {
+  background: rgba(255, 255, 255, 0.15);
+  height: 4px;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+  width: 100%;
+}
+body.light-theme .ludo-timer-track {
+  background: rgba(0, 0, 0, 0.08);
+}
+.ludo-timer-fill {
+  height: 100%;
+  width: 100%;
+  background: #10b981;
+  border-radius: 2px;
+  transition: width 0.1s linear, background-color var(--transition-fast);
+}
+
+/* Personal Dice Slots */
+.ludo-dice-slot {
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s;
+}
+body.light-theme .ludo-dice-slot {
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Dice Shaking Animation */
+.ludo-dice-slot.active-roll {
+  animation: dice-shake 0.8s infinite;
+  border-color: var(--text-main);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+@keyframes dice-shake {
+  0%, 100% { transform: rotate(0) scale(1); }
+  20% { transform: rotate(-8deg) scale(1.05); }
+  40% { transform: rotate(8deg) scale(1.05); }
+  60% { transform: rotate(-5deg) scale(1.05); }
+  80% { transform: rotate(5deg) scale(1.05); }
+}
+
+/* Card Glow Statuses */
+.ludo-player-card.active.red-card { border-color: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+.ludo-player-card.active.green-card { border-color: #10b981; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+.ludo-player-card.active.yellow-card { border-color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); }
+.ludo-player-card.active.blue-card { border-color: #3b82f6; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+
+.ludo-player-card.inactive {
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+
 .ludo-board-wrapper {
   width: 92%;
   max-width: 340px;
   aspect-ratio: 1;
-  border: 3px solid rgba(255, 255, 255, 0.45);
-  border-radius: 8px;
+  border: 4px solid #b45309; /* Premium wooden border frame */
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--glass-shadow);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
   margin-bottom: 12px;
-}
-body.light-theme .ludo-board-wrapper {
-  border-color: rgba(15, 23, 42, 0.45);
 }
 .ludo-grid {
   display: grid;
@@ -2631,7 +2746,7 @@ body.light-theme .ludo-board-wrapper {
   grid-template-rows: repeat(15, 1fr);
   width: 100%;
   height: 100%;
-  background-color: var(--bg-main);
+  background-color: #1e293b;
 }
 .ludo-cell {
   border: 0.5px solid rgba(255, 255, 255, 0.1);
@@ -2639,28 +2754,54 @@ body.light-theme .ludo-board-wrapper {
   align-items: center;
   justify-content: center;
   position: relative;
-  background-color: var(--bg-main);
+  background-color: #0f172a; /* Premium dark slate cells */
+  transition: background-color var(--transition-fast);
 }
 body.light-theme .ludo-cell {
-  border-color: rgba(0, 0, 0, 0.05);
+  background-color: #f8fafc;
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
-/* Ludo Base/Home styles */
-.ludo-cell.red-bg { background-color: #ef4444 !important; }
-.ludo-cell.green-bg { background-color: #10b981 !important; }
-.ludo-cell.yellow-bg { background-color: #f59e0b !important; }
-.ludo-cell.blue-bg { background-color: #3b82f6 !important; }
+/* Ludo Quadrant Colors */
+.ludo-cell.red-bg { background-color: #dc2626 !important; }
+.ludo-cell.green-bg { background-color: #16a34a !important; }
+.ludo-cell.yellow-bg { background-color: #d97706 !important; }
+.ludo-cell.blue-bg { background-color: #2563eb !important; }
 
-/* Safe points / home base grids */
-.ludo-cell.red-home-inner { background-color: rgba(239, 68, 68, 0.25) !important; }
-.ludo-cell.green-home-inner { background-color: rgba(16, 185, 129, 0.25) !important; }
-.ludo-cell.yellow-home-inner { background-color: rgba(245, 158, 11, 0.25) !important; }
-.ludo-cell.blue-home-inner { background-color: rgba(59, 130, 246, 0.25) !important; }
+/* Home stretches path transparency colors */
+.ludo-cell.red-home-inner { background-color: #fee2e2 !important; }
+.ludo-cell.green-home-inner { background-color: #dcfce7 !important; }
+.ludo-cell.yellow-home-inner { background-color: #fef3c7 !important; }
+.ludo-cell.blue-home-inner { background-color: #dbeafe !important; }
 
+body.dark-theme .ludo-cell.red-home-inner { background-color: rgba(220, 38, 38, 0.2) !important; }
+body.dark-theme .ludo-cell.green-home-inner { background-color: rgba(22, 163, 74, 0.2) !important; }
+body.dark-theme .ludo-cell.yellow-home-inner { background-color: rgba(217, 119, 6, 0.2) !important; }
+body.dark-theme .ludo-cell.blue-home-inner { background-color: rgba(37, 99, 235, 0.2) !important; }
+
+/* Safe bases white slots */
+.ludo-base-slot {
+  width: 76%;
+  height: 76%;
+  background-color: #ffffff;
+  border: 3.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+body.light-theme .ludo-base-slot {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Safe star tiles and start indicators */
 .ludo-cell.star-cell::after {
   content: '★';
-  color: var(--text-muted);
-  font-size: 14px;
+  color: #f59e0b;
+  font-size: 16px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 .ludo-cell.star-cell.red-bg::after,
 .ludo-cell.star-cell.green-bg::after,
@@ -2669,91 +2810,95 @@ body.light-theme .ludo-cell {
   color: white;
 }
 
-/* Ludo Tokens */
+/* Starting arrow indicators */
+.ludo-cell.start-arrow::before {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.7);
+  position: absolute;
+  z-index: 1;
+}
+.ludo-cell.start-arrow.red-start::before { content: '➜'; left: 4px; }
+.ludo-cell.start-arrow.green-start::before { content: '⬇'; top: 2px; }
+.ludo-cell.start-arrow.yellow-start::before { content: '⬅'; right: 4px; }
+.ludo-cell.start-arrow.blue-start::before { content: '⬆'; bottom: 2px; }
+
+/* 3D Glossy Ludo Tokens (Ludo King look) */
 .ludo-token {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1.5px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, rgba(255, 255, 255, 0) 55%), var(--token-color);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.45), inset 0 -4px 6px rgba(0, 0, 0, 0.35);
   cursor: pointer;
   position: absolute;
   z-index: 10;
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
-.ludo-token.red-token { background-color: #ef4444; }
-.ludo-token.green-token { background-color: #10b981; }
-.ludo-token.yellow-token { background-color: #f59e0b; }
-.ludo-token.blue-token { background-color: #3b82f6; }
+.ludo-token.red-token { --token-color: #ef4444; }
+.ludo-token.green-token { --token-color: #10b981; }
+.ludo-token.yellow-token { --token-color: #f59e0b; }
+.ludo-token.blue-token { --token-color: #3b82f6; }
 
+/* Hopping Jump animation */
+@keyframes hop-jump {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-14px) scale(1.25); }
+  100% { transform: translateY(0) scale(1); }
+}
+.ludo-token.hopping {
+  animation: hop-jump 0.22s ease-out;
+  z-index: 20;
+}
+
+/* Selection bounce pointer and ring */
 .ludo-token.highlight-move {
   animation: pulse-token 0.6s infinite alternate;
   transform: scale(1.15);
   z-index: 15;
-  box-shadow: 0 0 8px white;
+  box-shadow: 0 0 10px #ffffff;
 }
 @keyframes pulse-token {
   0% { transform: scale(1.05); }
   100% { transform: scale(1.25); }
 }
 
-/* Tokens stacking offset styles (when multiple on same cell) */
-.ludo-token.offset-0 { transform: translate(-3px, -3px) scale(0.85); }
-.ludo-token.offset-1 { transform: translate(3px, -3px) scale(0.85); }
-.ludo-token.offset-2 { transform: translate(-3px, 3px) scale(0.85); }
-.ludo-token.offset-3 { transform: translate(3px, 3px) scale(0.85); }
+/* Tokens stacking offsets inside cell (handles up to 4 overlapping tokens) */
+.ludo-token.offset-0 { transform: translate(-3.5px, -3.5px) scale(0.8); }
+.ludo-token.offset-1 { transform: translate(3.5px, -3.5px) scale(0.8); }
+.ludo-token.offset-2 { transform: translate(-3.5px, 3.5px) scale(0.8); }
+.ludo-token.offset-3 { transform: translate(3.5px, 3.5px) scale(0.8); }
 
-/* Ludo controls footer */
-.ludo-controls-row {
+/* Controls layout */
+.ludo-actions-bar {
   width: 92%;
+  max-width: 340px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ludo-action-buttons {
+  display: flex;
   gap: 12px;
 }
-.ludo-turn-info {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-main);
-  flex: 1;
-}
-.ludo-dice-container {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.ludo-dice-box {
-  width: 44px;
-  height: 44px;
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  color: var(--text-main);
-  box-shadow: var(--glass-shadow);
-  transition: transform 0.4s;
-  user-select: none;
-}
-.ludo-dice-box.rolling {
-  animation: dice-roll-spin 0.4s ease-out;
-}
-@keyframes dice-roll-spin {
-  0% { transform: rotate(0deg) scale(0.9); }
-  50% { transform: rotate(180deg) scale(1.2); }
-  100% { transform: rotate(360deg) scale(1); }
-}
 .ludo-roll-btn {
+  flex: 1;
   background: var(--btn-primary-bg);
   border: none;
   color: white;
   padding: 10px 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 14px;
   cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+  transition: all var(--transition-fast);
+}
+.ludo-roll-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Othello Game layout */

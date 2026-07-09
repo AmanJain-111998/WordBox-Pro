@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.2';
+const APP_VERSION = '6.3';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=6.2')
+    navigator.serviceWorker.register('./service-worker.js?v=6.3')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -2795,6 +2795,153 @@ const Game2048Engine = {
 // ==========================================================================
 // GAME 6: Chess Engine
 // ==========================================================================
+const chessWorkerCode = `
+  importScripts('https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js');
+
+  const pieceValues = { p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000 };
+
+  const pawnPST = [
+    [0,  0,  0,  0,  0,  0,  0,  0],
+    [50, 50, 50, 50, 50, 50, 50, 50],
+    [10, 10, 20, 30, 30, 20, 10, 10],
+    [5,  5, 10, 25, 25, 10,  5,  5],
+    [0,  0,  0, 20, 20,  0,  0,  0],
+    [5, -5,-10,  0,  0,-10, -5,  5],
+    [5, 10, 10,-20,-20, 10, 10,  5],
+    [0,  0,  0,  0,  0,  0,  0,  0]
+  ];
+  const knightPST = [
+    [-50,-40,-30,-30,-30,-30,-40,-50],
+    [-40,-20,  0,  0,  0,  0,-20,-40],
+    [-30,  0, 10, 15, 15, 10,  0,-30],
+    [-30,  5, 15, 20, 20, 15,  5,-30],
+    [-30,  0, 15, 20, 20, 15,  0,-30],
+    [-30,  5, 10, 15, 15, 10,  5,-30],
+    [-40,-20,  0,  5,  5,  0,-20,-40],
+    [-50,-40,-30,-30,-30,-30,-40,-50]
+  ];
+  const bishopPST = [
+    [-20,-10,-10,-10,-10,-10,-10,-20],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
+    [-10,  0,  5, 10, 10,  5,  0,-10],
+    [-10,  5,  5, 10, 10,  5,  5,-10],
+    [-10,  0, 10, 10, 10, 10,  0,-10],
+    [-10, 10, 10, 10, 10, 10, 10,-10],
+    [-10,  5,  0,  0,  0,  0,  5,-10],
+    [-20,-10,-10,-10,-10,-10,-10,-20]
+  ];
+
+  function evaluateBoard(game) {
+    let totalScore = 0;
+    const board = game.board();
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const cell = board[r][c];
+        if (cell) {
+          let score = pieceValues[cell.type];
+          if (cell.type === 'p') {
+            score += cell.color === 'w' ? pawnPST[r][c] : pawnPST[7 - r][c];
+          } else if (cell.type === 'n') {
+            score += knightPST[r][c];
+          } else if (cell.type === 'b') {
+            score += bishopPST[r][c];
+          }
+          if (cell.color === 'w') {
+            totalScore += score;
+          } else {
+            totalScore -= score;
+          }
+        }
+      }
+    }
+    return game.turn() === 'w' ? totalScore : -totalScore;
+  }
+
+  function orderMoves(moves) {
+    const pVals = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    return moves.map(m => {
+      let score = 0;
+      if (m.captured) {
+        score += 1000 + (pVals[m.captured] * 10) - pVals[m.piece];
+      }
+      if (m.flags.includes('p')) score += 900;
+      if (m.flags.includes('+')) score += 100;
+      return { move: m, score: score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map(x => x.move);
+  }
+
+  function minimax(game, depth, alpha, beta, isMaximizing, elo) {
+    if (depth === 0) {
+      let val = evaluateBoard(game);
+      if (elo === 1300) {
+        val += (Math.random() * 80) - 40;
+      }
+      return val;
+    }
+    let moves = game.moves({ verbose: true });
+    if (moves.length === 0) {
+      if (game.in_checkmate()) {
+        return isMaximizing ? -50000 : 50000;
+      }
+      return 0;
+    }
+    moves = orderMoves(moves);
+    if (isMaximizing) {
+      let bestValue = -999999;
+      for (let i = 0; i < moves.length; i++) {
+        game.move(moves[i]);
+        bestValue = Math.max(bestValue, minimax(game, depth - 1, alpha, beta, false, elo));
+        game.undo();
+        alpha = Math.max(alpha, bestValue);
+        if (beta <= alpha) break;
+      }
+      return bestValue;
+    } else {
+      let bestValue = 999999;
+      for (let i = 0; i < moves.length; i++) {
+        game.move(moves[i]);
+        bestValue = Math.min(bestValue, minimax(game, depth - 1, alpha, beta, true, elo));
+        game.undo();
+        beta = Math.min(beta, bestValue);
+        if (beta <= alpha) break;
+      }
+      return bestValue;
+    }
+  }
+
+  self.onmessage = function(e) {
+    const { fen, elo } = e.data;
+    const game = new Chess(fen);
+    let moves = game.moves({ verbose: true });
+    if (moves.length === 0) {
+      self.postMessage(null);
+      return;
+    }
+    moves = orderMoves(moves);
+    const depth = elo === 1300 ? 2 : (elo === 1800 ? 3 : 4);
+    let bestMove = moves[0];
+    let bestValue = -999999;
+    let alpha = -999999;
+    let beta = 999999;
+
+    for (let i = 0; i < moves.length; i++) {
+      const move = moves[i];
+      game.move(move);
+      const boardValue = -minimax(game, depth - 1, -beta, -alpha, false, elo);
+      game.undo();
+      if (boardValue > bestValue) {
+        bestValue = boardValue;
+        bestMove = move;
+      }
+      alpha = Math.max(alpha, boardValue);
+    }
+
+    self.postMessage({ from: bestMove.from, to: bestMove.to, promotion: bestMove.promotion });
+  };
+`;
+
 const ChessEngine = {
   game: null,       // chess.js Chess object instance
   elo: 1300,
@@ -2805,10 +2952,20 @@ const ChessEngine = {
   activePlayer: 'w',
   selectedSquare: null,
   lastMove: null,
+  worker: null,
 
   start() {
     this.showSetup();
     this.setupListeners();
+    this.initWorker();
+  },
+
+  initWorker() {
+    if (this.worker) {
+      this.worker.terminate();
+    }
+    const blob = new Blob([chessWorkerCode], { type: 'application/javascript' });
+    this.worker = new Worker(URL.createObjectURL(blob));
   },
 
   showSetup() {
@@ -3044,196 +3201,42 @@ const ChessEngine = {
   triggerBotMove() {
     if (this.game.game_over()) return;
 
-    const possibleMoves = this.game.moves({ verbose: true });
-    if (possibleMoves.length === 0) return;
+    this.updateStatusText(`Bot (${this.elo} ELO) is thinking...`);
 
-    let bestMove = null;
-    
-    // Choose search depth based on ELO
-    // 1300 ELO -> Depth 2 search with random evaluation noise
-    // 1800 ELO -> Depth 3 search standard
-    // 2200 ELO -> Depth 4 search positional sorting
-    const depth = this.elo === 1300 ? 2 : (this.elo === 1800 ? 3 : 4);
-    
-    bestMove = this.getBestMove(depth);
+    // Post game state to background thread Worker
+    this.worker.postMessage({ fen: this.game.fen(), elo: this.elo });
 
-    if (bestMove) {
-      this.game.move(bestMove);
-      AudioPlayer.playClick();
-      this.lastMove = { from: bestMove.from, to: bestMove.to };
-      this.renderBoard();
+    this.worker.onmessage = (e) => {
+      const bestMove = e.data;
+      if (bestMove) {
+        const moveDetails = {
+          from: bestMove.from,
+          to: bestMove.to
+        };
+        if (bestMove.promotion) {
+          moveDetails.promotion = bestMove.promotion;
+        }
 
-      // Add increment
-      this.blackTime += this.increment;
-      this.updateClockDisplay('b');
+        const result = this.game.move(moveDetails);
+        if (result) {
+          AudioPlayer.playClick();
+          this.lastMove = { from: moveDetails.from, to: moveDetails.to };
+          this.selectedSquare = null;
+          this.renderBoard();
 
-      this.checkGameOverState();
+          // Add increment and toggle player
+          this.blackTime += this.increment;
+          this.updateClockDisplay('b');
 
-      if (!this.game.game_over()) {
-        this.activePlayer = 'w';
-      }
-    }
-  },
+          this.checkGameOverState();
 
-  // Move ordering for alpha-beta pruning efficiency
-  orderMoves(moves) {
-    const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
-    return moves.map(m => {
-      let score = 0;
-      if (m.captured) {
-        // MVV-LVA: capturing valuable pieces with low value pieces first
-        score += 1000 + (pieceValues[m.captured] * 10) - pieceValues[m.piece];
-      }
-      if (m.flags.includes('p')) {
-        score += 900; // Promotion
-      }
-      if (m.flags.includes('+')) {
-        score += 100; // Check
-      }
-      return { move: m, score: score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .map(x => x.move);
-  },
-
-  // Simplistic Minimax with Alpha-Beta Pruning
-  getBestMove(depth) {
-    let moves = this.game.moves({ verbose: true });
-    if (moves.length === 0) return null;
-
-    // Order moves for maximum pruning speed
-    moves = this.orderMoves(moves);
-
-    let bestMove = moves[0];
-    let bestValue = -999999;
-    let alpha = -999999;
-    let beta = 999999;
-
-    for (let i = 0; i < moves.length; i++) {
-      const move = moves[i];
-      this.game.move(move);
-      const boardValue = -this.minimax(depth - 1, -beta, -alpha, false);
-      this.game.undo();
-
-      if (boardValue > bestValue) {
-        bestValue = boardValue;
-        bestMove = move;
-      }
-      alpha = Math.max(alpha, boardValue);
-    }
-    return bestMove;
-  },
-
-  minimax(depth, alpha, beta, isMaximizing) {
-    if (depth === 0) {
-      let val = this.evaluateBoard();
-      // Add ELO noise for Easy 1300 bot
-      if (this.elo === 1300) {
-        val += (Math.random() * 80) - 40; 
-      }
-      return val;
-    }
-
-    let moves = this.game.moves({ verbose: true });
-    if (moves.length === 0) {
-      if (this.game.in_checkmate()) {
-        return isMaximizing ? -50000 : 50000;
-      }
-      return 0; // Draw/Stalemate
-    }
-
-    // Sort moves to maximize alpha-beta pruning
-    moves = this.orderMoves(moves);
-
-    if (isMaximizing) {
-      let bestValue = -999999;
-      for (let i = 0; i < moves.length; i++) {
-        this.game.move(moves[i]);
-        bestValue = Math.max(bestValue, this.minimax(depth - 1, alpha, beta, false));
-        this.game.undo();
-        alpha = Math.max(alpha, bestValue);
-        if (beta <= alpha) break;
-      }
-      return bestValue;
-    } else {
-      let bestValue = 999999;
-      for (let i = 0; i < moves.length; i++) {
-        this.game.move(moves[i]);
-        bestValue = Math.min(bestValue, this.minimax(depth - 1, alpha, beta, true));
-        this.game.undo();
-        beta = Math.min(beta, bestValue);
-        if (beta <= alpha) break;
-      }
-      return bestValue;
-    }
-  },
-
-  evaluateBoard() {
-    let totalScore = 0;
-    const board = this.game.board();
-    const pieceValues = {
-      p: 100, n: 320, b: 330, r: 500, q: 900, k: 20000
-    };
-
-    // Positional matrices to evaluate piece developments
-    // High values encourage center dominance, safety, activity
-    const pawnPST = [
-      [0,  0,  0,  0,  0,  0,  0,  0],
-      [50, 50, 50, 50, 50, 50, 50, 50],
-      [10, 10, 20, 30, 30, 20, 10, 10],
-      [5,  5, 10, 25, 25, 10,  5,  5],
-      [0,  0,  0, 20, 20,  0,  0,  0],
-      [5, -5,-10,  0,  0,-10, -5,  5],
-      [5, 10, 10,-20,-20, 10, 10,  5],
-      [0,  0,  0,  0,  0,  0,  0,  0]
-    ];
-    const knightPST = [
-      [-50,-40,-30,-30,-30,-30,-40,-50],
-      [-40,-20,  0,  0,  0,  0,-20,-40],
-      [-30,  0, 10, 15, 15, 10,  0,-30],
-      [-30,  5, 15, 20, 20, 15,  5,-30],
-      [-30,  0, 15, 20, 20, 15,  0,-30],
-      [-30,  5, 10, 15, 15, 10,  5,-30],
-      [-40,-20,  0,  5,  5,  0,-20,-40],
-      [-50,-40,-30,-30,-30,-30,-40,-50]
-    ];
-    const bishopPST = [
-      [-20,-10,-10,-10,-10,-10,-10,-20],
-      [-10,  0,  0,  0,  0,  0,  0,-10],
-      [-10,  0,  5, 10, 10,  5,  0,-10],
-      [-10,  5,  5, 10, 10,  5,  5,-10],
-      [-10,  0, 10, 10, 10, 10,  0,-10],
-      [-10, 10, 10, 10, 10, 10, 10,-10],
-      [-10,  5,  0,  0,  0,  0,  5,-10],
-      [-20,-10,-10,-10,-10,-10,-10,-20]
-    ];
-
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        const cell = board[r][c];
-        if (cell) {
-          let score = pieceValues[cell.type];
-          
-          // Positional values addition
-          if (cell.type === 'p') {
-            score += cell.color === 'w' ? pawnPST[r][c] : pawnPST[7 - r][c];
-          } else if (cell.type === 'n') {
-            score += knightPST[r][c];
-          } else if (cell.type === 'b') {
-            score += bishopPST[r][c];
-          }
-
-          if (cell.color === 'w') {
-            totalScore += score;
-          } else {
-            totalScore -= score;
+          if (!this.game.game_over()) {
+            this.activePlayer = 'w';
+            this.updateStatusText("Your turn!");
           }
         }
       }
-    }
-    
-    // Return relative score depending on active player
-    return this.game.turn() === 'w' ? totalScore : -totalScore;
+    };
   },
 
   startClock() {

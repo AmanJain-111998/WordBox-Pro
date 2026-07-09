@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamebox-pro-v6.0';
+const CACHE_NAME = 'gamebox-pro-v6.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -9,7 +9,19 @@ const ASSETS_TO_CACHE = [
   './app.js',
   './manifest.json',
   './icon.svg',
-  'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js',
+  'https://lichess1.org/assets/piece/cburnett/wP.svg',
+  'https://lichess1.org/assets/piece/cburnett/wR.svg',
+  'https://lichess1.org/assets/piece/cburnett/wN.svg',
+  'https://lichess1.org/assets/piece/cburnett/wB.svg',
+  'https://lichess1.org/assets/piece/cburnett/wQ.svg',
+  'https://lichess1.org/assets/piece/cburnett/wK.svg',
+  'https://lichess1.org/assets/piece/cburnett/bP.svg',
+  'https://lichess1.org/assets/piece/cburnett/bR.svg',
+  'https://lichess1.org/assets/piece/cburnett/bN.svg',
+  'https://lichess1.org/assets/piece/cburnett/bB.svg',
+  'https://lichess1.org/assets/piece/cburnett/bQ.svg',
+  'https://lichess1.org/assets/piece/cburnett/bK.svg'
 ];
 
 // Install Event - Precache Assets

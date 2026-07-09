@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.0';
+const APP_VERSION = '6.1';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=6.0')
+    navigator.serviceWorker.register('./service-worker.js?v=6.1')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -2905,10 +2905,8 @@ const ChessEngine = {
     const boardEl = document.getElementById('board-chess');
     boardEl.innerHTML = '';
     
-    const boardState = this.game.board(); // 8x8 array of cells (each cell is null or {type: 'p', color: 'w'})
-    const unicodePieces = {
-      p: '♟', n: '♞', b: '♝', r: '♜', q: '♛', k: '♚'
-    };
+    const boardState = this.game.board(); // 8x8 array of cells
+    const fileNames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
     // Render from White's perspective (row 8 to 1, col a to h)
     for (let r = 0; r < 8; r++) {
@@ -2917,16 +2915,35 @@ const ChessEngine = {
         const squareColorClass = (r + c) % 2 === 0 ? 'light' : 'dark';
         squareEl.className = `chess-square ${squareColorClass}`;
         
-        // Map square name (e.g. 'e4')
-        const fileNames = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
         const squareName = fileNames[c] + (8 - r);
         squareEl.dataset.square = squareName;
+
+        // Render file coordinates inside the bottom row cells (row r = 7)
+        if (r === 7) {
+          const fileLabel = document.createElement('span');
+          fileLabel.className = 'chess-coordinate file-coordinate';
+          fileLabel.innerText = fileNames[c];
+          squareEl.appendChild(fileLabel);
+        }
+
+        // Render rank coordinates inside the right column cells (col c = 7)
+        if (c === 7) {
+          const rankLabel = document.createElement('span');
+          rankLabel.className = 'chess-coordinate rank-coordinate';
+          rankLabel.innerText = 8 - r;
+          squareEl.appendChild(rankLabel);
+        }
 
         const cell = boardState[r][c];
         if (cell) {
           const pieceEl = document.createElement('div');
           pieceEl.className = `chess-piece ${cell.color === 'w' ? 'white-piece' : 'black-piece'}`;
-          pieceEl.innerText = unicodePieces[cell.type];
+          
+          const imgEl = document.createElement('img');
+          imgEl.src = `https://lichess1.org/assets/piece/cburnett/${cell.color}${cell.type.toUpperCase()}.svg`;
+          imgEl.alt = `${cell.color === 'w' ? 'White' : 'Black'} ${cell.type.toUpperCase()}`;
+          imgEl.draggable = false;
+          pieceEl.appendChild(imgEl);
           squareEl.appendChild(pieceEl);
         }
 

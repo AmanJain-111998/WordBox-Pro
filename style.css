@@ -2455,6 +2455,13 @@ body.light-theme .custom-time-row input {
 }
 
 /* Chess Board Game Layout */
+/* Chess Board Game Layout */
+#game-chess {
+  background-color: #312e2b !important; /* Chess.com signature dark mode charcoal */
+  border-radius: 12px;
+  padding: 16px 8px;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.6);
+}
 .chess-game-layout {
   display: flex;
   flex-direction: column;
@@ -2468,31 +2475,28 @@ body.light-theme .custom-time-row input {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 4px;
+  padding: 6px 4px;
   font-size: 14px;
-  font-weight: 600;
-  color: var(--text-main);
+  font-weight: 700;
+  color: #bababa; /* Light gray player names */
 }
 .chess-clock {
-  font-family: monospace;
-  background: rgba(0, 0, 0, 0.4);
-  padding: 4px 10px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-family: 'Outfit', monospace;
+  background: #262421; /* Chess.com clock background */
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
   font-size: 16px;
-  color: #10b981; /* Default neon green clock */
-}
-body.light-theme .chess-clock {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+  color: #ffffff; /* Bright digital display */
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5);
+  min-width: 70px;
+  text-align: center;
 }
 .chess-clock.low-time {
-  color: #ef4444; /* Neon Red clock alert */
-  animation: pulse-clock 1s infinite alternate;
-}
-@keyframes pulse-clock {
-  0% { opacity: 0.7; }
-  100% { opacity: 1; box-shadow: 0 0 8px rgba(239, 68, 68, 0.3); }
+  background: #b33939; /* Chess.com red clock alert */
+  color: #ffffff;
+  border-color: #ff5252;
 }
 
 .chess-grid {
@@ -2502,74 +2506,95 @@ body.light-theme .chess-clock {
   width: 92%;
   max-width: 340px;
   aspect-ratio: 1;
-  border-radius: 8px;
+  border-radius: 6px;
   overflow: hidden;
-  border: 3px solid rgba(255, 255, 255, 0.45);
-  box-shadow: var(--glass-shadow);
+  border: 4px solid #272522; /* Dark framing border */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   margin: 4px auto;
-}
-body.light-theme .chess-grid {
-  border-color: rgba(15, 23, 42, 0.45);
+  position: relative;
 }
 .chess-square {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  position: relative;
   user-select: none;
   cursor: pointer;
-  position: relative;
 }
+/* Chess.com default colors */
 .chess-square.light {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-body.dark-theme .chess-square.light {
-  background-color: rgba(255, 255, 255, 0.75);
+  background-color: #eeeed2;
 }
 .chess-square.dark {
-  background-color: #64748b; /* Slate dark squares */
+  background-color: #769656;
 }
-body.dark-theme .chess-square.dark {
-  background-color: #334155;
+
+/* Coordinates nested inside corner squares */
+.chess-coordinate {
+  position: absolute;
+  font-weight: 700;
+  font-size: 8.5px;
+  user-select: none;
+  pointer-events: none;
 }
-/* Piece Styles */
+.file-coordinate {
+  bottom: 2px;
+  right: 4px;
+}
+.rank-coordinate {
+  top: 2px;
+  left: 4px;
+}
+.chess-square.light .chess-coordinate {
+  color: #769656; /* Dark color text on light square */
+}
+.chess-square.dark .chess-coordinate {
+  color: #eeeed2; /* Light color text on dark square */
+}
+
+/* Vector Piece Styles */
 .chess-piece {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  width: 90%;
+  height: 90%;
+  z-index: 5;
   transition: transform var(--transition-fast);
 }
-.chess-piece.white-piece {
-  color: #f8fafc;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 6px rgba(255, 255, 255, 0.4);
+.chess-piece img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-.chess-piece.black-piece {
-  color: #ef4444; /* Neon Rose/Coral Black pieces for dark theme pop! */
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6), 0 0 6px rgba(239, 68, 68, 0.4);
-}
-body.light-theme .chess-piece.black-piece {
-  color: #1e293b;
-  text-shadow: 0 0 1px rgba(255, 255, 255, 0.8);
-}
+
+/* Selection and Move Highlights (Chess.com Yellow) */
 .chess-square.selected {
-  background-color: rgba(59, 130, 246, 0.6) !important; /* Blue selection */
+  background-color: rgba(247, 247, 105, 0.6) !important;
 }
 .chess-square.last-move {
-  background-color: rgba(234, 179, 8, 0.4) !important; /* Gold last-move highlighting */
+  background-color: rgba(247, 247, 105, 0.4) !important;
 }
+
+/* Chess.com Move Indicators */
 .chess-square.valid-dot::after {
   content: '';
-  width: 10px;
-  height: 10px;
-  background-color: rgba(16, 185, 129, 0.85); /* Emerald dot for moves */
+  width: 13px;
+  height: 13px;
+  background-color: rgba(0, 0, 0, 0.15) !important;
   border-radius: 50%;
   position: absolute;
-  z-index: 2;
+  z-index: 6;
 }
-.chess-square.valid-capture {
-  box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.85) !important; /* Red inset ring for captures */
+.chess-square.valid-capture::before {
+  content: '';
+  width: 80%;
+  height: 80%;
+  border: 5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  position: absolute;
+  z-index: 6;
+  box-sizing: border-box;
 }
 
 .chess-game-controls {
@@ -2580,27 +2605,25 @@ body.light-theme .chess-piece.black-piece {
 }
 .chess-control-btn {
   flex: 1;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--text-main);
+  background: #262421; /* Chess.com dark slate button */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #bababa;
   padding: 8px 0;
   border-radius: 6px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
   transition: all var(--transition-fast);
 }
-body.light-theme .chess-control-btn {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.08);
-}
 .chess-control-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: #3c3934;
+  color: white;
 }
 .chess-control-btn.resign:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.4);
+  background: #b33939;
+  color: white;
+  border-color: #ff5252;
 }
 
 /* Ludo Game layout */

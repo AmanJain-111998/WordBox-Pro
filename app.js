@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '5.8';
+const APP_VERSION = '5.9';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=5.8')
+    navigator.serviceWorker.register('./service-worker.js?v=5.9')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -3498,6 +3498,19 @@ const LudoEngine = {
     this.consecutiveSixes = 0;
     this.turnOrder = this.playerCount === 2 ? ['red', 'green'] : ['red', 'green', 'yellow', 'blue'];
 
+    // Setup player cards text/avatars (Ludo King look)
+    document.querySelector('#ludo-card-red .ludo-name').innerText = 'Red (You)';
+    document.querySelector('#ludo-card-red .ludo-avatar').innerText = '🧑‍💻';
+    
+    document.querySelector('#ludo-card-green .ludo-name').innerText = 'Green (CPU 1)';
+    document.querySelector('#ludo-card-green .ludo-avatar').innerText = '🤖';
+    
+    document.querySelector('#ludo-card-yellow .ludo-name').innerText = 'Yellow (CPU 2)';
+    document.querySelector('#ludo-card-yellow .ludo-avatar').innerText = '👽';
+    
+    document.querySelector('#ludo-card-blue .ludo-name').innerText = 'Blue (CPU 3)';
+    document.querySelector('#ludo-card-blue .ludo-avatar').innerText = '👾';
+
     for (const color of ['red', 'green', 'yellow', 'blue']) {
       this.tokens[color] = [
         { id: 0, pos: -1, isHopping: false },
@@ -3505,10 +3518,11 @@ const LudoEngine = {
         { id: 2, pos: -1, isHopping: false },
         { id: 3, pos: -1, isHopping: false }
       ];
-      // Reset personal dice values
+      // Reset personal 3D dice to 1
+      this.updateDiceSlotFace(color, 1);
+      
       const diceSlot = document.getElementById(`ludo-dice-${color}`);
       if (diceSlot) {
-        diceSlot.innerText = '⚀';
         diceSlot.classList.remove('active-roll');
         diceSlot.onclick = null;
       }
@@ -3632,11 +3646,8 @@ const LudoEngine = {
     LudoAudioSynth.playDice();
 
     // Spin faces during rolling (Ludo King look)
-    const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
     let spinInterval = setInterval(() => {
-      if (diceSlot) {
-        diceSlot.innerText = diceFaces[Math.floor(Math.random() * 6)];
-      }
+      this.updateDiceSlotFace(this.activeColor, Math.floor(Math.random() * 6) + 1);
     }, 60);
 
     setTimeout(() => {
@@ -3646,9 +3657,7 @@ const LudoEngine = {
       }
 
       this.diceValue = Math.floor(Math.random() * 6) + 1;
-      if (diceSlot) {
-        diceSlot.innerText = diceFaces[this.diceValue - 1];
-      }
+      this.updateDiceSlotFace(this.activeColor, this.diceValue);
 
       // Check consecutive 6s
       if (this.diceValue === 6) {
@@ -3931,6 +3940,19 @@ const LudoEngine = {
 
     baseEl.appendChild(innerEl);
     return baseEl;
+  },
+
+  updateDiceSlotFace(color, value) {
+    const diceSlot = document.getElementById(`ludo-dice-${color}`);
+    if (diceSlot) {
+      diceSlot.innerHTML = `
+        <div class="dice-dots-grid val-${value}">
+          <div class="dot dot-1"></div><div class="dot dot-2"></div><div class="dot dot-3"></div>
+          <div class="dot dot-4"></div><div class="dot dot-5"></div><div class="dot dot-6"></div>
+          <div class="dot dot-7"></div><div class="dot dot-8"></div><div class="dot dot-9"></div>
+        </div>
+      `;
+    }
   },
 
   renderTokens() {

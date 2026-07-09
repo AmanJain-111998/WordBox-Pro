@@ -2111,3 +2111,227 @@ body.light-theme #keyboard-numeric .dialer-key:active {
   }
 }
 
+/* ==========================================================================
+   2048 Game Styling
+   ========================================================================== */
+.game2048-header-info {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.score-container, .best-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: var(--glass-border);
+  min-width: 80px;
+}
+
+.score-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+#game2048-score, #game2048-best {
+  font-family: var(--font-logo);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.game2048-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.grid-2048 {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 10px;
+  width: min(100vw - 32px, 330px);
+  height: min(100vw - 32px, 330px);
+  background: rgba(30, 41, 59, 0.6); /* Translucent dark slate */
+  padding: 10px;
+  border-radius: 16px;
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  touch-action: none; /* Disables standard scrolling on swipe */
+}
+
+body.light-theme .grid-2048 {
+  background: rgba(226, 232, 240, 0.8);
+}
+
+.grid-cell-2048 {
+  background: rgba(15, 23, 42, 0.4);
+  border-radius: 10px;
+  width: 100%;
+  height: 100%;
+}
+
+body.light-theme .grid-cell-2048 {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+.tiles-container-2048 {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  pointer-events: none;
+}
+
+/* Base style for active tiles */
+.tile-2048 {
+  position: absolute;
+  width: 25%;
+  height: 25%;
+  padding: 5px; /* offset for grid gap */
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-logo);
+  font-weight: 700;
+  font-size: min(8vw, 24px);
+  border-radius: 10px;
+  transition: transform 0.12s ease-in-out, top 0.12s ease-in-out, left 0.12s ease-in-out, background-color 0.12s ease-in-out;
+  animation: tileAppear 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  background-clip: content-box;
+}
+
+@keyframes tileAppear {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Color palettes based on values */
+.tile-2048-2 { background-color: rgba(255, 255, 255, 0.1); color: var(--text-main); }
+.tile-2048-4 { background-color: rgba(255, 255, 255, 0.2); color: var(--text-main); }
+.tile-2048-8 { background-color: #f59e0b; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.tile-2048-16 { background-color: #f97316; color: #fff; }
+.tile-2048-32 { background-color: #ef4444; color: #fff; }
+.tile-2048-64 { background-color: #ec4899; color: #fff; }
+.tile-2048-128 { background-color: #a855f7; color: #fff; box-shadow: 0 0 12px rgba(168, 85, 247, 0.4); }
+.tile-2048-256 { background-color: #6366f1; color: #fff; box-shadow: 0 0 12px rgba(99, 102, 241, 0.4); }
+.tile-2048-512 { background-color: #3b82f6; color: #fff; box-shadow: 0 0 12px rgba(59, 130, 246, 0.4); }
+.tile-2048-1024 { background-color: #10b981; color: #fff; box-shadow: 0 0 12px rgba(16, 185, 129, 0.4); }
+.tile-2048-2048 {
+  background: linear-gradient(135deg, #f59e0b, #ec4899);
+  color: #fff;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
+  animation: tileAppear 0.18s forwards, pulseWin 1.5s infinite alternate ease-in-out;
+}
+
+@keyframes pulseWin {
+  0% { transform: scale(1); box-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+  100% { transform: scale(1.04); box-shadow: 0 0 30px rgba(236, 72, 153, 0.8); }
+}
+
+body.light-theme .tile-2048-2 { background-color: rgba(15, 23, 42, 0.08); color: var(--text-main); }
+body.light-theme .tile-2048-4 { background-color: rgba(15, 23, 42, 0.15); color: var(--text-main); }
+
+/* Virtual D-Pad controller */
+.dpad-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 8px auto;
+  max-width: 160px;
+}
+
+.dpad-middle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dpad-btn {
+  width: 44px;
+  height: 44px;
+  background: rgba(30, 41, 59, 0.5);
+  border: var(--glass-border);
+  border-radius: 50%;
+  color: var(--text-main);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: var(--glass-shadow);
+}
+
+body.light-theme .dpad-btn {
+  background: rgba(226, 232, 240, 0.8);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.dpad-btn:active {
+  transform: scale(0.92);
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.dpad-btn-center {
+  width: 44px;
+  height: 44px;
+  background: rgba(30, 41, 59, 0.6);
+  border: var(--glass-border);
+  border-radius: 50%;
+  color: var(--text-main);
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+body.light-theme .dpad-btn-center {
+  background: rgba(226, 232, 240, 0.9);
+  border-color: rgba(15, 23, 42, 0.08);
+}
+
+.dpad-btn-center:active {
+  transform: scale(0.92);
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Tablet / Desktop sizes scaling */
+@media (min-width: 480px) {
+  .grid-2048 {
+    width: 340px;
+    height: 340px;
+    gap: 12px;
+    padding: 12px;
+  }
+  .tiles-container-2048 {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+  }
+  .tile-2048 {
+    font-size: 26px;
+  }
+}
+

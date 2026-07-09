@@ -132,6 +132,17 @@
             </div>
             <button class="play-btn">Play</button>
           </div>
+
+          <!-- 2048 Card -->
+          <div class="game-card" data-game="game2048">
+            <div class="card-icon game2048-color">2k</div>
+            <div class="card-info">
+              <h3>2048 Classic</h3>
+              <p>Slide and merge matching tiles to reach 2048!</p>
+              <span class="badge">500 Levels</span>
+            </div>
+            <button class="play-btn">Play</button>
+          </div>
         </div>
       </section>
 
@@ -213,6 +224,56 @@
         <!-- GAME D: Sudoku Board -->
         <div id="game-sudoku" class="game-board-panel hidden">
           <div id="board-sudoku" class="sudoku-grid" aria-label="Sudoku Grid"></div>
+        </div>
+
+        <!-- GAME E: 2048 Board -->
+        <div id="game-game2048" class="game-board-panel hidden">
+          <div class="game2048-header-info">
+            <div class="score-container">
+              <span class="score-label">SCORE</span>
+              <span id="game2048-score">0</span>
+            </div>
+            <div class="best-container">
+              <span class="score-label">BEST</span>
+              <span id="game2048-best">0</span>
+            </div>
+          </div>
+          
+          <div class="game2048-container">
+            <div id="board-2048" class="grid-2048" aria-label="2048 Grid">
+              <!-- Grid background cells (16 cells) -->
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              <div class="grid-cell-2048"></div>
+              
+              <!-- Dynamic tiles will be injected here -->
+              <div id="tiles-container-2048" class="tiles-container-2048"></div>
+            </div>
+          </div>
+
+          <!-- Minimalist On-Screen D-Pad / Controls for easy mobile play -->
+          <div class="dpad-container">
+            <button id="dpad-up" class="dpad-btn" aria-label="Move Up">▲</button>
+            <div class="dpad-middle-row">
+              <button id="dpad-left" class="dpad-btn" aria-label="Move Left">◀</button>
+              <button id="dpad-restart" class="dpad-btn-center" aria-label="Restart Game">🔄</button>
+              <button id="dpad-right" class="dpad-btn" aria-label="Move Right">▶</button>
+            </div>
+            <button id="dpad-down" class="dpad-btn" aria-label="Move Down">▼</button>
+          </div>
         </div>
         
       </main>

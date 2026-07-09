@@ -7,7 +7,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=5.2')
+    navigator.serviceWorker.register('./service-worker.js?v=5.3')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -203,6 +203,10 @@ const defaultStatsSchema = {
   sudoku: {
     practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
     daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
+  },
+  game2048: {
+    practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
+    daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
   }
 };
 
@@ -297,7 +301,7 @@ function loadStats() {
   if (saved) {
     GameHubState.stats = JSON.parse(saved);
     // Ensure compatibility with previous formats by merging schemas
-    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku']) {
+    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku', 'game2048']) {
       if (!GameHubState.stats[game]) {
         GameHubState.stats[game] = JSON.parse(JSON.stringify(defaultStatsSchema[game]));
       } else {
@@ -385,7 +389,8 @@ function showView(view) {
       wordle: 'WORDLE<span class="logo-accent">PRO</span>',
       octordle: 'OCTORDLE<span class="logo-accent">PRO</span>',
       crossword: 'CROSSWORD<span class="logo-accent">PRO</span>',
-      sudoku: 'SUDOKU<span class="logo-accent">PRO</span>'
+      sudoku: 'SUDOKU<span class="logo-accent">PRO</span>',
+      game2048: '2048<span class="logo-accent">PRO</span>'
     };
     document.getElementById('logo-main').innerHTML = gameTitles[view];
     
@@ -401,6 +406,10 @@ function showView(view) {
     if (view === 'sudoku') {
       qwertyKb.classList.add('hidden');
       numericKb.classList.remove('hidden');
+      octordleShortcuts.classList.add('hidden');
+    } else if (view === 'game2048') {
+      qwertyKb.classList.add('hidden');
+      numericKb.classList.add('hidden');
       octordleShortcuts.classList.add('hidden');
     } else {
       qwertyKb.classList.remove('hidden');
@@ -444,6 +453,8 @@ function startActiveGame() {
     CrosswordEngine.start();
   } else if (GameHubState.activeGame === 'sudoku') {
     SudokuEngine.start();
+  } else if (GameHubState.activeGame === 'game2048') {
+    Game2048Engine.start();
   }
 }
 
@@ -2356,14 +2367,15 @@ function updateStatsModal() {
     dist.classList.add('hidden');
   }
 
-  // Next level toggles (Practice mode for Sudoku and Crossword)
+  // Next level toggles (Practice mode for Sudoku, Crossword, and 2048)
   const isGameOver = (game === 'wordle' ? WordleEngine.status !== 'IN_PROGRESS' :
                      (game === 'octordle' ? OctordleEngine.status !== 'IN_PROGRESS' :
                      (game === 'crossword' ? (CrosswordEngine.isChecked && !document.getElementById('modal-stats').classList.contains('hidden')) :
-                     (SudokuEngine.checkSudokuWin()))));
+                     (game === 'sudoku' ? SudokuEngine.checkSudokuWin() :
+                     (game === 'game2048' ? (Game2048Engine.isGameOver || Game2048Engine.isGameWon) : false)))));
                      
   if (isGameOver) {
-    if (game === 'sudoku' || game === 'crossword') {
+    if (game === 'sudoku' || game === 'crossword' || game === 'game2048') {
       if (mode === 'practice') {
         nextLevelBtn.classList.remove('hidden');
         nextLevelBtn.onclick = () => {
@@ -2408,6 +2420,373 @@ function getShareContent() {
     return `Mini Crossword (${diff}) - ${mode} Solved!\nPlay offline at Gamebox Pro!`;
   } else if (game === 'sudoku') {
     return `Sudoku Master (${diff}) - ${mode} Solved with ${SudokuEngine.mistakes} mistakes!\nPlay offline at Gamebox Pro!`;
+  } else if (game === 'game2048') {
+    const res = Game2048Engine.isGameWon ? 'WON' : 'FAILED';
+    return `2048 Classic (${diff}) - ${mode} - ${res} with score ${Game2048Engine.score}!\nPlay offline at Gamebox Pro!`;
   }
   return '';
 }
+
+// ==========================================================================
+// GAME 5: 2048 Engine
+// ==========================================================================
+const Game2048Engine = {
+  grid: [],      // 4x4 grid array of numbers (0 for empty)
+  score: 0,
+  bestScore: 0,
+  targetTile: 2048, // Win threshold based on difficulty (256, 1024, 2048)
+  isGameOver: false,
+  isGameWon: false,
+  swipeStartX: 0,
+  swipeStartY: 0,
+
+  start() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    
+    // Set level index
+    let levelIndex = 0;
+    if (mode === 'daily') {
+      levelIndex = GameHubState.dailyIndex % 500;
+    } else {
+      levelIndex = GameHubState.stats.game2048.practice[diff].levelIndex % 500;
+    }
+    
+    // Set target tile based on difficulty
+    if (diff === 'easy') {
+      this.targetTile = 256;
+    } else if (diff === 'medium') {
+      this.targetTile = 1024;
+    } else {
+      this.targetTile = 2048;
+    }
+
+    // Load best score from local storage
+    this.bestScore = parseInt(localStorage.getItem('gamebox_2048_best') || '0', 10);
+    document.getElementById('game2048-best').textContent = this.bestScore;
+
+    this.initGame();
+    
+    // Show toast for level target
+    showToast(`Target: Reach the ${this.targetTile} tile! 🎯`);
+  },
+
+  initGame() {
+    this.grid = Array(4).fill(null).map(() => Array(4).fill(0));
+    this.score = 0;
+    this.isGameOver = false;
+    this.isGameWon = false;
+    
+    document.getElementById('game2048-score').textContent = '0';
+    
+    // Add two random tiles
+    this.addRandomTile();
+    this.addRandomTile();
+    
+    this.render();
+    this.setupListeners();
+  },
+
+  addRandomTile() {
+    const emptyCells = [];
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (this.grid[r][c] === 0) {
+          emptyCells.push({ r, c });
+        }
+      }
+    }
+    if (emptyCells.length > 0) {
+      const cell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      // 90% chance of 2, 10% chance of 4
+      this.grid[cell.r][cell.c] = Math.random() < 0.9 ? 2 : 4;
+    }
+  },
+
+  render() {
+    const container = document.getElementById('tiles-container-2048');
+    container.innerHTML = '';
+    
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        const val = this.grid[r][c];
+        if (val > 0) {
+          const tile = document.createElement('div');
+          tile.className = `tile-2048 tile-2048-${val}`;
+          tile.textContent = val;
+          
+          // Calculate grid positioning (percentage based for perfect responsiveness)
+          tile.style.top = `${r * 25}%`;
+          tile.style.left = `${c * 25}%`;
+          
+          container.appendChild(tile);
+        }
+      }
+    }
+  },
+
+  // Setup input listeners (keyboard, swipe, dpad)
+  listenersBound: false,
+  setupListeners() {
+    if (this.listenersBound) return;
+    this.listenersBound = true;
+
+    // Keyboard Arrow Keys / WASD
+    window.addEventListener('keydown', (e) => {
+      if (GameHubState.activeGame !== 'game2048' || this.isGameOver || this.isGameWon) return;
+      
+      let moved = false;
+      switch (e.key) {
+        case 'ArrowUp':
+        case 'w':
+        case 'W':
+          moved = this.moveUp();
+          break;
+        case 'ArrowDown':
+        case 's':
+        case 'S':
+          moved = this.moveDown();
+          break;
+        case 'ArrowLeft':
+        case 'a':
+        case 'A':
+          moved = this.moveLeft();
+          break;
+        case 'ArrowRight':
+        case 'd':
+        case 'D':
+          moved = this.moveRight();
+          break;
+        default:
+          return; // Ignore other keys
+      }
+
+      if (moved) {
+        e.preventDefault();
+        this.afterMove();
+      }
+    });
+
+    // Touch Swipe gestures
+    const board = document.getElementById('board-2048');
+    board.addEventListener('touchstart', (e) => {
+      if (GameHubState.activeGame !== 'game2048' || this.isGameOver || this.isGameWon) return;
+      this.swipeStartX = e.touches[0].clientX;
+      this.swipeStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    board.addEventListener('touchend', (e) => {
+      if (GameHubState.activeGame !== 'game2048' || this.isGameOver || this.isGameWon) return;
+      
+      const diffX = e.changedTouches[0].clientX - this.swipeStartX;
+      const diffY = e.changedTouches[0].clientY - this.swipeStartY;
+      
+      // Minimum swipe distance threshold
+      const threshold = 30;
+      let moved = false;
+      
+      if (Math.abs(diffX) > Math.abs(diffY)) {
+        // Horizontal swipe
+        if (Math.abs(diffX) > threshold) {
+          if (diffX > 0) {
+            moved = this.moveRight();
+          } else {
+            moved = this.moveLeft();
+          }
+        }
+      } else {
+        // Vertical swipe
+        if (Math.abs(diffY) > threshold) {
+          if (diffY > 0) {
+            moved = this.moveDown();
+          } else {
+            moved = this.moveUp();
+          }
+        }
+      }
+
+      if (moved) {
+        this.afterMove();
+      }
+    }, { passive: true });
+
+    // D-Pad Click Handlers
+    document.getElementById('dpad-up').addEventListener('click', () => this.handleDpadMove('up'));
+    document.getElementById('dpad-down').addEventListener('click', () => this.handleDpadMove('down'));
+    document.getElementById('dpad-left').addEventListener('click', () => this.handleDpadMove('left'));
+    document.getElementById('dpad-right').addEventListener('click', () => this.handleDpadMove('right'));
+    document.getElementById('dpad-restart').addEventListener('click', () => {
+      AudioPlayer.playClick();
+      this.initGame();
+    });
+  },
+
+  handleDpadMove(dir) {
+    if (GameHubState.activeGame !== 'game2048' || this.isGameOver || this.isGameWon) return;
+    
+    let moved = false;
+    if (dir === 'up') moved = this.moveUp();
+    else if (dir === 'down') moved = this.moveDown();
+    else if (dir === 'left') moved = this.moveLeft();
+    else if (dir === 'right') moved = this.moveRight();
+
+    if (moved) {
+      this.afterMove();
+    }
+  },
+
+  afterMove() {
+    AudioPlayer.playClick();
+    this.addRandomTile();
+    this.render();
+    
+    // Update Score UI
+    document.getElementById('game2048-score').textContent = this.score;
+    if (this.score > this.bestScore) {
+      this.bestScore = this.score;
+      localStorage.setItem('gamebox_2048_best', this.bestScore);
+      document.getElementById('game2048-best').textContent = this.bestScore;
+    }
+
+    // Check Win/Loss states
+    this.checkGameStatus();
+  },
+
+  // Slide & Merge Logic
+  slideAndMergeLine(line) {
+    let compressed = line.filter(val => val > 0);
+    let mergedLine = [];
+    let movedOrMerged = false;
+
+    for (let i = 0; i < compressed.length; i++) {
+      if (i < compressed.length - 1 && compressed[i] === compressed[i+1]) {
+        const mergedVal = compressed[i] * 2;
+        mergedLine.push(mergedVal);
+        this.score += mergedVal;
+        i++; // skip next tile
+        movedOrMerged = true;
+      } else {
+        mergedLine.push(compressed[i]);
+      }
+    }
+
+    while (mergedLine.length < 4) {
+      mergedLine.push(0);
+    }
+
+    for (let i = 0; i < 4; i++) {
+      if (line[i] !== mergedLine[i]) {
+        movedOrMerged = true;
+      }
+    }
+
+    return { line: mergedLine, changed: movedOrMerged };
+  },
+
+  moveLeft() {
+    let anyChanged = false;
+    for (let r = 0; r < 4; r++) {
+      const res = this.slideAndMergeLine(this.grid[r]);
+      this.grid[r] = res.line;
+      if (res.changed) anyChanged = true;
+    }
+    return anyChanged;
+  },
+
+  moveRight() {
+    let anyChanged = false;
+    for (let r = 0; r < 4; r++) {
+      const reversed = [...this.grid[r]].reverse();
+      const res = this.slideAndMergeLine(reversed);
+      this.grid[r] = res.line.reverse();
+      if (res.changed) anyChanged = true;
+    }
+    return anyChanged;
+  },
+
+  moveUp() {
+    let anyChanged = false;
+    for (let c = 0; c < 4; c++) {
+      const column = [this.grid[0][c], this.grid[1][c], this.grid[2][c], this.grid[3][c]];
+      const res = this.slideAndMergeLine(column);
+      for (let r = 0; r < 4; r++) {
+        this.grid[r][c] = res.line[r];
+      }
+      if (res.changed) anyChanged = true;
+    }
+    return anyChanged;
+  },
+
+  moveDown() {
+    let anyChanged = false;
+    for (let c = 0; c < 4; c++) {
+      const column = [this.grid[3][c], this.grid[2][c], this.grid[1][c], this.grid[0][c]];
+      const res = this.slideAndMergeLine(column);
+      const reversedLine = res.line.reverse();
+      for (let r = 0; r < 4; r++) {
+        this.grid[r][c] = reversedLine[r];
+      }
+      if (res.changed) anyChanged = true;
+    }
+    return anyChanged;
+  },
+
+  checkGameStatus() {
+    // 1. Check Win Target
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (this.grid[r][c] >= this.targetTile) {
+          this.isGameWon = true;
+          this.handleWin();
+          return;
+        }
+      }
+    }
+
+    // 2. Check empty cells
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        if (this.grid[r][c] === 0) return;
+      }
+    }
+
+    // 3. Check adjacent matching numbers
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        const val = this.grid[r][c];
+        if (r < 3 && val === this.grid[r+1][c]) return;
+        if (c < 3 && val === this.grid[r][c+1]) return;
+      }
+    }
+
+    // No moves possible -> Game Over
+    this.isGameOver = true;
+    setTimeout(() => {
+      showToast("No moves left! Game Over. 😢");
+    }, 400);
+  },
+
+  handleWin() {
+    const mode = GameHubState.gameMode;
+    const diff = GameHubState.difficulty;
+    
+    setTimeout(() => {
+      showToast(`Congratulations! You reached the ${this.targetTile} tile! 🏆🎉`);
+      
+      if (mode === 'practice') {
+        const statsObj = GameHubState.stats.game2048.practice[diff];
+        if (!statsObj.completedLevels) statsObj.completedLevels = [];
+        if (!statsObj.completedLevels.includes(statsObj.levelIndex)) {
+          statsObj.completedLevels.push(statsObj.levelIndex);
+        }
+        statsObj.levelIndex++;
+      }
+      saveStats();
+      
+      setTimeout(() => {
+        updateStatsModal();
+        openModal(document.getElementById('modal-stats'));
+      }, 1200);
+    }, 400);
+  }
+};

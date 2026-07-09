@@ -2779,22 +2779,92 @@ body.dark-theme .ludo-cell.green-home-inner { background-color: rgba(22, 163, 74
 body.dark-theme .ludo-cell.yellow-home-inner { background-color: rgba(217, 119, 6, 0.2) !important; }
 body.dark-theme .ludo-cell.blue-home-inner { background-color: rgba(37, 99, 235, 0.2) !important; }
 
-/* Safe bases white slots */
-.ludo-base-slot {
-  width: 76%;
-  height: 76%;
+/* Premium Solid Bases (Ludo King replica) */
+.ludo-base {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4);
+}
+.ludo-base.red-base { grid-area: 1 / 1 / 7 / 7; background-color: #dc2626; }
+.ludo-base.green-base { grid-area: 1 / 10 / 7 / 16; background-color: #16a34a; }
+.ludo-base.yellow-base { grid-area: 10 / 10 / 16 / 16; background-color: #d97706; }
+.ludo-base.blue-base { grid-area: 10 / 1 / 16 / 7; background-color: #2563eb; }
+
+.ludo-base-inner {
+  width: 70%;
+  height: 70%;
   background-color: #ffffff;
-  border: 3.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 8px;
+  padding: 8px;
+}
+.ludo-base-slot {
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.35);
+  border: 3.5px solid rgba(0, 0, 0, 0.12);
+  background-color: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
 }
-body.light-theme .ludo-base-slot {
-  border-color: rgba(0, 0, 0, 0.1);
+.ludo-base-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0.35;
 }
+.ludo-base-dot.dot-red { background-color: #ef4444; }
+.ludo-base-dot.dot-green { background-color: #10b981; }
+.ludo-base-dot.dot-yellow { background-color: #f59e0b; }
+.ludo-base-dot.dot-blue { background-color: #3b82f6; }
+
+/* Premium Diagonal Center Finish (Triangles meeting in center) */
+.ludo-center-finish {
+  grid-area: 7 / 7 / 10 / 10;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #1e293b; /* center meeting borders */
+}
+.center-tri {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.center-tri.tri-green {
+  background-color: #16a34a;
+  clip-path: polygon(50% 50%, 0 0, 100% 0);
+}
+.center-tri.tri-yellow {
+  background-color: #d97706;
+  clip-path: polygon(50% 50%, 100% 0, 100% 100%);
+}
+.center-tri.tri-blue {
+  background-color: #2563eb;
+  clip-path: polygon(50% 50%, 100% 100%, 0 100%);
+}
+.center-tri.tri-red {
+  background-color: #dc2626;
+  clip-path: polygon(50% 50%, 0 100%, 0 0);
+}
+
+/* Offset token positions inside center triangles so they sit neatly in the colored zones */
+.center-tri.tri-red .ludo-token { left: 15%; top: 50%; transform: translateY(-50%); }
+.center-tri.tri-green .ludo-token { top: 15%; left: 50%; transform: translateX(-50%); }
+.center-tri.tri-yellow .ludo-token { right: 15%; top: 50%; transform: translateY(-50%); }
+.center-tri.tri-blue .ludo-token { bottom: 15%; left: 50%; transform: translateX(-50%); }
 
 /* Safe star tiles and start indicators */
 .ludo-cell.star-cell::after {

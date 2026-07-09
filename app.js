@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '5.7';
+const APP_VERSION = '5.8';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=5.7')
+    navigator.serviceWorker.register('./service-worker.js?v=5.8')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -3402,6 +3402,7 @@ const LudoEngine = {
   timerValue: 15,
   turnTimerId: null,
   isGameOver: false,
+  consecutiveSixes: 0,
   tokens: {
     red: [{ id: 0, pos: -1 }, { id: 1, pos: -1 }, { id: 2, pos: -1 }, { id: 3, pos: -1 }],
     green: [{ id: 0, pos: -1 }, { id: 1, pos: -1 }, { id: 2, pos: -1 }, { id: 3, pos: -1 }],
@@ -3494,6 +3495,7 @@ const LudoEngine = {
     this.diceValue = 1;
     this.activeColor = 'red';
     this.isGameOver = false;
+    this.consecutiveSixes = 0;
     this.turnOrder = this.playerCount === 2 ? ['red', 'green'] : ['red', 'green', 'yellow', 'blue'];
 
     for (const color of ['red', 'green', 'yellow', 'blue']) {
@@ -3624,20 +3626,41 @@ const LudoEngine = {
     const diceSlot = document.getElementById(`ludo-dice-${this.activeColor}`);
     if (diceSlot) {
       diceSlot.classList.remove('active-roll');
-      diceSlot.classList.add('active-roll'); // shake dice
+      diceSlot.classList.add('active-roll');
     }
 
     LudoAudioSynth.playDice();
 
+    // Spin faces during rolling (Ludo King look)
+    const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+    let spinInterval = setInterval(() => {
+      if (diceSlot) {
+        diceSlot.innerText = diceFaces[Math.floor(Math.random() * 6)];
+      }
+    }, 60);
+
     setTimeout(() => {
+      clearInterval(spinInterval);
       if (diceSlot) {
         diceSlot.classList.remove('active-roll');
       }
 
       this.diceValue = Math.floor(Math.random() * 6) + 1;
-      const diceFaces = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
       if (diceSlot) {
         diceSlot.innerText = diceFaces[this.diceValue - 1];
+      }
+
+      // Check consecutive 6s
+      if (this.diceValue === 6) {
+        this.consecutiveSixes++;
+        if (this.consecutiveSixes === 3) {
+          showToast(`Three 6s rolled in a row! Turn passes. 🛑`);
+          this.updateStatusText(`Three 6s! Pass turn.`);
+          setTimeout(() => this.passTurn(), 1500);
+          return;
+        }
+      } else {
+        this.consecutiveSixes = 0;
       }
 
       const moves = this.tokens[this.activeColor].filter(t => this.canMoveToken(this.activeColor, t, this.diceValue));
@@ -3645,11 +3668,21 @@ const LudoEngine = {
       if (moves.length === 0) {
         this.updateStatusText(`${this.activeColor.toUpperCase()} rolled a ${this.diceValue}. No moves!`);
         setTimeout(() => this.passTurn(), 1500);
+      } else if (moves.length === 1) {
+        // Auto-move single legal option
+        if (this.activeColor === 'red') {
+          this.updateStatusText(`Auto-moving your only valid piece!`);
+          this.renderBoard();
+          setTimeout(() => this.executeMove(this.activeColor, moves[0], this.diceValue), 700);
+        } else {
+          this.updateStatusText(`${this.activeColor.toUpperCase()} auto-moving...`);
+          setTimeout(() => this.executeMove(this.activeColor, moves[0], this.diceValue), 700);
+        }
       } else {
         if (this.activeColor === 'red') {
           this.updateStatusText(`You rolled a ${this.diceValue}! Select a token.`);
           this.renderBoard();
-          this.startTurnTimer(); // start decision countdown timer
+          this.startTurnTimer();
         } else {
           this.updateStatusText(`${this.activeColor.toUpperCase()} rolled a ${this.diceValue}. Deciding...`);
           setTimeout(() => this.makeComputerMove(moves), 1000);
@@ -3782,6 +3815,7 @@ const LudoEngine = {
 
   passTurn() {
     this.stopTurnTimer();
+    this.consecutiveSixes = 0;
     const currentIdx = this.turnOrder.indexOf(this.activeColor);
     const nextIdx = (currentIdx + 1) % this.turnOrder.length;
     this.activeColor = this.turnOrder[nextIdx];
@@ -3792,31 +3826,22 @@ const LudoEngine = {
     const boardEl = document.getElementById('board-ludo');
     boardEl.innerHTML = '';
 
+    // Step 1: Render the static board elements (excluding bases & center finish)
     for (let r = 0; r < 15; r++) {
       for (let c = 0; c < 15; c++) {
+        // Skip base quadrants (rendered as solid containers)
+        if (r < 6 && c < 6) continue;
+        if (r < 6 && c > 8) continue;
+        if (r > 8 && c < 6) continue;
+        if (r > 8 && c > 8) continue;
+
+        // Skip center finish (rendered as diagonal triangles)
+        if (r >= 6 && r <= 8 && c >= 6 && c <= 8) continue;
+
         const cellEl = document.createElement('div');
         cellEl.className = 'ludo-cell';
         cellEl.dataset.r = r;
         cellEl.dataset.c = c;
-
-        // Base quadrant colors
-        if (r < 6 && c < 6) cellEl.classList.add('red-bg');
-        else if (r < 6 && c > 8) cellEl.classList.add('green-bg');
-        else if (r > 8 && c > 8) cellEl.classList.add('yellow-bg');
-        else if (r > 8 && c < 6) cellEl.classList.add('blue-bg');
-
-        // Circular slots inside home bases
-        let isBaseSlot = false;
-        for (const col of ['red', 'green', 'yellow', 'blue']) {
-          if (this.baseCoords[col].some(coord => coord.r === r && coord.c === c)) {
-            isBaseSlot = true;
-          }
-        }
-        if (isBaseSlot) {
-          const slotEl = document.createElement('div');
-          slotEl.className = 'ludo-base-slot';
-          cellEl.appendChild(slotEl);
-        }
 
         // Safe star tiles
         if ((r === 6 && c === 1) || (r === 8 && c === 13) || (r === 1 && c === 8) || (r === 13 && c === 6)) {
@@ -3832,26 +3857,80 @@ const LudoEngine = {
         else if (r === 7 && c > 8 && c < 14) cellEl.classList.add('yellow-home-inner');
         else if (c === 7 && r > 8 && r < 14) cellEl.classList.add('blue-home-inner');
 
-        // Main entry cells for each color
+        // Main entry cells for each color with arrows
         if (r === 6 && c === 1) cellEl.classList.add('red-bg', 'start-arrow', 'red-start');
         else if (r === 1 && c === 8) cellEl.classList.add('green-bg', 'start-arrow', 'green-start');
         else if (r === 8 && c === 13) cellEl.classList.add('yellow-bg', 'start-arrow', 'yellow-start');
         else if (r === 13 && c === 6) cellEl.classList.add('blue-bg', 'start-arrow', 'blue-start');
 
-        // Center finish area layout
-        if (r >= 6 && r <= 8 && c >= 6 && c <= 8) {
-          if (r < 7) cellEl.classList.add('green-bg');
-          else if (r > 7) cellEl.classList.add('blue-bg');
-          else if (c < 7) cellEl.classList.add('red-bg');
-          else if (c > 7) cellEl.classList.add('yellow-bg');
-          else cellEl.style.backgroundColor = '#1e293b';
-        }
-
         boardEl.appendChild(cellEl);
       }
     }
 
+    // Step 2: Render solid bases (Ludo King look)
+    boardEl.appendChild(this.createBaseElement('red'));
+    boardEl.appendChild(this.createBaseElement('green'));
+    boardEl.appendChild(this.createBaseElement('yellow'));
+    boardEl.appendChild(this.createBaseElement('blue'));
+
+    // Step 3: Render diagonal center finish meeting triangles
+    const centerEl = document.createElement('div');
+    centerEl.className = 'ludo-center-finish';
+
+    const triGreen = document.createElement('div');
+    triGreen.className = 'center-tri tri-green';
+    triGreen.dataset.r = 6;
+    triGreen.dataset.c = 7;
+
+    const triYellow = document.createElement('div');
+    triYellow.className = 'center-tri tri-yellow';
+    triYellow.dataset.r = 7;
+    triYellow.dataset.c = 8;
+
+    const triBlue = document.createElement('div');
+    triBlue.className = 'center-tri tri-blue';
+    triBlue.dataset.r = 8;
+    triBlue.dataset.c = 7;
+
+    const triRed = document.createElement('div');
+    triRed.className = 'center-tri tri-red';
+    triRed.dataset.r = 7;
+    triRed.dataset.c = 6;
+
+    centerEl.appendChild(triGreen);
+    centerEl.appendChild(triYellow);
+    centerEl.appendChild(triBlue);
+    centerEl.appendChild(triRed);
+
+    boardEl.appendChild(centerEl);
+
+    // Step 4: Inject active tokens stacked
     this.renderTokens();
+  },
+
+  createBaseElement(color) {
+    const baseEl = document.createElement('div');
+    baseEl.className = `ludo-base ${color}-base`;
+
+    const innerEl = document.createElement('div');
+    innerEl.className = 'ludo-base-inner';
+
+    const coords = this.baseCoords[color];
+    coords.forEach(coord => {
+      const slotEl = document.createElement('div');
+      slotEl.className = 'ludo-base-slot';
+      slotEl.dataset.r = coord.r;
+      slotEl.dataset.c = coord.c;
+
+      const dotEl = document.createElement('div');
+      dotEl.className = `ludo-base-dot dot-${color}`;
+      slotEl.appendChild(dotEl);
+
+      innerEl.appendChild(slotEl);
+    });
+
+    baseEl.appendChild(innerEl);
+    return baseEl;
   },
 
   renderTokens() {

@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.1';
+const APP_VERSION = '6.2';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=6.1')
+    navigator.serviceWorker.register('./service-worker.js?v=6.2')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -3075,13 +3075,34 @@ const ChessEngine = {
     }
   },
 
+  // Move ordering for alpha-beta pruning efficiency
+  orderMoves(moves) {
+    const pieceValues = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+    return moves.map(m => {
+      let score = 0;
+      if (m.captured) {
+        // MVV-LVA: capturing valuable pieces with low value pieces first
+        score += 1000 + (pieceValues[m.captured] * 10) - pieceValues[m.piece];
+      }
+      if (m.flags.includes('p')) {
+        score += 900; // Promotion
+      }
+      if (m.flags.includes('+')) {
+        score += 100; // Check
+      }
+      return { move: m, score: score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .map(x => x.move);
+  },
+
   // Simplistic Minimax with Alpha-Beta Pruning
   getBestMove(depth) {
-    const moves = this.game.moves({ verbose: true });
+    let moves = this.game.moves({ verbose: true });
     if (moves.length === 0) return null;
 
-    // Shuffle moves to make bot play varied games
-    moves.sort(() => Math.random() - 0.5);
+    // Order moves for maximum pruning speed
+    moves = this.orderMoves(moves);
 
     let bestMove = moves[0];
     let bestValue = -999999;
@@ -3113,13 +3134,16 @@ const ChessEngine = {
       return val;
     }
 
-    const moves = this.game.moves({ verbose: true });
+    let moves = this.game.moves({ verbose: true });
     if (moves.length === 0) {
       if (this.game.in_checkmate()) {
         return isMaximizing ? -50000 : 50000;
       }
       return 0; // Draw/Stalemate
     }
+
+    // Sort moves to maximize alpha-beta pruning
+    moves = this.orderMoves(moves);
 
     if (isMaximizing) {
       let bestValue = -999999;

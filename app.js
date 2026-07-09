@@ -1365,6 +1365,72 @@ const OctordleEngine = {
   }
 };
 
+// Dictionary of Indianized clues for common crossword words to make it feel localized
+const INDIAN_CLUES = {
+  "TEA": "Popular Indian hot beverage, often brewed with milk, ginger, and cardamom (Chai)",
+  "CAR": "Common sight on Indian roads, like a Maruti or Tata",
+  "CUP": "Vessel used to serve hot tea (chai) or filter coffee",
+  "STAR": "Bollywood celebrity, like SRK or Amitabh Bachchan",
+  "NATION": "A country, like India",
+  "BAND": "Musical group, popular in Indian wedding baraat processions",
+  "LONDON": "Capital city of UK, a highly popular travel destination for Indians",
+  "CENTRE": "Spelled in British English (used in India) for the middle point of something",
+  "RULE": "Regulate or govern (like the British Raj in India before 1947)",
+  "LAW": "Legal rules, guarded by the Supreme Court of India in New Delhi",
+  "YELLOW": "Vibrant color of turmeric (haldi) used in Indian cooking and wedding rituals",
+  "WINDOW": "Casement, or the ticket booking counter at an Indian railway station",
+  "HOLIDAY": "A day off work, like Diwali, Eid, or Independence Day in India",
+  "MONEY": "Rupees and paisa in India",
+  "PUT": "Place or set down (e.g., '___ a bindi on the forehead')",
+  "DELHI": "Capital territory of India, famous for historical monuments and street food",
+  "MUMBAI": "Gateway of India city, home to Bollywood and local trains",
+  "CURRY": "A spiced dish with gravy, staple of Indian cuisine",
+  "YOGA": "Ancient Indian physical, mental, and spiritual practice celebrated globally on June 21",
+  "BREAD": "Flat staple food like Roti, Naan, or Paratha in Indian households",
+  "SWEET": "Traditional Indian dessert like Mithai, Laddu, or Gulab Jamun",
+  "HOT": "Spicy, like biryani or street food in India",
+  "RED": "Color of the bride's traditional wedding lehenga or sari in India",
+  "KING": "Raja or Maharaja, like Akbar or Ashoka in Indian history",
+  "QUEEN": "Rani, like Rani Lakshmibai of Jhansi",
+  "GOLD": "Precious metal worn as jewelry, highly valued during Indian weddings and Dhanteras",
+  "COW": "Revered animal in Indian culture, representing motherly gentleness",
+  "COCONUT": "Fruit used in coastal Indian curries and offered in temples during puja",
+  "CINEMA": "Popular Indian entertainment, spanning Bollywood, Tollywood, and Kollywood",
+  "OCEAN": "Large body of water south of India (___ Ocean)",
+  "RICE": "Staple grain eaten with sambar, curry, or dal in South and East India",
+  "DANCE": "Classical Indian form like Bharatanatyam, Kathak, or folk forms like Bhangra/Garba",
+  "MUSIC": "Art form involving ragas, talas, and instruments like Sitar or Tabla",
+  "GARDEN": "Lush park, like the Shalimar Bagh in Kashmir",
+  "FORT": "Historical stronghold, like the Red Fort in Delhi or Mehrangarh in Jodhpur",
+  "VILLAGE": "Rural settlement where a large portion of the Indian population lives",
+  "GUITAR": "Stringed instrument, similar to the classical Indian Sitar or Veena",
+  "AWARD": "Honor, like the Bharat Ratna or Padma Shri in India",
+  "STONE": "Carved material of ancient Indian temples, like Ajanta and Ellora caves",
+  "DRY": "Arid region, like the Thar Desert in Rajasthan",
+  "BAG": "Jute or cotton sack, commonly used for shopping in Indian local markets (bazaars)",
+  "GIFT": "Shorthand for present, often exchanged during Diwali, Rakhi, or weddings",
+  "STREET": "Roadway, often filled with street food vendors (thelas) in Indian cities",
+  "JUNE": "Summer month when the monsoon rains start arriving in India",
+  "WED": "To marry, leading to grand multi-day celebrations in India",
+  "MAP": "Geographical layout, showing the states and union territories of India",
+  "HEART": "Dil, often romanticized in Bollywood movie songs",
+  "VIA": "By way of (e.g., traveling from Pune to Mumbai ___ Express Highway)",
+  "FIVE": "Number of rivers in Punjab ('Land of Five Rivers')",
+  "PEACOCK": "National bird of India, famous for its majestic tail feathers",
+  "TIGER": "Bengal ___, the majestic national animal of India",
+  "MANGO": "National fruit of India, highly anticipated summer treat",
+  "CHAI": "Popular Indian spiced milk tea",
+  "DIWALI": "Indian festival of lights, celebrating the return of Lord Rama",
+  "HOLI": "Indian festival of colors, celebrating spring and love",
+  "CRICKET": "Sport followed like a religion in India",
+  "RUPEE": "Official currency symbol ₹ of India",
+  "GANGA": "Holy river of India, flowing from the Himalayas to the Bay of Bengal",
+  "RAGA": "Melodic framework in classical Indian music",
+  "SAMOSA": "Triangular fried pastry filled with spiced potatoes, a classic Indian snack",
+  "NAAN": "Leavened flatbread cooked in a tandoor clay oven",
+  "TAJ": "Famous monument in Agra, Taj Mahal"
+};
+
 // ==========================================================================
 // GAME 3: Crossword Engine
 // ==========================================================================
@@ -1395,7 +1461,17 @@ const CrosswordEngine = {
       ? EASY_CROSSWORDS 
       : (diff === 'medium' ? MEDIUM_CROSSWORDS : HARD_CROSSWORDS);
     
-    const puzzle = db[this.puzzleIndex];
+    // Create a deep copy of the puzzle to safely modify clues without altering the database array
+    const puzzle = JSON.parse(JSON.stringify(db[this.puzzleIndex]));
+    
+    // Dynamically replace clues with localized Indianized definitions if word matches
+    puzzle.forEach((entry) => {
+      const upperWord = entry.w.toUpperCase();
+      if (INDIAN_CLUES[upperWord]) {
+        entry.cl = INDIAN_CLUES[upperWord];
+      }
+    });
+
     this.placedWords = puzzle;
     this.size = diff === 'easy' ? 10 : (diff === 'medium' ? 15 : 25);
     this.isChecked = false;

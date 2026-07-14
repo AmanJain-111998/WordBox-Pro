@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.7';
+const APP_VERSION = '6.8';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=6.7')
+    navigator.serviceWorker.register('./service-worker.js?v=6.8')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -3389,36 +3389,37 @@ const ChessEngine = {
   },
 
   handleSquareClick(square) {
-    if (this.game.game_over() || this.activePlayer !== 'w') return;
+    if (this.game.game_over()) return;
+
+    const isP2P = P2PManager.dataChannel && P2PManager.dataChannel.readyState === 'open';
+    const myColor = isP2P ? this.activePlayer : 'w';
+
+    // Verify it is indeed our turn
+    if (this.game.turn() !== myColor) return;
 
     const piece = this.game.get(square);
 
     if (this.selectedSquare === square) {
-      // Deselect
       this.selectedSquare = null;
       AudioPlayer.playClick();
       this.renderBoard();
       return;
     }
 
-    if (piece && piece.color === 'w') {
-      // Select White piece
+    if (piece && piece.color === myColor) {
       this.selectedSquare = square;
       AudioPlayer.playClick();
       this.renderBoard();
     } else if (this.selectedSquare) {
-      // Attempt move to destination square
       const moves = this.game.moves({ square: this.selectedSquare, verbose: true });
       const move = moves.find(m => m.to === square);
 
       if (move) {
-        // Trigger move
         const moveDetails = {
           from: this.selectedSquare,
           to: square
         };
 
-        // Pawn promotion auto-queen for simple playability
         if (move.flags.includes('p')) {
           moveDetails.promotion = 'q';
         }
@@ -3430,19 +3431,27 @@ const ChessEngine = {
           this.selectedSquare = null;
           this.renderBoard();
 
-          // Add increment and toggle player
-          this.whiteTime += this.increment;
-          this.updateClockDisplay('w');
+          // Increment local clocks
+          if (myColor === 'w') {
+            this.whiteTime += this.increment;
+            this.updateClockDisplay('w');
+          } else {
+            this.blackTime += this.increment;
+            this.updateClockDisplay('b');
+          }
 
           this.checkGameOverState();
 
           if (!this.game.game_over()) {
-            this.activePlayer = 'b';
-            setTimeout(() => this.triggerBotMove(), 300);
+            if (isP2P) {
+              P2PManager.send({ type: 'chess-move', move: moveDetails });
+            } else {
+              this.activePlayer = 'b';
+              setTimeout(() => this.triggerBotMove(), 300);
+            }
           }
         }
       } else {
-        // Clicked invalid destination -> clear selection
         this.selectedSquare = null;
         AudioPlayer.playClick();
         this.renderBoard();
@@ -5618,7 +5627,6 @@ const P2PManager = {
     } else if (data.type === 'chess-move') {
       ChessEngine.game.move(data.move);
       ChessEngine.renderBoard();
-      ChessEngine.activePlayer = 'w';
     } else if (data.type === 'ludo-move') {
       LudoEngine.executeTokenMove(data.color, data.tokenIdx);
     } else if (data.type === 'othello-move') {

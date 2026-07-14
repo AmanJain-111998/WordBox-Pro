@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.3';
+const APP_VERSION = '6.4';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=6.3')
+    navigator.serviceWorker.register('./service-worker.js?v=6.4')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -242,6 +242,7 @@ const defaultStatsSchema = {
 document.addEventListener('DOMContentLoaded', () => {
   loadUserSettings();
   loadStats();
+  loadUserProfile();
   bindOrchestratorEvents();
   renderQWERTYKeyboard();
   showView('dashboard');
@@ -393,18 +394,32 @@ function getDailyIndex() {
 // Views Switcher
 // ==========================================================================
 function showView(view) {
+  // Hide all main containers first
+  document.getElementById('view-dashboard').classList.add('hidden');
+  document.getElementById('view-game').classList.add('hidden');
+  document.getElementById('view-leaderboard').classList.add('hidden');
+  document.getElementById('view-p2p').classList.add('hidden');
+
   if (view === 'dashboard') {
     GameHubState.activeGame = null;
     document.getElementById('view-dashboard').classList.remove('hidden');
-    document.getElementById('view-game').classList.add('hidden');
     
     // Header tweaks
     document.getElementById('btn-home').classList.add('hidden');
     document.getElementById('btn-stats').classList.add('hidden');
     document.getElementById('logo-main').innerHTML = 'GAMEBOX<span class="logo-accent">PRO</span>';
+  } else if (view === 'leaderboard') {
+    document.getElementById('view-leaderboard').classList.remove('hidden');
+    document.getElementById('btn-home').classList.remove('hidden');
+    document.getElementById('btn-stats').classList.add('hidden');
+    document.getElementById('logo-main').innerHTML = 'LEADERBOARD';
+  } else if (view === 'p2p') {
+    document.getElementById('view-p2p').classList.remove('hidden');
+    document.getElementById('btn-home').classList.remove('hidden');
+    document.getElementById('btn-stats').classList.add('hidden');
+    document.getElementById('logo-main').innerHTML = 'MULTIPLAYER';
   } else {
     GameHubState.activeGame = view;
-    document.getElementById('view-dashboard').classList.add('hidden');
     document.getElementById('view-game').classList.remove('hidden');
     
     document.getElementById('btn-home').classList.remove('hidden');
@@ -419,13 +434,17 @@ function showView(view) {
       game2048: '2048<span class="logo-accent">PRO</span>',
       chess: 'CHESS<span class="logo-accent">PRO</span>',
       ludo: 'LUDO<span class="logo-accent">PRO</span>',
-      othello: 'OTHELLO<span class="logo-accent">PRO</span>'
+      othello: 'OTHELLO<span class="logo-accent">PRO</span>',
+      crossmath: 'CROSSMATH<span class="logo-accent">PRO</span>',
+      solitaire: 'SOLITAIRE<span class="logo-accent">PRO</span>',
+      monopolydeal: 'MONOPOLY<span class="logo-accent">DEAL</span>'
     };
-    document.getElementById('logo-main').innerHTML = gameTitles[view];
+    document.getElementById('logo-main').innerHTML = gameTitles[view] || 'GAMEBOX<span class="logo-accent">PRO</span>';
     
     // Manage Game View Panels
     document.querySelectorAll('.game-board-panel').forEach(p => p.classList.add('hidden'));
-    document.getElementById(`game-${view}`).classList.remove('hidden');
+    const gamePanel = document.getElementById(`game-${view}`);
+    if (gamePanel) gamePanel.classList.remove('hidden');
     
     // Keyboard layouts
     const qwertyKb = document.getElementById('keyboard-qwerty');
@@ -436,17 +455,15 @@ function showView(view) {
       qwertyKb.classList.add('hidden');
       numericKb.classList.remove('hidden');
       octordleShortcuts.classList.add('hidden');
-    } else if (view === 'game2048' || view === 'chess' || view === 'ludo' || view === 'othello') {
+    } else {
       qwertyKb.classList.add('hidden');
       numericKb.classList.add('hidden');
       octordleShortcuts.classList.add('hidden');
-    } else {
-      qwertyKb.classList.remove('hidden');
-      numericKb.classList.add('hidden');
-      if (view === 'octordle') {
-        octordleShortcuts.classList.remove('hidden');
-      } else {
-        octordleShortcuts.classList.add('hidden');
+      if (view === 'wordle' || view === 'octordle' || view === 'crossword') {
+        qwertyKb.classList.remove('hidden');
+        if (view === 'octordle') {
+          octordleShortcuts.classList.remove('hidden');
+        }
       }
     }
     
@@ -461,10 +478,12 @@ function showView(view) {
       crosswordClueBar.classList.add('hidden');
     }
     
-    if (view === 'game2048' || view === 'ludo') {
-      if (diffTabs) diffTabs.classList.add('hidden');
-    } else {
+    // Show difficulty tabs only for games that support practice difficulty sets
+    const practiceGames = ['wordle', 'octordle', 'crossword', 'sudoku'];
+    if (practiceGames.includes(view)) {
       if (diffTabs) diffTabs.classList.remove('hidden');
+    } else {
+      if (diffTabs) diffTabs.classList.add('hidden');
     }
     
     updateLevelIndicator();
@@ -497,6 +516,12 @@ function startActiveGame() {
     LudoEngine.start();
   } else if (GameHubState.activeGame === 'othello') {
     OthelloEngine.start();
+  } else if (GameHubState.activeGame === 'crossmath') {
+    CrossMathEngine.start();
+  } else if (GameHubState.activeGame === 'solitaire') {
+    SolitaireEngine.start();
+  } else if (GameHubState.activeGame === 'monopolydeal') {
+    MonopolyDealEngine.start();
   }
 }
 
@@ -733,6 +758,127 @@ function bindOrchestratorEvents() {
     closeModal(document.getElementById('modal-stats'));
     startActiveGame();
   });
+
+  // P2P/Leaderboard and Onboarding Events setup
+  document.getElementById('btn-leaderboard').onclick = () => {
+    AudioPlayer.playClick();
+    updateLeaderboardUI();
+    showView('leaderboard');
+  };
+
+  document.getElementById('btn-close-leaderboard').onclick = () => {
+    AudioPlayer.playClick();
+    showView('dashboard');
+  };
+
+  document.getElementById('btn-onboarding-submit').onclick = () => {
+    const input = document.getElementById('input-username');
+    const val = input.value.trim();
+    if (val.length < 3) {
+      alert('Username must be at least 3 letters.');
+      return;
+    }
+    UserProfile.username = val;
+    UserProfile.points = 0;
+    saveUserProfile();
+    closeModal(document.getElementById('modal-onboarding'));
+    showToast(`Profile created: ${val}!`);
+    AudioPlayer.playClick();
+  };
+
+  // P2P choices
+  document.getElementById('btn-p2p-choose-host').onclick = () => {
+    AudioPlayer.playClick();
+    document.getElementById('p2p-choices-row').classList.add('hidden');
+    document.getElementById('p2p-host-panel').classList.remove('hidden');
+    P2PManager.initHost();
+  };
+
+  document.getElementById('btn-p2p-choose-join').onclick = () => {
+    AudioPlayer.playClick();
+    document.getElementById('p2p-choices-row').classList.add('hidden');
+    document.getElementById('p2p-join-panel').classList.remove('hidden');
+    P2PManager.initJoiner();
+  };
+
+  document.getElementById('btn-p2p-copy-offer').onclick = () => {
+    AudioPlayer.playClick();
+    const txt = document.getElementById('p2p-offer-text');
+    navigator.clipboard.writeText(txt.value);
+    showToast("Offer Code copied!");
+  };
+
+  document.getElementById('btn-p2p-generate-answer').onclick = () => {
+    AudioPlayer.playClick();
+    const offerCode = document.getElementById('p2p-joiner-offer-text').value;
+    if (!offerCode) {
+      alert("Please paste the host's offer code!");
+      return;
+    }
+    P2PManager.generateJoinerAnswer(offerCode);
+  };
+
+  document.getElementById('btn-p2p-copy-answer').onclick = () => {
+    AudioPlayer.playClick();
+    const txt = document.getElementById('p2p-joiner-answer-text');
+    navigator.clipboard.writeText(txt.value);
+    showToast("Answer Code copied!");
+  };
+
+  document.getElementById('btn-p2p-connect').onclick = () => {
+    AudioPlayer.playClick();
+    const answerCode = document.getElementById('p2p-answer-text').value;
+    if (!answerCode) {
+      alert("Please paste Player 2's answer code!");
+      return;
+    }
+    P2PManager.connectHost(answerCode);
+  };
+
+  document.getElementById('btn-p2p-back').onclick = () => {
+    AudioPlayer.playClick();
+    // Terminate connections if active
+    if (P2PManager.peerConnection) {
+      P2PManager.peerConnection.close();
+    }
+    // Reset inputs & panel views
+    document.getElementById('p2p-choices-row').classList.remove('hidden');
+    document.getElementById('p2p-host-panel').classList.add('hidden');
+    document.getElementById('p2p-join-panel').classList.add('hidden');
+    document.getElementById('p2p-offer-text').value = '';
+    document.getElementById('p2p-answer-text').value = '';
+    document.getElementById('p2p-joiner-offer-text').value = '';
+    document.getElementById('p2p-joiner-answer-text').value = '';
+    showView('dashboard');
+  };
+
+  // Monopoly Deal Play controls
+  document.getElementById('btn-monopoly-endturn').onclick = () => {
+    AudioPlayer.playClick();
+    MonopolyDealEngine.endTurn();
+  };
+  
+  document.getElementById('btn-monopoly-quit').onclick = () => {
+    AudioPlayer.playClick();
+    showView('dashboard');
+  };
+
+  // Solitaire controls
+  document.getElementById('btn-solitaire-restart').onclick = () => {
+    AudioPlayer.playClick();
+    SolitaireEngine.start();
+  };
+
+  document.getElementById('btn-solitaire-quit').onclick = () => {
+    AudioPlayer.playClick();
+    showView('dashboard');
+  };
+
+  // CrossMath controls
+  document.getElementById('btn-crossmath-restart').onclick = () => {
+    AudioPlayer.playClick();
+    CrossMathEngine.start();
+  };
 
   // QWERTY physical keyboard router
   document.addEventListener('keydown', (e) => {
@@ -1515,7 +1661,82 @@ const INDIAN_CLUES = {
   "RAGA": "Melodic framework in classical Indian music",
   "SAMOSA": "Triangular fried pastry filled with spiced potatoes, a classic Indian snack",
   "NAAN": "Leavened flatbread cooked in a tandoor clay oven",
-  "TAJ": "Famous monument in Agra, Taj Mahal"
+  "TAJ": "Famous monument in Agra, Taj Mahal",
+  "EAT": "Consume food, like enjoying hot jalebis or biryani",
+  "DRINK": "Consume liquid, like refreshing lassi, nimbu paani, or coconut water",
+  "WATER": "Liquid essential for life, holy like the Ganges (Jal)",
+  "RIVER": "Ganga, Yamuna, Godavari, or Narmada, for example",
+  "CITY": "Delhi, Mumbai, Kolkata, or Chennai, for example",
+  "FESTIVAL": "Diwali, Holi, Eid, or Christmas, celebrated with joy in India",
+  "TEMPLE": "Mandir, like the Golden Temple or Kedarnath",
+  "SPICE": "Masala, like turmeric, cumin, or cardamom, crucial for Indian food",
+  "FOOD": "Staple diet, from spicy curries and rotis to biryanis and dosas",
+  "CLOTH": "Fabric, like a beautiful cotton saree, khadi kurta, or silk dhoti",
+  "BOOK": "Reading material, like the ancient epics Ramayana, Mahabharata, or Upanishads",
+  "TREE": "Like the sacred Banyan tree (national tree of India) or Neem tree",
+  "FLOWER": "Lotus (national flower of India) or marigold (genda) used in garlands",
+  "SCHOOL": "Place of learning, historically a Gurukul in ancient India",
+  "STUDENT": "Shishya, seeking knowledge from a Guru",
+  "TEACHER": "Guru or Acharya, celebrated on Teachers' Day in India",
+  "FATHER": "Pita, Bapuji, or Papa, often depicted in emotional Bollywood dramas",
+  "MOTHER": "Maa or Amma, central to Indian families and cinema dialogues ('Mere paas Maa hai')",
+  "BROTHER": "Bhai, celebrated on the festival of Raksha Bandhan",
+  "SISTER": "Behen, who ties a sacred thread (rakhi) on her brother's wrist",
+  "FRIEND": "Dost or Yaar, celebrated in classic Bollywood friendship songs",
+  "HOUSE": "Ghar or Makaan, often decorated with rangoli during festivals",
+  "TRAIN": "Indian Railways passenger transport, the lifeline of the nation",
+  "BUS": "State transport or local red buses in cities like Mumbai (BEST)",
+  "ROAD": "Often busy street, shared by autos, rickshaws, cars, and vendors",
+  "MARKET": "Bazaar, like Chandni Chowk in Delhi or Crawford Market in Mumbai",
+  "MONSOON": "Rainy season, vital for Indian agriculture and farmers",
+  "WINTER": "Season when North India gets cold and enjoys hot gajar ka halwa",
+  "SUMMER": "Hot season marked by juicy mangoes (Alphonso) and school holidays",
+  "GOD": "Bhagwan or Ishwar, worshipped in diverse forms across India",
+  "PRAYER": "Puja or Aarti, done with incense sticks (agarbatti) and diyas",
+  "CARD": "Like playing Teen Patti or Rummy during Diwali card parties",
+  "GAME": "Traditional Indian sports like Kabaddi, Kho-Kho, or Chess (invented in India)",
+  "BENGAL": "Indian state famous for sweets like Rasgulla and the royal Tiger",
+  "PUNJAB": "Land of five rivers, bhangra dance, and delicious sarson ka saag",
+  "KERALA": "God's Own Country, famous for backwaters, coconuts, and Kathakali",
+  "GOA": "Coastal state famous for sunny beaches, churches, and seafood",
+  "CHENNAI": "Gateway to the South, famous for Marina Beach and filter coffee",
+  "GITA": "Bhagavad Gita, sacred philosophical text of India",
+  "VEDAS": "Ancient sacred scriptures of India (Rig, Sama, Yajur, Atharva)",
+  "SARI": "Traditional elegant Indian attire for women, draped gracefully",
+  "KURTA": "Traditional loose tunic shirt worn by men and women in India",
+  "GANDHI": "Mahatma Gandhi, Father of the Nation who led non-violent freedom movement",
+  "NEHRU": "Jawaharlal Nehru, first Prime Minister of India, celebrated on Children's Day",
+  "PATEL": "Sardar Vallabhbhai Patel, the Iron Man who unified India",
+  "BOSE": "Netaji Subhas Chandra Bose, freedom fighter who led the INA",
+  "SINGH": "Bhagat Singh, legendary young revolutionary freedom fighter",
+  "HOCKEY": "National game of India, dominated by legends like Dhyan Chand",
+  "SPICED": "Masala, central to Indian curries",
+  "DESI": "Local or indigenous, referring to Indian things",
+  "DOLA": "Doli, the traditional palanquin carrying an Indian bride",
+  "SAAG": "Spinach or green leaf curry, popular in North India",
+  "ALOO": "Potato, the most common vegetable in Indian kitchens",
+  "GHEE": "Clarified butter, used for cooking and lighting puja lamps",
+  "DOST": "Hindi word for friend, celebrated in Bollywood",
+  "LADDU": "Round sweet sphere, distributed during Indian festivals and celebrations",
+  "YATRA": "Journey or pilgrimage, like Char Dham or Amarnath Yatra",
+  "MELA": "Grand fair or festival, like the massive Kumbh Mela",
+  "NAGAR": "City or town suffix, common in Indian place names",
+  "KUMAR": "Common Indian middle or last name, meaning prince",
+  "RAJ": "Reign or rule, often referring to historical empires or the British era",
+  "DEVI": "Goddess, or a respect suffix for women in India",
+  "RAJA": "King or maharaja in Indian history",
+  "RANI": "Queen or female ruler in Indian history",
+  "SADHU": "Holy man or ascetic practicing yoga and meditation",
+  "GURU": "Teacher, spiritual guide, or mentor",
+  "BINDI": "Small colored dot worn on the forehead by Indian women",
+  "LASSI": "Sweet or salted yogurt drink from Punjab",
+  "HALDI": "Turmeric, the yellow spice used for cooking and healing",
+  "IDLI": "Steamed savory rice cake, a South Indian breakfast staple",
+  "DOSA": "Thin, crispy rice crepe served with coconut chutney and sambar",
+  "SAMBAR": "Spiced lentil soup with vegetables, served with idli/dosa",
+  "BIRYANI": "Layered spiced rice dish with meat or vegetables, legendary in Hyderabad/Lucknow",
+  "ROTI": "Round unleavened flatbread, daily staple in Indian homes",
+  "PUJA": "Devotional ritual performed by offering prayers and flowers"
 };
 
 // ==========================================================================
@@ -4458,5 +4679,936 @@ const OthelloEngine = {
     saveStats();
   }
 };
+
+// ==========================================================================
+// Profile, Points and Leaderboard Management
+// ==========================================================================
+let UserProfile = {
+  username: '',
+  points: 0
+};
+
+function loadUserProfile() {
+  UserProfile.username = localStorage.getItem('gamebox_username') || '';
+  UserProfile.points = parseInt(localStorage.getItem('gamebox_points'), 10) || 0;
+  if (!UserProfile.username) {
+    document.getElementById('modal-onboarding').classList.remove('hidden');
+  }
+}
+
+function saveUserProfile() {
+  localStorage.setItem('gamebox_username', UserProfile.username);
+  localStorage.setItem('gamebox_points', UserProfile.points);
+}
+
+function addPoints(amount) {
+  UserProfile.points += amount;
+  saveUserProfile();
+  showToast(`+${amount} Points! Total: ${UserProfile.points}`);
+}
+
+const simulatedPlayers = [
+  { username: "Aarav", points: 1200 },
+  { username: "Priya", points: 950 },
+  { username: "Rohan", points: 800 },
+  { username: "Ananya", points: 600 },
+  { username: "Aditya", points: 350 }
+];
+
+function updateLeaderboardUI() {
+  const container = document.getElementById('leaderboard-list-container');
+  container.innerHTML = '';
+  
+  // Combine user profile with simulated players
+  let allPlayers = [...simulatedPlayers];
+  allPlayers.push({ username: UserProfile.username || 'You', points: UserProfile.points });
+  
+  // Sort by points descending
+  allPlayers.sort((a, b) => b.points - a.points);
+  
+  allPlayers.forEach((player, idx) => {
+    const row = document.createElement('div');
+    row.className = 'leaderboard-row';
+    if (player.username === UserProfile.username) {
+      row.classList.add('user-row');
+    }
+    
+    // Add Rank badge
+    let rankBadge = `${idx + 1}`;
+    if (idx === 0) rankBadge = '🥇';
+    else if (idx === 1) rankBadge = '🥈';
+    else if (idx === 2) rankBadge = '🥉';
+    
+    row.innerHTML = `
+      <span>${rankBadge}</span>
+      <span>${player.username}</span>
+      <span>${player.points} pts</span>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ==========================================================================
+// CrossMath Engine
+// ==========================================================================
+const CrossMathEngine = {
+  numbers: [],
+  operators: [],
+  targets: [],
+  selectedDigit: null,
+  placedDigits: {},
+
+  start() {
+    this.selectedDigit = null;
+    this.placedDigits = {};
+    this.generatePuzzle();
+    this.render();
+  },
+
+  generatePuzzle() {
+    const getRandomDigit = () => Math.floor(Math.random() * 9) + 1;
+    this.numbers = [getRandomDigit(), getRandomDigit(), getRandomDigit(), getRandomDigit()];
+    
+    const ops = ['+', '-', '*'];
+    const getRandomOp = () => ops[Math.floor(Math.random() * ops.length)];
+    this.operators = [getRandomOp(), getRandomOp(), getRandomOp(), getRandomOp()];
+    
+    const evalEq = (a, op, b) => {
+      if (op === '+') return a + b;
+      if (op === '-') return a - b;
+      if (op === '*') return a * b;
+      return a;
+    };
+    
+    this.targets = [
+      evalEq(this.numbers[0], this.operators[0], this.numbers[1]),
+      evalEq(this.numbers[2], this.operators[1], this.numbers[3]),
+      evalEq(this.numbers[0], this.operators[2], this.numbers[2]),
+      evalEq(this.numbers[1], this.operators[3], this.numbers[3])
+    ];
+  },
+
+  render() {
+    const gridContainer = document.getElementById('board-crossmath');
+    gridContainer.innerHTML = '';
+
+    const gridLayout = [
+      ['in0', 'opRow1', 'in1', '=', 't0'],
+      ['opCol1', 'space', 'opCol2', 'space', 'space'],
+      ['in2', 'opRow2', 'in3', '=', 't1'],
+      ['=', 'space', '=', 'space', 'space'],
+      ['t2', 'space', 't3', 'space', 'space']
+    ];
+
+    for (let r = 0; r < 5; r++) {
+      for (let c = 0; c < 5; c++) {
+        const item = gridLayout[r][c];
+        const cell = document.createElement('div');
+        cell.className = 'crossmath-cell';
+
+        if (item === 'space') {
+          cell.style.visibility = 'hidden';
+        } else if (item.startsWith('in')) {
+          const index = parseInt(item.replace('in', ''), 10);
+          cell.classList.add('empty-slot');
+          cell.dataset.index = index;
+          if (this.placedDigits[index] !== undefined) {
+            cell.innerText = this.placedDigits[index];
+          } else {
+            cell.innerText = '?';
+          }
+          cell.onclick = () => this.handleSlotClick(index);
+        } else if (item.startsWith('op')) {
+          cell.classList.add('operator');
+          const type = item;
+          let opStr = '';
+          if (type === 'opRow1') opStr = this.operators[0];
+          else if (type === 'opRow2') opStr = this.operators[1];
+          else if (type === 'opCol1') opStr = this.operators[2];
+          else if (type === 'opCol2') opStr = this.operators[3];
+          cell.innerText = opStr;
+        } else if (item === '=') {
+          cell.classList.add('operator');
+          cell.innerText = '=';
+        } else if (item.startsWith('t')) {
+          cell.classList.add('result-cell');
+          const type = item;
+          let targetVal = 0;
+          if (type === 't0') targetVal = this.targets[0];
+          else if (type === 't1') targetVal = this.targets[1];
+          else if (type === 't2') targetVal = this.targets[2];
+          else if (type === 't3') targetVal = this.targets[3];
+          cell.innerText = targetVal;
+        }
+
+        gridContainer.appendChild(cell);
+      }
+    }
+
+    const digitsContainer = document.getElementById('crossmath-digits-container');
+    digitsContainer.innerHTML = '';
+    
+    const usedDigits = Object.values(this.placedDigits);
+
+    for (let d = 1; d <= 9; d++) {
+      const token = document.createElement('div');
+      token.className = 'digit-token';
+      token.innerText = d;
+      if (usedDigits.includes(d)) {
+        token.classList.add('used');
+      }
+      token.onclick = () => this.handleDigitClick(d);
+      digitsContainer.appendChild(token);
+    }
+  },
+
+  handleDigitClick(val) {
+    AudioPlayer.playClick();
+    if (this.selectedDigit === val) {
+      this.selectedDigit = null;
+      document.querySelectorAll('.digit-token').forEach(t => t.classList.remove('active'));
+    } else {
+      this.selectedDigit = val;
+      document.querySelectorAll('.digit-token').forEach(t => t.classList.remove('active'));
+      const activeToken = Array.from(document.querySelectorAll('.digit-token')).find(t => parseInt(t.innerText, 10) === val);
+      if (activeToken) activeToken.classList.add('active');
+    }
+  },
+
+  handleSlotClick(index) {
+    AudioPlayer.playClick();
+    if (this.selectedDigit !== null) {
+      this.placedDigits[index] = this.selectedDigit;
+      this.selectedDigit = null;
+      this.render();
+      this.checkSolution();
+    } else {
+      if (this.placedDigits[index] !== undefined) {
+        delete this.placedDigits[index];
+        this.render();
+      }
+    }
+  },
+
+  checkSolution() {
+    const indices = [0, 1, 2, 3];
+    const allFilled = indices.every(idx => this.placedDigits[idx] !== undefined);
+    if (!allFilled) return;
+
+    const val = (idx) => this.placedDigits[idx];
+    const evalEq = (a, op, b) => {
+      if (op === '+') return a + b;
+      if (op === '-') return a - b;
+      if (op === '*') return a * b;
+      return a;
+    };
+
+    const r1 = evalEq(val(0), this.operators[0], val(1)) === this.targets[0];
+    const r2 = evalEq(val(2), this.operators[1], val(3)) === this.targets[1];
+    const c1 = evalEq(val(0), this.operators[2], val(2)) === this.targets[2];
+    const c2 = evalEq(val(1), this.operators[3], val(3)) === this.targets[3];
+
+    if (r1 && r2 && c1 && c2) {
+      setTimeout(() => {
+        showToast("CrossMath Solved! Awesome job! 🏆");
+        addPoints(100);
+        document.querySelectorAll('.crossmath-cell.empty-slot').forEach(el => el.classList.add('correct'));
+      }, 300);
+    }
+  }
+};
+
+// ==========================================================================
+// Solitaire Engine
+// ==========================================================================
+const SolitaireEngine = {
+  deck: [],
+  waste: [],
+  foundations: { H: [], D: [], C: [], S: [] },
+  tableau: [[], [], [], [], [], [], []],
+  selectedCardInfo: null,
+
+  start() {
+    this.selectedCardInfo = null;
+    this.initDeck();
+    this.shuffleDeck();
+    this.deal();
+    this.render();
+  },
+
+  initDeck() {
+    const suits = ['H', 'D', 'C', 'S'];
+    this.deck = [];
+    this.waste = [];
+    this.foundations = { H: [], D: [], C: [], S: [] };
+    this.tableau = [[], [], [], [], [], [], []];
+    
+    for (const s of suits) {
+      const color = (s === 'H' || s === 'D') ? 'red' : 'black';
+      for (let r = 1; r <= 13; r++) {
+        this.deck.push({ rank: r, suit: s, color: color, faceUp: false });
+      }
+    }
+  },
+
+  shuffleDeck() {
+    for (let i = this.deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+    }
+  },
+
+  deal() {
+    for (let i = 0; i < 7; i++) {
+      for (let j = i; j < 7; j++) {
+        const card = this.deck.pop();
+        if (j === i) card.faceUp = true;
+        this.tableau[j].push(card);
+      }
+    }
+  },
+
+  drawCard() {
+    AudioPlayer.playClick();
+    if (this.deck.length === 0) {
+      this.deck = [...this.waste].reverse().map(c => {
+        c.faceUp = false;
+        return c;
+      });
+      this.waste = [];
+    } else {
+      const card = this.deck.pop();
+      card.faceUp = true;
+      this.waste.push(card);
+    }
+    this.selectedCardInfo = null;
+    this.render();
+  },
+
+  render() {
+    const deckEl = document.getElementById('solitaire-deck');
+    if (this.deck.length > 0) {
+      deckEl.className = 'solitaire-card-slot deck-back';
+      deckEl.innerText = '🎴';
+    } else {
+      deckEl.className = 'solitaire-card-slot empty';
+      deckEl.innerText = '🔄';
+    }
+    deckEl.onclick = () => this.drawCard();
+
+    const wasteEl = document.getElementById('solitaire-waste');
+    wasteEl.innerHTML = '';
+    if (this.waste.length > 0) {
+      const topCard = this.waste[this.waste.length - 1];
+      const cardEl = this.createCardElement(topCard);
+      if (this.selectedCardInfo && this.selectedCardInfo.source === 'waste') {
+        cardEl.style.boxShadow = '0 0 10px #a78bfa';
+      }
+      cardEl.onclick = (e) => {
+        e.stopPropagation();
+        AudioPlayer.playClick();
+        this.selectCard('waste');
+      };
+      wasteEl.appendChild(cardEl);
+    } else {
+      wasteEl.innerText = '';
+    }
+
+    const suits = ['H', 'D', 'C', 'S'];
+    for (const s of suits) {
+      const fEl = document.getElementById(`foundation-${s}`);
+      fEl.innerHTML = '';
+      fEl.className = 'solitaire-card-slot foundation';
+      const pile = this.foundations[s];
+      if (pile.length > 0) {
+        const topCard = pile[pile.length - 1];
+        const cardEl = this.createCardElement(topCard);
+        cardEl.onclick = (e) => {
+          e.stopPropagation();
+          AudioPlayer.playClick();
+          this.selectCard('foundation', s);
+        };
+        fEl.appendChild(cardEl);
+      } else {
+        const suitGlyphs = { H: '♥️', D: '♦️', C: '♣️', S: '♠️' };
+        fEl.innerText = suitGlyphs[s];
+        fEl.onclick = () => this.moveSelectedToFoundation(s);
+      }
+    }
+
+    const tabCols = document.getElementById('solitaire-tableau');
+    tabCols.innerHTML = '';
+    for (let c = 0; c < 7; c++) {
+      const colEl = document.createElement('div');
+      colEl.className = 'solitaire-col';
+      colEl.dataset.col = c;
+      colEl.onclick = () => this.moveSelectedToTableau(c);
+
+      const colList = this.tableau[c];
+      colList.forEach((card, idx) => {
+        const cardEl = this.createCardElement(card);
+        cardEl.style.top = `${idx * 16}px`;
+
+        if (card.faceUp) {
+          if (this.selectedCardInfo && this.selectedCardInfo.source === 'tableau' && this.selectedCardInfo.colIndex === c && this.selectedCardInfo.cardIndex === idx) {
+            cardEl.style.boxShadow = '0 0 10px #a78bfa';
+          }
+          cardEl.onclick = (e) => {
+            e.stopPropagation();
+            AudioPlayer.playClick();
+            this.selectCard('tableau', c, idx);
+          };
+        } else {
+          cardEl.classList.add('back');
+          cardEl.onclick = null;
+        }
+        colEl.appendChild(cardEl);
+      });
+      tabCols.appendChild(colEl);
+    }
+  },
+
+  createCardElement(card) {
+    const cardEl = document.createElement('div');
+    cardEl.className = `solitaire-card ${card.color}`;
+    
+    const rankStrs = { 1: 'A', 11: 'J', 12: 'Q', 13: 'K' };
+    const rankStr = rankStrs[card.rank] || card.rank.toString();
+    
+    const suitGlyphs = { H: '♥️', D: '♦️', C: '♣️', S: '♠️' };
+    const suitGlyph = suitGlyphs[card.suit];
+
+    cardEl.innerHTML = `
+      <div class="card-top-left">${rankStr}<br/>${suitGlyph}</div>
+      <div class="card-suit-center">${suitGlyph}</div>
+    `;
+    return cardEl;
+  },
+
+  selectCard(source, arg1, arg2) {
+    if (source === 'waste') {
+      this.selectedCardInfo = { source: 'waste' };
+    } else if (source === 'foundation') {
+      this.selectedCardInfo = { source: 'foundation', suit: arg1 };
+    } else if (source === 'tableau') {
+      this.selectedCardInfo = { source: 'tableau', colIndex: arg1, cardIndex: arg2 };
+    }
+    this.render();
+  },
+
+  moveSelectedToFoundation(suit) {
+    if (!this.selectedCardInfo) return;
+    const card = this.getSelectedCard();
+    if (!card) return;
+
+    const pile = this.foundations[suit];
+    const isNext = (pile.length === 0 && card.rank === 1) || (pile.length > 0 && card.rank === pile[pile.length - 1].rank + 1 && card.suit === suit);
+
+    if (isNext) {
+      AudioPlayer.playClick();
+      this.popSelectedCard();
+      pile.push(card);
+      this.revealTopTableau();
+      this.selectedCardInfo = null;
+      this.render();
+      this.checkWinState();
+    }
+  },
+
+  moveSelectedToTableau(colIndex) {
+    if (!this.selectedCardInfo) return;
+    const card = this.getSelectedCard();
+    if (!card) return;
+
+    const destCol = this.tableau[colIndex];
+    let isValid = false;
+
+    if (destCol.length === 0) {
+      if (card.rank === 13) isValid = true;
+    } else {
+      const topCard = destCol[destCol.length - 1];
+      if (card.rank === topCard.rank - 1 && card.color !== topCard.color) {
+        isValid = true;
+      }
+    }
+
+    if (isValid) {
+      AudioPlayer.playClick();
+      if (this.selectedCardInfo.source === 'tableau') {
+        const sourceCol = this.tableau[this.selectedCardInfo.colIndex];
+        const cardsToMove = sourceCol.splice(this.selectedCardInfo.cardIndex);
+        destCol.push(...cardsToMove);
+      } else {
+        this.popSelectedCard();
+        destCol.push(card);
+      }
+      this.revealTopTableau();
+      this.selectedCardInfo = null;
+      this.render();
+    }
+  },
+
+  getSelectedCard() {
+    if (!this.selectedCardInfo) return null;
+    const s = this.selectedCardInfo;
+    if (s.source === 'waste') return this.waste[this.waste.length - 1];
+    if (s.source === 'foundation') return this.foundations[s.suit][this.foundations[s.suit].length - 1];
+    if (s.source === 'tableau') return this.tableau[s.colIndex][s.cardIndex];
+    return null;
+  },
+
+  popSelectedCard() {
+    const s = this.selectedCardInfo;
+    if (s.source === 'waste') this.waste.pop();
+    if (s.source === 'foundation') this.foundations[s.suit].pop();
+    if (s.source === 'tableau') {
+      this.tableau[s.colIndex].pop();
+    }
+  },
+
+  revealTopTableau() {
+    if (this.selectedCardInfo && this.selectedCardInfo.source === 'tableau') {
+      const colIdx = this.selectedCardInfo.colIndex;
+      const col = this.tableau[colIdx];
+      if (col.length > 0) {
+        col[col.length - 1].faceUp = true;
+      }
+    }
+  },
+
+  checkWinState() {
+    const won = this.foundations.H.length === 13 && this.foundations.D.length === 13 && this.foundations.C.length === 13 && this.foundations.S.length === 13;
+    if (won) {
+      showToast("Solitaire Solved! Congratulations! 🃏🎉");
+      addPoints(250);
+    }
+  }
+};
+
+// ==========================================================================
+// Monopoly Deal Engine
+// ==========================================================================
+const MonopolyDealEngine = {
+  deck: [],
+  playerHand: [],
+  playerProperties: {},
+  playerBank: [],
+  oppHandSize: 5,
+  oppProperties: {},
+  oppBank: [],
+  playsLeft: 3,
+  isMyTurn: true,
+
+  start() {
+    this.deck = [];
+    this.playerHand = [];
+    this.playerProperties = {};
+    this.playerBank = [];
+    this.oppProperties = {};
+    this.oppBank = [];
+    this.playsLeft = 3;
+    this.isMyTurn = true;
+
+    this.initDeck();
+    this.shuffleDeck();
+    
+    for (let i = 0; i < 5; i++) {
+      this.playerHand.push(this.deck.pop());
+    }
+    this.oppHandSize = 5;
+
+    this.playerHand.push(this.deck.pop(), this.deck.pop());
+    this.render();
+  },
+
+  initDeck() {
+    const props = [
+      { name: "Baltic", color: "brown", value: 1 },
+      { name: "Mediter.", color: "brown", value: 1 },
+      { name: "Boardwalk", color: "blue", value: 4 },
+      { name: "Park Place", color: "blue", value: 4 },
+      { name: "Kentucky", color: "red", value: 3 },
+      { name: "Indiana", color: "red", value: 3 },
+      { name: "Illinois", color: "red", value: 3 },
+      { name: "St. James", color: "orange", value: 2 },
+      { name: "Tennessee", color: "orange", value: 2 },
+      { name: "New York", color: "orange", value: 2 },
+      { name: "Pacific", color: "green", value: 4 },
+      { name: "N. Car.", color: "green", value: 4 },
+      { name: "Penn. Ave", color: "green", value: 4 }
+    ];
+
+    for (let i = 0; i < 6; i++) this.deck.push({ type: "money", value: 1, name: "$1M" });
+    for (let i = 0; i < 5; i++) this.deck.push({ type: "money", value: 2, name: "$2M" });
+    for (let i = 0; i < 3; i++) this.deck.push({ type: "money", value: 3, name: "$3M" });
+    for (let i = 0; i < 2; i++) this.deck.push({ type: "money", value: 4, name: "$4M" });
+    for (let i = 0; i < 2; i++) this.deck.push({ type: "money", value: 5, name: "$5M" });
+
+    for (let i = 0; i < 4; i++) this.deck.push({ type: "action", value: 2, action: "passgo", name: "Pass Go" });
+    for (let i = 0; i < 3; i++) this.deck.push({ type: "action", value: 3, action: "slydeal", name: "Sly Deal" });
+    for (let i = 0; i < 3; i++) this.deck.push({ type: "action", value: 3, action: "forcedeal", name: "Force Deal" });
+    for (let i = 0; i < 3; i++) this.deck.push({ type: "action", value: 3, action: "debtcollector", name: "Debt Coll" });
+
+    props.forEach(p => {
+      this.deck.push({ type: "property", value: p.value, name: p.name, color: p.color });
+    });
+  },
+
+  shuffleDeck() {
+    for (let i = this.deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [this.deck[i], this.deck[j]] = [this.deck[j], this.deck[i]];
+    }
+  },
+
+  render() {
+    const ann = document.getElementById('monopoly-turn-announcement');
+    ann.innerText = this.isMyTurn ? `Your Turn (${this.playsLeft} plays left)` : "Bot is playing...";
+
+    const pProps = document.getElementById('monopoly-player-properties');
+    pProps.innerHTML = '';
+    Object.keys(this.playerProperties).forEach(color => {
+      this.playerProperties[color].forEach(card => {
+        pProps.appendChild(this.createCardMini(card));
+      });
+    });
+
+    const pBank = document.getElementById('monopoly-player-bank');
+    pBank.innerHTML = '';
+    this.playerBank.forEach(card => {
+      pBank.appendChild(this.createCardMini(card));
+    });
+
+    const oProps = document.getElementById('monopoly-opp-properties');
+    oProps.innerHTML = '';
+    Object.keys(this.oppProperties).forEach(color => {
+      this.oppProperties[color].forEach(card => {
+        oProps.appendChild(this.createCardMini(card));
+      });
+    });
+
+    const oBank = document.getElementById('monopoly-opp-bank');
+    oBank.innerHTML = '';
+    this.oppBank.forEach(card => {
+      oBank.appendChild(this.createCardMini(card));
+    });
+
+    const handEl = document.getElementById('monopoly-player-hand');
+    handEl.innerHTML = '';
+    this.playerHand.forEach((card, idx) => {
+      const cardEl = document.createElement('div');
+      cardEl.className = 'monopoly-card-large';
+      if (card.type === 'money') {
+        cardEl.style.background = '#059669';
+        cardEl.innerHTML = `<div>MONEY</div><div style='font-size:18px;'>${card.name}</div><div>Value: $${card.value}M</div>`;
+      } else if (card.type === 'action') {
+        cardEl.style.background = '#2563eb';
+        cardEl.innerHTML = `<div>ACTION</div><div style='font-size:12px;'>${card.name}</div><div>Value: $${card.value}M</div>`;
+      } else if (card.type === 'property') {
+        cardEl.className += ` prop-${card.color}`;
+        cardEl.innerHTML = `<div>PROPERTY</div><div style='font-size:11px;'>${card.name}</div><div>Value: $${card.value}M</div>`;
+      }
+      cardEl.onclick = () => this.handleCardClick(idx);
+      handEl.appendChild(cardEl);
+    });
+  },
+
+  createCardMini(card) {
+    const el = document.createElement('div');
+    el.className = 'monopoly-card-mini';
+    if (card.type === 'property') {
+      el.className += ` prop-${card.color}`;
+      el.innerText = card.name.substring(0, 4);
+    } else {
+      el.classList.add(card.type);
+      el.innerText = card.name;
+    }
+    return el;
+  },
+
+  handleCardClick(idx) {
+    if (!this.isMyTurn) return;
+    if (this.playsLeft <= 0) {
+      showToast("No plays left! End your turn.");
+      return;
+    }
+
+    const card = this.playerHand[idx];
+    AudioPlayer.playClick();
+
+    let choices = [];
+    if (card.type === 'property') {
+      choices = ["Play as Property", "Put in Bank"];
+    } else if (card.type === 'money') {
+      choices = ["Put in Bank"];
+    } else if (card.type === 'action') {
+      choices = ["Play Action", "Put in Bank"];
+    }
+
+    const act = prompt(`How would you like to play ${card.name}?\nOptions:\n1. ${choices[0]}\n${choices[1] ? '2. ' + choices[1] : ''}`);
+    if (!act) return;
+
+    if (act === '1') {
+      this.playerHand.splice(idx, 1);
+      this.playsLeft--;
+      if (card.type === 'property') {
+        if (!this.playerProperties[card.color]) this.playerProperties[card.color] = [];
+        this.playerProperties[card.color].push(card);
+      } else if (card.type === 'money') {
+        this.playerBank.push(card);
+      } else if (card.type === 'action') {
+        this.executeAction(card, true);
+      }
+    } else if (act === '2' && choices[1]) {
+      this.playerHand.splice(idx, 1);
+      this.playsLeft--;
+      this.playerBank.push(card);
+    }
+
+    this.render();
+    this.checkWinState();
+  },
+
+  executeAction(card, isPlayer) {
+    if (card.action === 'passgo') {
+      const targetHand = isPlayer ? this.playerHand : null;
+      if (targetHand) {
+        targetHand.push(this.deck.pop(), this.deck.pop());
+        showToast("Drew 2 cards!");
+      }
+    } else if (card.action === 'debtcollector') {
+      const destBank = isPlayer ? this.playerBank : this.oppBank;
+      const srcBank = isPlayer ? this.oppBank : this.playerBank;
+      if (srcBank.length > 0) {
+        const item = srcBank.pop();
+        destBank.push(item);
+        showToast(`${isPlayer ? 'You' : 'Bot'} collected $${item.value}M from ${isPlayer ? 'Bot' : 'You'}`);
+      } else {
+        showToast("No money to collect!");
+      }
+    } else if (card.action === 'slydeal') {
+      const destProps = isPlayer ? this.playerProperties : this.oppProperties;
+      const srcProps = isPlayer ? this.oppProperties : this.playerProperties;
+      
+      const colors = Object.keys(srcProps).filter(c => srcProps[c].length > 0);
+      if (colors.length > 0) {
+        const color = colors[0];
+        const prop = srcProps[color].pop();
+        if (!destProps[color]) destProps[color] = [];
+        destProps[color].push(prop);
+        showToast(`${isPlayer ? 'You' : 'Bot'} stole ${prop.name}!`);
+      } else {
+        showToast("No properties to steal!");
+      }
+    } else if (card.action === 'forcedeal') {
+      const myProps = isPlayer ? this.playerProperties : this.oppProperties;
+      const oppProps = isPlayer ? this.oppProperties : this.playerProperties;
+      
+      const myColors = Object.keys(myProps).filter(c => myProps[c].length > 0);
+      const oppColors = Object.keys(oppProps).filter(c => oppProps[c].length > 0);
+
+      if (myColors.length > 0 && oppColors.length > 0) {
+        const card1 = myProps[myColors[0]].pop();
+        const card2 = oppProps[oppColors[0]].pop();
+        
+        if (!myProps[card2.color]) myProps[card2.color] = [];
+        myProps[card2.color].push(card2);
+        
+        if (!oppProps[card1.color]) oppProps[card1.color] = [];
+        oppProps[card1.color].push(card1);
+        
+        showToast(`Swapped ${card1.name} for ${card2.name}!`);
+      } else {
+        showToast("Cannot perform Force Deal!");
+      }
+    }
+  },
+
+  endTurn() {
+    this.isMyTurn = false;
+    this.playsLeft = 3;
+    this.render();
+    
+    setTimeout(() => {
+      this.botPlayTurn();
+    }, 1500);
+  },
+
+  botPlayTurn() {
+    this.oppHandSize += 2;
+    
+    for (let p = 0; p < 3; p++) {
+      const roll = Math.random();
+      if (roll < 0.4) {
+        const colors = ["red", "blue", "green", "yellow", "orange"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        if (!this.oppProperties[color]) this.oppProperties[color] = [];
+        this.oppProperties[color].push({ type: "property", name: "Prop", color: color });
+      } else if (roll < 0.7) {
+        this.oppBank.push({ type: "money", value: 2, name: "$2M" });
+      } else {
+        const actions = ["debtcollector", "slydeal"];
+        const act = actions[Math.floor(Math.random() * actions.length)];
+        this.executeAction({ action: act }, false);
+      }
+    }
+
+    this.isMyTurn = true;
+    this.playsLeft = 3;
+    this.playerHand.push(this.deck.pop(), this.deck.pop());
+    
+    this.render();
+    this.checkWinState();
+  },
+
+  checkWinState() {
+    const countSets = (props) => {
+      let sets = 0;
+      Object.keys(props).forEach(c => {
+        if (c === 'blue' || c === 'brown') {
+          if (props[c].length >= 2) sets++;
+        } else {
+          if (props[c].length >= 3) sets++;
+        }
+      });
+      return sets;
+    };
+
+    const playerSets = countSets(this.playerProperties);
+    const oppSets = countSets(this.oppProperties);
+
+    if (playerSets >= 3) {
+      showToast("You win Monopoly Deal! 🎩🎉");
+      addPoints(300);
+      this.isMyTurn = false;
+    } else if (oppSets >= 3) {
+      showToast("Bot wins Monopoly Deal! 😢");
+      this.isMyTurn = false;
+    }
+  }
+};
+
+// ==========================================================================
+// WebRTC Offline P2P Manager
+// ==========================================================================
+const P2PManager = {
+  peerConnection: null,
+  dataChannel: null,
+  isHost: false,
+
+  initHost() {
+    this.isHost = true;
+    this.peerConnection = new RTCPeerConnection({
+      iceServers: []
+    });
+
+    this.dataChannel = this.peerConnection.createDataChannel("gameChannel");
+    this.setupDataChannel();
+
+    this.peerConnection.onicecandidate = (e) => {
+      if (!e.candidate) {
+        const offer = this.peerConnection.localDescription;
+        document.getElementById('p2p-offer-text').value = JSON.stringify(offer);
+      }
+    };
+
+    this.peerConnection.createOffer().then(offer => {
+      return this.peerConnection.setLocalDescription(offer);
+    });
+  },
+
+  initJoiner() {
+    this.isHost = false;
+    this.peerConnection = new RTCPeerConnection({
+      iceServers: []
+    });
+
+    this.peerConnection.ondatachannel = (e) => {
+      this.dataChannel = e.channel;
+      this.setupDataChannel();
+    };
+
+    this.peerConnection.onicecandidate = (e) => {
+      if (!e.candidate) {
+        const answer = this.peerConnection.localDescription;
+        document.getElementById('p2p-joiner-answer-text').value = JSON.stringify(answer);
+        document.getElementById('p2p-joiner-answer-block').classList.remove('hidden');
+      }
+    };
+  },
+
+  generateJoinerAnswer(offerStr) {
+    try {
+      const offer = JSON.parse(offerStr);
+      this.peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+        .then(() => this.peerConnection.createAnswer())
+        .then(answer => this.peerConnection.setLocalDescription(answer))
+        .catch(err => alert("Invalid Host Code!"));
+    } catch(err) {
+      alert("Invalid Host Code!");
+    }
+  },
+
+  connectHost(answerStr) {
+    try {
+      const answer = JSON.parse(answerStr);
+      this.peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
+        .catch(err => alert("Invalid Answer Code!"));
+    } catch(err) {
+      alert("Invalid Answer Code!");
+    }
+  },
+
+  setupDataChannel() {
+    this.dataChannel.onopen = () => {
+      showToast("Peer Connected Offline! Let's play!");
+      if (this.isHost) {
+        const selectedGame = document.getElementById('p2p-host-game-select').value;
+        this.send({ type: 'launch-game', game: selectedGame });
+        this.launchGame(selectedGame, 'host');
+      }
+    };
+
+    this.dataChannel.onmessage = (e) => {
+      const data = JSON.parse(e.data);
+      this.handleMessage(data);
+    };
+  },
+
+  send(data) {
+    if (this.dataChannel && this.dataChannel.readyState === 'open') {
+      this.dataChannel.send(JSON.stringify(data));
+    }
+  },
+
+  handleMessage(data) {
+    if (data.type === 'launch-game') {
+      this.launchGame(data.game, 'joiner');
+    } else if (data.type === 'chess-move') {
+      ChessEngine.game.move(data.move);
+      ChessEngine.renderBoard();
+      ChessEngine.activePlayer = 'w';
+    } else if (data.type === 'ludo-move') {
+      LudoEngine.executeTokenMove(data.color, data.tokenIdx);
+    } else if (data.type === 'othello-move') {
+      OthelloEngine.makeMove(data.r, data.c);
+    }
+  },
+
+  launchGame(game, role) {
+    showView(game);
+    if (game === 'chess') {
+      ChessEngine.activePlayer = role === 'host' ? 'w' : 'b';
+      showToast(role === 'host' ? "You are White!" : "You are Black!");
+    } else if (game === 'ludo') {
+      LudoEngine.isMultiplayer = true;
+      LudoEngine.myColor = role === 'host' ? 'red' : 'green';
+      showToast(`Multiplayer: You are ${LudoEngine.myColor.toUpperCase()}!`);
+    } else if (game === 'othello') {
+      OthelloEngine.activePlayer = role === 'host' ? 1 : 2;
+    }
+  }
+};
+
 
 // Trigger rebuild: 2026-07-09T06:18

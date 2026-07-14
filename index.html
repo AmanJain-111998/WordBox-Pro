@@ -22,7 +22,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap" rel="stylesheet">
   
   <!-- Stylesheets -->
-  <link rel="stylesheet" href="./style.css?v=6.3">
+  <link rel="stylesheet" href="./style.css?v=6.4">
 </head>
 <body class="dark-theme">
   <!-- Main App Shell -->
@@ -44,8 +44,8 @@
       </div>
       
       <div class="header-right">
-        <button id="btn-stats" class="icon-button hidden" style="display: none !important;" aria-label="Game Statistics">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <button id="btn-leaderboard" class="icon-button" aria-label="Leaderboard">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
         </button>
         <button id="btn-settings" class="icon-button" aria-label="Settings">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -143,6 +143,17 @@
             </div>
             <button class="play-btn">Play</button>
           </div>
+
+          <!-- CrossMath Card -->
+          <div class="game-card" data-game="crossmath">
+            <div class="card-icon crossword-color">M</div>
+            <div class="card-info">
+              <h3>CrossMath Pro</h3>
+              <p>Solve arithmetic grids vertically &amp; horizontally.</p>
+              <span class="badge">Dynamic Equations</span>
+            </div>
+            <button class="play-btn">Play</button>
+          </div>
         </div>
       </section>
 
@@ -178,6 +189,28 @@
               <h3>Othello</h3>
               <p>Sandwich opposing pieces to flip and control the board.</p>
               <span class="badge">Easy, Medium, Hard</span>
+            </div>
+            <button class="play-btn">Play</button>
+          </div>
+
+          <!-- Solitaire Card -->
+          <div class="game-card" data-game="solitaire">
+            <div class="card-icon boardbox-color" style="font-size: 26px;">🃏</div>
+            <div class="card-info">
+              <h3>Solitaire</h3>
+              <p>Classic Klondike card puzzle. Draw, stack, and clear.</p>
+              <span class="badge">Classic Card Game</span>
+            </div>
+            <button class="play-btn">Play</button>
+          </div>
+
+          <!-- Monopoly Deal Card -->
+          <div class="game-card" data-game="monopolydeal">
+            <div class="card-icon boardbox-color" style="font-size: 26px;">🎩</div>
+            <div class="card-info">
+              <h3>Monopoly Deal</h3>
+              <p>Fast trading card game. Collect 3 property sets.</p>
+              <span class="badge">Action Cards</span>
             </div>
             <button class="play-btn">Play</button>
           </div>
@@ -480,6 +513,94 @@
             </div>
           </div>
         </div>
+
+        <!-- GAME I: CrossMath Board -->
+        <div id="game-crossmath" class="game-board-panel hidden">
+          <div class="crossmath-info-header">
+            <span id="crossmath-equation-desc">Fill numbers 1-9 to solve all horizontal and vertical equations!</span>
+          </div>
+          <div class="crossmath-board-wrapper">
+            <div id="board-crossmath" class="crossmath-grid"></div>
+          </div>
+          <div class="crossmath-numbers-bank">
+            <div id="crossmath-digits-container" class="digits-bank"></div>
+          </div>
+          <div class="crossmath-actions">
+            <button id="btn-crossmath-restart" class="crossword-action-button text-btn">New Puzzle</button>
+          </div>
+        </div>
+
+        <!-- GAME J: Solitaire Board -->
+        <div id="game-solitaire" class="game-board-panel hidden">
+          <div class="solitaire-layout">
+            <div class="solitaire-top-bar">
+              <div class="solitaire-left-piles">
+                <div id="solitaire-deck" class="solitaire-card-slot deck-back">🎴</div>
+                <div id="solitaire-waste" class="solitaire-card-slot empty"></div>
+              </div>
+              <div class="solitaire-foundations">
+                <div class="solitaire-card-slot foundation" data-suit="H" id="foundation-H">♥️</div>
+                <div class="solitaire-card-slot foundation" data-suit="D" id="foundation-D">♦️</div>
+                <div class="solitaire-card-slot foundation" data-suit="C" id="foundation-C">♣️</div>
+                <div class="solitaire-card-slot foundation" data-suit="S" id="foundation-S">♠️</div>
+              </div>
+            </div>
+            <div id="solitaire-tableau" class="solitaire-tableau-cols">
+              <div class="solitaire-col" data-col="0"></div>
+              <div class="solitaire-col" data-col="1"></div>
+              <div class="solitaire-col" data-col="2"></div>
+              <div class="solitaire-col" data-col="3"></div>
+              <div class="solitaire-col" data-col="4"></div>
+              <div class="solitaire-col" data-col="5"></div>
+              <div class="solitaire-col" data-col="6"></div>
+            </div>
+            <div class="solitaire-actions" style="margin-top: 15px;">
+              <button id="btn-solitaire-restart" class="chess-control-btn">Restart</button>
+              <button id="btn-solitaire-quit" class="chess-control-btn">Quit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GAME K: Monopoly Deal Board -->
+        <div id="game-monopolydeal" class="game-board-panel hidden">
+          <div class="monopoly-playfield">
+            <!-- Opponent Area -->
+            <div class="monopoly-section opponent-section">
+              <div class="section-title">Bot's Assets</div>
+              <div class="monopoly-row">
+                <div id="monopoly-opp-properties" class="property-container-row"></div>
+                <div id="monopoly-opp-bank" class="bank-container-row"></div>
+              </div>
+            </div>
+            
+            <!-- Table center -->
+            <div class="monopoly-center-table">
+              <div id="monopoly-draw-pile" class="monopoly-card-pile deck-back">🎴</div>
+              <div id="monopoly-discard-pile" class="monopoly-card-pile empty">Discard</div>
+              <div class="turn-announcement" id="monopoly-turn-announcement">Your Turn</div>
+            </div>
+
+            <!-- Player Area -->
+            <div class="monopoly-section player-section">
+              <div class="section-title">Your Assets</div>
+              <div class="monopoly-row">
+                <div id="monopoly-player-properties" class="property-container-row"></div>
+                <div id="monopoly-player-bank" class="bank-container-row"></div>
+              </div>
+            </div>
+
+            <!-- Player Hand -->
+            <div class="monopoly-hand-section">
+              <div class="section-title">Your Hand (Click card to play, Max 3 plays/turn)</div>
+              <div id="monopoly-player-hand" class="hand-container-row"></div>
+            </div>
+
+            <div class="monopoly-controls" style="margin-top: 15px;">
+              <button id="btn-monopoly-endturn" class="primary-btn">End Turn</button>
+              <button id="btn-monopoly-quit" class="chess-control-btn">Quit</button>
+            </div>
+          </div>
+        </div>
       </main>
       
       <!-- Shared Keyboard / Controls Footer -->
@@ -536,6 +657,83 @@
           </div>
         </div>
       </footer>
+    </div>
+
+    <!-- VIEW 3: Global Leaderboard Dashboard -->
+    <div id="view-leaderboard" class="game-container hidden">
+      <section class="game-controls">
+        <div class="mode-indicator">
+          <span class="mode-label">LOCAL LEADERBOARD</span>
+        </div>
+      </section>
+      <main class="game-board-wrapper">
+        <div class="board-setup-card" style="max-width: 500px; margin: 0 auto; text-align: center;">
+          <h2 class="outfit-font">Points Leaderboard</h2>
+          <p style="margin-bottom: 20px; color: #a1a1aa;">Earn points by solving and winning games!</p>
+          <div class="leaderboard-table" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
+            <div id="leaderboard-list-container">
+              <!-- Dynamically populated rows -->
+            </div>
+          </div>
+          <button id="btn-close-leaderboard" class="setup-start-btn">Back to Games</button>
+        </div>
+      </main>
+    </div>
+
+    <!-- VIEW 4: P2P Connection Screen -->
+    <div id="view-p2p" class="game-container hidden">
+      <section class="game-controls">
+        <div class="mode-indicator">
+          <span class="mode-label">OFFLINE P2P MULTIPLAYER</span>
+        </div>
+      </section>
+      <main class="game-board-wrapper">
+        <div class="board-setup-card" style="max-width: 500px; margin: 0 auto;">
+          <h2 class="outfit-font" style="text-align: center;">Local Hotspot Play</h2>
+          <p style="text-align: center; color: #a1a1aa; margin-bottom: 20px;">Connect directly over local network / Wi-Fi hotspot with zero internet.</p>
+          
+          <div class="p2p-choices" id="p2p-choices-row" style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <button id="btn-p2p-choose-host" class="setup-start-btn" style="flex: 1;">Host Game</button>
+            <button id="btn-p2p-choose-join" class="setup-start-btn" style="flex: 1; background-color: #4b5563;">Join Game</button>
+          </div>
+
+          <!-- Host Panel -->
+          <div id="p2p-host-panel" class="setup-group hidden">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">1. Send this code to Player 2:</h3>
+            <textarea id="p2p-offer-text" readonly style="width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: monospace; font-size: 11px; padding: 6px; border-radius: 6px; resize: none; margin-bottom: 8px;"></textarea>
+            <button id="btn-p2p-copy-offer" class="primary-btn" style="padding: 6px 12px; font-size: 12px; margin-bottom: 15px;">Copy Code</button>
+
+            <h3 style="font-size: 14px; margin-bottom: 6px; margin-top: 10px;">2. Paste Player 2's Answer Code here:</h3>
+            <textarea id="p2p-answer-text" style="width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: monospace; font-size: 11px; padding: 6px; border-radius: 6px; resize: none; margin-bottom: 8px;"></textarea>
+            
+            <div class="setup-group" style="margin-top: 10px;">
+              <label>Select Game to Host:</label>
+              <select id="p2p-host-game-select" class="setup-select">
+                <option value="chess">Chess Master</option>
+                <option value="ludo">Ludo Royale</option>
+                <option value="othello">Othello</option>
+              </select>
+            </div>
+            
+            <button id="btn-p2p-connect" class="setup-start-btn" style="margin-top: 10px;">Connect &amp; Launch</button>
+          </div>
+
+          <!-- Joiner Panel -->
+          <div id="p2p-join-panel" class="setup-group hidden">
+            <h3 style="font-size: 14px; margin-bottom: 6px;">1. Paste Player 1's Connection Code:</h3>
+            <textarea id="p2p-joiner-offer-text" style="width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: monospace; font-size: 11px; padding: 6px; border-radius: 6px; resize: none; margin-bottom: 8px;"></textarea>
+            <button id="btn-p2p-generate-answer" class="setup-start-btn" style="margin-bottom: 15px;">Generate Answer Code</button>
+
+            <div id="p2p-joiner-answer-block" class="hidden">
+              <h3 style="font-size: 14px; margin-bottom: 6px;">2. Send this Answer Code back to Player 1:</h3>
+              <textarea id="p2p-joiner-answer-text" readonly style="width: 100%; height: 80px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-family: monospace; font-size: 11px; padding: 6px; border-radius: 6px; resize: none; margin-bottom: 8px;"></textarea>
+              <button id="btn-p2p-copy-answer" class="primary-btn" style="padding: 6px 12px; font-size: 12px; margin-bottom: 15px;">Copy Answer Code</button>
+            </div>
+          </div>
+
+          <button id="btn-p2p-back" class="setup-start-btn" style="margin-top: 15px; background-color: #374151;">Back to Menu</button>
+        </div>
+      </main>
     </div>
     
     <!-- PWA Install Banner -->
@@ -770,11 +968,23 @@
     </div>
   </div>
 
+  <!-- Mandatory Username Onboarding Modal -->
+  <div id="modal-onboarding" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 400px; text-align: center; padding: 25px;">
+      <h2 class="outfit-font" style="margin-bottom: 12px; color: #a78bfa;">Welcome to BoardBox Pro!</h2>
+      <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 20px;">Please set a username to register your progress and local scores on the leaderboard.</p>
+      <div class="setup-group">
+        <input type="text" id="input-username" placeholder="Username (max 12 letters)" maxlength="12" style="width: 100%; padding: 10px 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; text-align: center; font-size: 15px; margin-bottom: 15px;">
+      </div>
+      <button id="btn-onboarding-submit" class="setup-start-btn" style="margin-top: 5px;">Let's Play</button>
+    </div>
+  </div>
+
   <!-- Javascript Modules -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-  <script src="./words.js?v=6.3"></script>
-  <script src="./crosswords.js?v=6.3"></script>
-  <script src="./sudokus.js?v=6.3"></script>
-  <script src="./app.js?v=6.3"></script>
+  <script src="./words.js?v=6.4"></script>
+  <script src="./crosswords.js?v=6.4"></script>
+  <script src="./sudokus.js?v=6.4"></script>
+  <script src="./app.js?v=6.4"></script>
 </body>
 </html>

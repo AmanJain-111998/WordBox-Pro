@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.8';
+const APP_VERSION = '6.9';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -233,6 +233,12 @@ const defaultStatsSchema = {
   othello: {
     practice: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, levelIndex: 0, completedLevels: [] } },
     daily: { easy: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, medium: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null }, hard: { played: 0, won: 0, currentStreak: 0, maxStreak: 0, lastPlayedDay: -1, lastResult: null } }
+  },
+  solitaire: {
+    practice: { easy: { played: 0, won: 0 } }
+  },
+  monopolydeal: {
+    practice: { easy: { played: 0, won: 0 } }
   }
 };
 
@@ -337,7 +343,7 @@ function loadStats() {
   if (saved) {
     GameHubState.stats = JSON.parse(saved);
     // Ensure compatibility with previous formats by merging schemas
-    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku', 'game2048', 'chess', 'ludo', 'othello']) {
+    for (const game of ['wordle', 'octordle', 'crossword', 'sudoku', 'game2048', 'chess', 'ludo', 'othello', 'solitaire', 'monopolydeal']) {
       if (!GameHubState.stats[game]) {
         GameHubState.stats[game] = JSON.parse(JSON.stringify(defaultStatsSchema[game]));
       } else {
@@ -793,6 +799,11 @@ function bindOrchestratorEvents() {
   });
 
   // P2P/Leaderboard and Onboarding Events setup
+  safeBindClick('btn-multiplayer', () => {
+    AudioPlayer.playClick();
+    showView('p2p');
+  });
+
   safeBindClick('btn-leaderboard', () => {
     AudioPlayer.playClick();
     updateLeaderboardUI();
@@ -814,6 +825,7 @@ function bindOrchestratorEvents() {
     UserProfile.username = val;
     UserProfile.points = 0;
     saveUserProfile();
+    updateWelcomeBar();
     closeModal(document.getElementById('modal-onboarding'));
     showToast(`Profile created: ${val}!`);
     AudioPlayer.playClick();
@@ -1215,6 +1227,7 @@ const WordleEngine = {
         showToast(getWinText(this.guesses.length));
         this.bounce(row);
         this.saveResults();
+        addPoints(100);
       } else if (this.guesses.length >= 6) {
         this.status = 'LOST';
         AudioPlayer.playLoss();
@@ -1584,6 +1597,7 @@ const OctordleEngine = {
         AudioPlayer.playWin();
         showToast('Victory!');
         this.saveResults();
+        addPoints(200);
       } else if (this.guesses.length >= 13) {
         this.status = 'LOST';
         AudioPlayer.playLoss();
@@ -2214,6 +2228,7 @@ const CrosswordEngine = {
       statObj.levelIndex++; // unlock next level
     }
     saveStats();
+    addPoints(150);
     
     setTimeout(() => {
       updateStatsModal();
@@ -2527,6 +2542,7 @@ const SudokuEngine = {
       statObj.levelIndex++; // unlock next level
     }
     saveStats();
+    addPoints(120);
     
     setTimeout(() => {
       updateStatsModal();
@@ -3015,6 +3031,7 @@ const Game2048Engine = {
           if (this.grid[r][c] === 2048) {
             this.reached2048 = true;
             showToast("You reached the 2048 tile! 🏆 Keep playing to beat your high score! 🎉");
+            addPoints(180);
           }
         }
       }
@@ -3218,6 +3235,35 @@ const ChessEngine = {
     }
     const blob = new Blob([chessWorkerCode], { type: 'application/javascript' });
     this.worker = new Worker(URL.createObjectURL(blob));
+    this.worker.onmessage = (e) => {
+      const bestMove = e.data;
+      if (bestMove) {
+        const moveDetails = {
+          from: bestMove.from,
+          to: bestMove.to
+        };
+        if (bestMove.promotion) {
+          moveDetails.promotion = bestMove.promotion;
+        }
+
+        const result = this.game.move(moveDetails);
+        if (result) {
+          AudioPlayer.playClick();
+          this.lastMove = { from: moveDetails.from, to: moveDetails.to };
+          this.selectedSquare = null;
+          this.renderBoard();
+
+          this.blackTime += this.increment;
+          this.updateClockDisplay('b');
+
+          this.checkGameOverState();
+
+          if (!this.game.game_over()) {
+            this.activePlayer = 'w';
+          }
+        }
+      }
+    };
   },
 
   showSetup() {
@@ -3461,43 +3507,7 @@ const ChessEngine = {
 
   triggerBotMove() {
     if (this.game.game_over()) return;
-
-    this.updateStatusText(`Bot (${this.elo} ELO) is thinking...`);
-
-    // Post game state to background thread Worker
     this.worker.postMessage({ fen: this.game.fen(), elo: this.elo });
-
-    this.worker.onmessage = (e) => {
-      const bestMove = e.data;
-      if (bestMove) {
-        const moveDetails = {
-          from: bestMove.from,
-          to: bestMove.to
-        };
-        if (bestMove.promotion) {
-          moveDetails.promotion = bestMove.promotion;
-        }
-
-        const result = this.game.move(moveDetails);
-        if (result) {
-          AudioPlayer.playClick();
-          this.lastMove = { from: moveDetails.from, to: moveDetails.to };
-          this.selectedSquare = null;
-          this.renderBoard();
-
-          // Add increment and toggle player
-          this.blackTime += this.increment;
-          this.updateClockDisplay('b');
-
-          this.checkGameOverState();
-
-          if (!this.game.game_over()) {
-            this.activePlayer = 'w';
-            this.updateStatusText("Your turn!");
-          }
-        }
-      }
-    };
   },
 
   startClock() {
@@ -3548,10 +3558,13 @@ const ChessEngine = {
       if (this.game.in_checkmate()) {
         const winner = this.game.turn() === 'w' ? 'Black' : 'White';
         showToast(`Checkmate! ${winner} wins the game! 🏆`);
-        this.saveStats(winner === 'White');
+        const playerWon = winner === 'White';
+        this.saveStats(playerWon);
+        if (playerWon) addPoints(200);
       } else if (this.game.in_draw() || this.game.in_stalemate() || this.game.in_threefold_repetition()) {
         showToast("Game ended in a Draw! 🤝");
         this.saveStats(false, true);
+        addPoints(50);
       }
     }
   },
@@ -3574,11 +3587,17 @@ const ChessEngine = {
   },
 
   saveStats(playerWon, isDraw = false) {
-    const diff = GameHubState.difficulty; // easy, medium, hard
+    const eloToDiff = { 1300: 'easy', 1800: 'medium', 2200: 'hard' };
+    const diff = eloToDiff[this.elo] || 'easy';
     const practiceObj = GameHubState.stats.chess.practice[diff];
     practiceObj.played++;
     if (playerWon) practiceObj.won++;
     saveStats();
+  },
+
+  updateStatusText(txt) {
+    // Chess doesn't have a dedicated status element, use toast instead
+    // No-op to prevent errors (status is shown via toasts)
   }
 };
 
@@ -4007,12 +4026,12 @@ const LudoEngine = {
   },
 
   canMoveToken(color, token, steps) {
-    if (token.pos === 57) return false;
+    if (token.pos === 56) return false; // Already home
     if (token.pos === -1) {
       return steps === 6;
     }
     const targetPos = token.pos + steps;
-    return targetPos <= 57;
+    return targetPos <= 56;
   },
 
   moveTokenPlayer(token) {
@@ -4024,7 +4043,7 @@ const LudoEngine = {
     let chosenToken = validTokens[0];
     for (const t of validTokens) {
       const targetPos = this.calculateTargetPosition(this.activeColor, t, this.diceValue);
-      if (this.wouldCaptureOpponent(targetPos, this.activeColor)) {
+      if (this.wouldCaptureOpponent(this.activeColor, targetPos)) {
         chosenToken = t;
         break;
       }
@@ -4037,16 +4056,26 @@ const LudoEngine = {
   },
 
   calculateTargetPosition(color, token, steps) {
-    if (token.pos === -1) return this.startTrackIndices[color];
+    if (token.pos === -1) return 0; // First step from start
     return token.pos + steps;
   },
 
-  wouldCaptureOpponent(targetPos, color) {
-    if (targetPos >= 52) return false;
-    if (this.safePositions.includes(targetPos)) return false;
+  // Convert a token's steps-from-start to the absolute board track index
+  getAbsoluteTrackIndex(color, stepsFromStart) {
+    return (this.startTrackIndices[color] + stepsFromStart) % 52;
+  },
+
+  wouldCaptureOpponent(color, targetSteps) {
+    if (targetSteps >= 51) return false; // In home path, no captures
+    const targetBoardPos = this.getAbsoluteTrackIndex(color, targetSteps);
+    if (this.safePositions.includes(targetBoardPos)) return false;
     for (const col of this.turnOrder) {
       if (col === color) continue;
-      if (this.tokens[col].some(t => t.pos === targetPos)) return true;
+      for (const t of this.tokens[col]) {
+        if (t.pos === -1 || t.pos >= 51) continue;
+        const oppBoardPos = this.getAbsoluteTrackIndex(col, t.pos);
+        if (oppBoardPos === targetBoardPos) return true;
+      }
     }
     return false;
   },
@@ -4077,7 +4106,7 @@ const LudoEngine = {
 
   animateTokenMove(color, token, steps, callback) {
     if (token.pos === -1) {
-      token.pos = this.startTrackIndices[color];
+      token.pos = 0; // First step: now at start square
       LudoAudioSynth.playHop();
       this.renderBoard();
       setTimeout(callback, 250);
@@ -4105,14 +4134,17 @@ const LudoEngine = {
   },
 
   checkTokenCaptures(color, pos) {
-    if (pos >= 52 || pos === -1) return;
-    if (this.safePositions.includes(pos)) return;
+    if (pos >= 51 || pos === -1) return; // In home path or base, no captures
+    const boardPos = this.getAbsoluteTrackIndex(color, pos);
+    if (this.safePositions.includes(boardPos)) return;
 
     let captured = false;
     for (const col of this.turnOrder) {
       if (col === color) continue;
       this.tokens[col].forEach(t => {
-        if (t.pos === pos) {
+        if (t.pos === -1 || t.pos >= 51) return; // Skip base and home tokens
+        const oppBoardPos = this.getAbsoluteTrackIndex(col, t.pos);
+        if (oppBoardPos === boardPos) {
           t.pos = -1; // Fly back to base
           captured = true;
         }
@@ -4125,7 +4157,7 @@ const LudoEngine = {
   },
 
   checkPlayerWin(color) {
-    return this.tokens[color].every(t => t.pos === 57);
+    return this.tokens[color].every(t => t.pos === 56);
   },
 
   passTurn() {
@@ -4319,11 +4351,14 @@ const LudoEngine = {
   getTokenCoords(color, token) {
     if (token.pos === -1) {
       return this.baseCoords[color][token.id];
-    } else if (token.pos >= 52) {
-      const homeIdx = token.pos - 52;
+    } else if (token.pos >= 51) {
+      // Home path: steps 51-56 map to homeCoords indices 0-5
+      const homeIdx = token.pos - 51;
       return this.homeCoords[color][homeIdx];
     } else {
-      return this.trackCoords[token.pos];
+      // On track: convert steps-from-start to absolute board position
+      const absIdx = this.getAbsoluteTrackIndex(color, token.pos);
+      return this.trackCoords[absIdx];
     }
   },
 
@@ -4332,10 +4367,15 @@ const LudoEngine = {
   },
 
   saveStats(playerWon) {
-    const practiceObj = GameHubState.stats.ludo.practice.easy;
+    const diff = this.playerCount === 2 ? 'easy' : 'medium';
+    if (!GameHubState.stats.ludo.practice[diff]) {
+      GameHubState.stats.ludo.practice[diff] = { played: 0, won: 0 };
+    }
+    const practiceObj = GameHubState.stats.ludo.practice[diff];
     practiceObj.played++;
     if (playerWon) practiceObj.won++;
     saveStats();
+    if (playerWon) addPoints(150);
   }
 };
 
@@ -4703,6 +4743,7 @@ const OthelloEngine = {
     if (scores.black > scores.white) {
       showToast(`Congratulations! You win ${scores.black} to ${scores.white}! 🏆🎉`);
       this.saveStats(true);
+      addPoints(150);
     } else if (scores.white > scores.black) {
       showToast(`Othello Over! Bot wins ${scores.white} to ${scores.black}. 😢`);
       this.saveStats(false);
@@ -4734,6 +4775,14 @@ function loadUserProfile() {
   if (!UserProfile.username) {
     document.getElementById('modal-onboarding').classList.remove('hidden');
   }
+  updateWelcomeBar();
+}
+
+function updateWelcomeBar() {
+  const nameEl = document.getElementById('welcome-username');
+  const ptsEl = document.getElementById('welcome-points');
+  if (nameEl) nameEl.textContent = UserProfile.username ? `👋 Hey, ${UserProfile.username}!` : '👋 Welcome!';
+  if (ptsEl) ptsEl.textContent = `⭐ ${UserProfile.points} pts`;
 }
 
 function saveUserProfile() {
@@ -4744,6 +4793,7 @@ function saveUserProfile() {
 function addPoints(amount) {
   UserProfile.points += amount;
   saveUserProfile();
+  updateWelcomeBar();
   showToast(`+${amount} Points! Total: ${UserProfile.points}`);
 }
 
@@ -5221,6 +5271,12 @@ const SolitaireEngine = {
     if (won) {
       showToast("Solitaire Solved! Congratulations! 🃏🎉");
       addPoints(250);
+      if (!GameHubState.stats.solitaire) {
+        GameHubState.stats.solitaire = { practice: { easy: { played: 0, won: 0 } } };
+      }
+      GameHubState.stats.solitaire.practice.easy.played++;
+      GameHubState.stats.solitaire.practice.easy.won++;
+      saveStats();
     }
   }
 };
@@ -5385,7 +5441,38 @@ const MonopolyDealEngine = {
       choices = ["Play Action", "Put in Bank"];
     }
 
-    const act = prompt(`How would you like to play ${card.name}?\nOptions:\n1. ${choices[0]}\n${choices[1] ? '2. ' + choices[1] : ''}`);
+    this.showChoiceModal(card, choices, idx);
+  },
+
+  showChoiceModal(card, choices, idx) {
+    const overlay = document.createElement('div');
+    overlay.className = 'monopoly-choice-overlay';
+    const modal = document.createElement('div');
+    modal.className = 'monopoly-choice-card';
+    modal.innerHTML = `<h3>${card.name}</h3><p>How would you like to play this card?</p>`;
+
+    choices.forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = i === 0 ? 'choice-primary' : 'choice-secondary';
+      btn.textContent = label;
+      btn.onclick = () => {
+        overlay.remove();
+        this.executeCardChoice(card, idx, i === 0 ? '1' : '2', choices);
+      };
+      modal.appendChild(btn);
+    });
+
+    const cancel = document.createElement('button');
+    cancel.className = 'choice-cancel';
+    cancel.textContent = 'Cancel';
+    cancel.onclick = () => overlay.remove();
+    modal.appendChild(cancel);
+
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+  },
+
+  executeCardChoice(card, idx, act, choices) {
     if (!act) return;
 
     if (act === '1') {
@@ -5475,27 +5562,35 @@ const MonopolyDealEngine = {
   },
 
   botPlayTurn() {
-    this.oppHandSize += 2;
-    
-    for (let p = 0; p < 3; p++) {
-      const roll = Math.random();
-      if (roll < 0.4) {
-        const colors = ["red", "blue", "green", "yellow", "orange"];
-        const color = colors[Math.floor(Math.random() * colors.length)];
-        if (!this.oppProperties[color]) this.oppProperties[color] = [];
-        this.oppProperties[color].push({ type: "property", name: "Prop", color: color });
-      } else if (roll < 0.7) {
-        this.oppBank.push({ type: "money", value: 2, name: "$2M" });
-      } else {
-        const actions = ["debtcollector", "slydeal"];
-        const act = actions[Math.floor(Math.random() * actions.length)];
-        this.executeAction({ action: act }, false);
+    // Bot draws 2 cards from deck (with guards)
+    const botHand = [];
+    for (let i = 0; i < 2; i++) {
+      if (this.deck.length > 0) botHand.push(this.deck.pop());
+    }
+
+    // Bot plays up to 3 cards from drawn hand
+    for (let p = 0; p < 3 && botHand.length > 0; p++) {
+      const card = botHand.shift();
+      if (!card) break;
+
+      if (card.type === 'property') {
+        if (!this.oppProperties[card.color]) this.oppProperties[card.color] = [];
+        this.oppProperties[card.color].push(card);
+      } else if (card.type === 'money') {
+        this.oppBank.push(card);
+      } else if (card.type === 'action') {
+        this.executeAction(card, false);
       }
     }
+    // Remaining unplayed cards go to bank
+    botHand.forEach(c => { if (c) this.oppBank.push(c); });
 
     this.isMyTurn = true;
     this.playsLeft = 3;
-    this.playerHand.push(this.deck.pop(), this.deck.pop());
+    // Player draws 2 cards (with guards)
+    for (let i = 0; i < 2; i++) {
+      if (this.deck.length > 0) this.playerHand.push(this.deck.pop());
+    }
     
     this.render();
     this.checkWinState();
@@ -5517,13 +5612,22 @@ const MonopolyDealEngine = {
     const playerSets = countSets(this.playerProperties);
     const oppSets = countSets(this.oppProperties);
 
+    if (!GameHubState.stats.monopolydeal) {
+      GameHubState.stats.monopolydeal = { practice: { easy: { played: 0, won: 0 } } };
+    }
+
     if (playerSets >= 3) {
       showToast("You win Monopoly Deal! 🎩🎉");
       addPoints(300);
       this.isMyTurn = false;
+      GameHubState.stats.monopolydeal.practice.easy.played++;
+      GameHubState.stats.monopolydeal.practice.easy.won++;
+      saveStats();
     } else if (oppSets >= 3) {
       showToast("Bot wins Monopoly Deal! 😢");
       this.isMyTurn = false;
+      GameHubState.stats.monopolydeal.practice.easy.played++;
+      saveStats();
     }
   }
 };

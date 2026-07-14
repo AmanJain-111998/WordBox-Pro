@@ -1,5 +1,5 @@
 // Auto-updater: clears caches and unregisters service workers if the app version has updated
-const APP_VERSION = '6.5';
+const APP_VERSION = '6.6';
 if (localStorage.getItem('gamebox_version') !== APP_VERSION) {
   localStorage.setItem('gamebox_version', APP_VERSION);
   if ('serviceWorker' in navigator) {
@@ -21,7 +21,7 @@ let deferredPrompt = null;
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js?v=6.5')
+    navigator.serviceWorker.register('./service-worker.js?v=6.6')
       .then((reg) => {
         console.log('[Service Worker] Registered:', reg.scope);
         
@@ -393,37 +393,60 @@ function getDailyIndex() {
 // ==========================================================================
 // Views Switcher
 // ==========================================================================
+function safeClass(id, action, className) {
+  const el = document.getElementById(id);
+  if (el) {
+    if (action === 'add') el.classList.add(className);
+    else if (action === 'remove') el.classList.remove(className);
+  }
+}
+
+function safeHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+function safeBindClick(id, handler) {
+  const el = document.getElementById(id);
+  if (el) el.onclick = handler;
+}
+
+function safeBindEvent(id, event, handler) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener(event, handler);
+}
+
 function showView(view) {
   // Hide all main containers first
-  document.getElementById('view-dashboard').classList.add('hidden');
-  document.getElementById('view-game').classList.add('hidden');
-  document.getElementById('view-leaderboard').classList.add('hidden');
-  document.getElementById('view-p2p').classList.add('hidden');
+  safeClass('view-dashboard', 'add', 'hidden');
+  safeClass('view-game', 'add', 'hidden');
+  safeClass('view-leaderboard', 'add', 'hidden');
+  safeClass('view-p2p', 'add', 'hidden');
 
   if (view === 'dashboard') {
     GameHubState.activeGame = null;
-    document.getElementById('view-dashboard').classList.remove('hidden');
+    safeClass('view-dashboard', 'remove', 'hidden');
     
     // Header tweaks
-    document.getElementById('btn-home').classList.add('hidden');
-    document.getElementById('btn-stats').classList.add('hidden');
-    document.getElementById('logo-main').innerHTML = 'GAMEBOX<span class="logo-accent">PRO</span>';
+    safeClass('btn-home', 'add', 'hidden');
+    safeClass('btn-stats', 'add', 'hidden');
+    safeHTML('logo-main', 'GAMEBOX<span class="logo-accent">PRO</span>');
   } else if (view === 'leaderboard') {
-    document.getElementById('view-leaderboard').classList.remove('hidden');
-    document.getElementById('btn-home').classList.remove('hidden');
-    document.getElementById('btn-stats').classList.add('hidden');
-    document.getElementById('logo-main').innerHTML = 'LEADERBOARD';
+    safeClass('view-leaderboard', 'remove', 'hidden');
+    safeClass('btn-home', 'remove', 'hidden');
+    safeClass('btn-stats', 'add', 'hidden');
+    safeHTML('logo-main', 'LEADERBOARD');
   } else if (view === 'p2p') {
-    document.getElementById('view-p2p').classList.remove('hidden');
-    document.getElementById('btn-home').classList.remove('hidden');
-    document.getElementById('btn-stats').classList.add('hidden');
-    document.getElementById('logo-main').innerHTML = 'MULTIPLAYER';
+    safeClass('view-p2p', 'remove', 'hidden');
+    safeClass('btn-home', 'remove', 'hidden');
+    safeClass('btn-stats', 'add', 'hidden');
+    safeHTML('logo-main', 'MULTIPLAYER');
   } else {
     GameHubState.activeGame = view;
-    document.getElementById('view-game').classList.remove('hidden');
+    safeClass('view-game', 'remove', 'hidden');
     
-    document.getElementById('btn-home').classList.remove('hidden');
-    document.getElementById('btn-stats').classList.remove('hidden');
+    safeClass('btn-home', 'remove', 'hidden');
+    safeClass('btn-stats', 'remove', 'hidden');
     
     // Set headers
     const gameTitles = {
@@ -439,7 +462,7 @@ function showView(view) {
       solitaire: 'SOLITAIRE<span class="logo-accent">PRO</span>',
       monopolydeal: 'MONOPOLY<span class="logo-accent">DEAL</span>'
     };
-    document.getElementById('logo-main').innerHTML = gameTitles[view] || 'GAMEBOX<span class="logo-accent">PRO</span>';
+    safeHTML('logo-main', gameTitles[view] || 'GAMEBOX<span class="logo-accent">PRO</span>');
     
     // Manage Game View Panels
     document.querySelectorAll('.game-board-panel').forEach(p => p.classList.add('hidden'));
@@ -760,18 +783,18 @@ function bindOrchestratorEvents() {
   });
 
   // P2P/Leaderboard and Onboarding Events setup
-  document.getElementById('btn-leaderboard').onclick = () => {
+  safeBindClick('btn-leaderboard', () => {
     AudioPlayer.playClick();
     updateLeaderboardUI();
     showView('leaderboard');
-  };
+  });
 
-  document.getElementById('btn-close-leaderboard').onclick = () => {
+  safeBindClick('btn-close-leaderboard', () => {
     AudioPlayer.playClick();
     showView('dashboard');
-  };
+  });
 
-  document.getElementById('btn-onboarding-submit').onclick = () => {
+  safeBindClick('btn-onboarding-submit', () => {
     const input = document.getElementById('input-username');
     const val = input.value.trim();
     if (val.length < 3) {
@@ -784,31 +807,31 @@ function bindOrchestratorEvents() {
     closeModal(document.getElementById('modal-onboarding'));
     showToast(`Profile created: ${val}!`);
     AudioPlayer.playClick();
-  };
+  });
 
   // P2P choices
-  document.getElementById('btn-p2p-choose-host').onclick = () => {
+  safeBindClick('btn-p2p-choose-host', () => {
     AudioPlayer.playClick();
     document.getElementById('p2p-choices-row').classList.add('hidden');
     document.getElementById('p2p-host-panel').classList.remove('hidden');
     P2PManager.initHost();
-  };
+  });
 
-  document.getElementById('btn-p2p-choose-join').onclick = () => {
+  safeBindClick('btn-p2p-choose-join', () => {
     AudioPlayer.playClick();
     document.getElementById('p2p-choices-row').classList.add('hidden');
     document.getElementById('p2p-join-panel').classList.remove('hidden');
     P2PManager.initJoiner();
-  };
+  });
 
-  document.getElementById('btn-p2p-copy-offer').onclick = () => {
+  safeBindClick('btn-p2p-copy-offer', () => {
     AudioPlayer.playClick();
     const txt = document.getElementById('p2p-offer-text');
     navigator.clipboard.writeText(txt.value);
     showToast("Offer Code copied!");
-  };
+  });
 
-  document.getElementById('btn-p2p-generate-answer').onclick = () => {
+  safeBindClick('btn-p2p-generate-answer', () => {
     AudioPlayer.playClick();
     const offerCode = document.getElementById('p2p-joiner-offer-text').value;
     if (!offerCode) {
@@ -816,16 +839,16 @@ function bindOrchestratorEvents() {
       return;
     }
     P2PManager.generateJoinerAnswer(offerCode);
-  };
+  });
 
-  document.getElementById('btn-p2p-copy-answer').onclick = () => {
+  safeBindClick('btn-p2p-copy-answer', () => {
     AudioPlayer.playClick();
     const txt = document.getElementById('p2p-joiner-answer-text');
     navigator.clipboard.writeText(txt.value);
     showToast("Answer Code copied!");
-  };
+  });
 
-  document.getElementById('btn-p2p-connect').onclick = () => {
+  safeBindClick('btn-p2p-connect', () => {
     AudioPlayer.playClick();
     const answerCode = document.getElementById('p2p-answer-text').value;
     if (!answerCode) {
@@ -833,15 +856,13 @@ function bindOrchestratorEvents() {
       return;
     }
     P2PManager.connectHost(answerCode);
-  };
+  });
 
-  document.getElementById('btn-p2p-back').onclick = () => {
+  safeBindClick('btn-p2p-back', () => {
     AudioPlayer.playClick();
-    // Terminate connections if active
     if (P2PManager.peerConnection) {
       P2PManager.peerConnection.close();
     }
-    // Reset inputs & panel views
     document.getElementById('p2p-choices-row').classList.remove('hidden');
     document.getElementById('p2p-host-panel').classList.add('hidden');
     document.getElementById('p2p-join-panel').classList.add('hidden');
@@ -850,35 +871,35 @@ function bindOrchestratorEvents() {
     document.getElementById('p2p-joiner-offer-text').value = '';
     document.getElementById('p2p-joiner-answer-text').value = '';
     showView('dashboard');
-  };
+  });
 
   // Monopoly Deal Play controls
-  document.getElementById('btn-monopoly-endturn').onclick = () => {
+  safeBindClick('btn-monopoly-endturn', () => {
     AudioPlayer.playClick();
     MonopolyDealEngine.endTurn();
-  };
+  });
   
-  document.getElementById('btn-monopoly-quit').onclick = () => {
+  safeBindClick('btn-monopoly-quit', () => {
     AudioPlayer.playClick();
     showView('dashboard');
-  };
+  });
 
   // Solitaire controls
-  document.getElementById('btn-solitaire-restart').onclick = () => {
+  safeBindClick('btn-solitaire-restart', () => {
     AudioPlayer.playClick();
     SolitaireEngine.start();
-  };
+  });
 
-  document.getElementById('btn-solitaire-quit').onclick = () => {
+  safeBindClick('btn-solitaire-quit', () => {
     AudioPlayer.playClick();
     showView('dashboard');
-  };
+  });
 
   // CrossMath controls
-  document.getElementById('btn-crossmath-restart').onclick = () => {
+  safeBindClick('btn-crossmath-restart', () => {
     AudioPlayer.playClick();
     CrossMathEngine.start();
-  };
+  });
 
   // QWERTY physical keyboard router
   document.addEventListener('keydown', (e) => {

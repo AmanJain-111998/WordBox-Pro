@@ -6,6 +6,12 @@
   --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-logo: 'Outfit', 'Inter', sans-serif;
 
+  /* Primary Accent & Button Colors */
+  --color-primary: #10b981;
+  --color-primary-hover: #059669;
+  --color-primary-glow: rgba(16, 185, 129, 0.25);
+  --btn-primary-bg: #10b981;
+
   /* Common Colors */
   --white: #ffffff;
   --black: #000000;
@@ -89,7 +95,7 @@ html, body {
   width: 100%;
   overflow: hidden;
   font-family: var(--font-primary);
-  background: radial-gradient(circle at top, #18143c 0%, #09090c 100%) !important;
+  background: radial-gradient(circle at top, #0f2e24 0%, #060b09 100%) !important;
   color: var(--text-main);
   transition: background var(--transition-normal), color var(--transition-normal);
 }
@@ -3166,7 +3172,7 @@ body.light-theme .othello-square.valid-othello-move::after {
   text-align: center;
   padding: 10px;
   font-size: 13px;
-  color: #a78bfa;
+  color: var(--color-primary);
 }
 .crossmath-board-wrapper {
   display: flex;
@@ -3194,21 +3200,21 @@ body.light-theme .othello-square.valid-othello-move::after {
 }
 .crossmath-cell.empty-slot {
   background: rgba(0,0,0,0.3);
-  border: 2px dashed rgba(167, 139, 250, 0.4);
-  color: #a78bfa;
+  border: 2px dashed var(--color-primary-glow);
+  color: var(--color-primary);
   cursor: pointer;
 }
 .crossmath-cell.empty-slot.active {
-  border-color: #a78bfa;
-  box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 10px var(--color-primary-glow);
 }
 .crossmath-cell.operator {
   color: #cbd5e1;
   background: rgba(255, 255, 255, 0.05);
 }
 .crossmath-cell.result-cell {
-  background: rgba(167, 139, 250, 0.15);
-  border: 1px solid rgba(167, 139, 250, 0.3);
+  background: var(--color-primary-glow);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: #fff;
 }
 .crossmath-cell.empty-slot.correct {
@@ -3367,7 +3373,7 @@ body.light-theme .othello-square.valid-othello-move::after {
 .section-title {
   font-size: 11px;
   font-weight: bold;
-  color: #a78bfa;
+  color: var(--color-primary);
   margin-bottom: 6px;
   text-transform: uppercase;
 }
